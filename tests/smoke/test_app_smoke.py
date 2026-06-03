@@ -16,7 +16,7 @@ def test_app_constructs_and_handles_started_event(db_url, qapp):
 
     container.event_bus.publish(AppStarted(occurred_at=container.clock.now()))
 
-    assert "Hoş geldin" in app.window._dashboard._status_label.text()
+    assert "döndün" in app.window._dashboard._status_label.text()
 
 
 def test_theme_switch_applies_stylesheet(db_url, qapp):

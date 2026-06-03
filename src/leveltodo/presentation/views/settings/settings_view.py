@@ -25,7 +25,14 @@ from PyQt6.QtWidgets import (
 
 from leveltodo.presentation.views.settings.settings_viewmodel import SettingsViewModel
 
-_THEME_LABELS = {"dark": "Koyu (gece)", "light": "Açık (gündüz)"}
+_THEME_LABELS = {
+    "dark": "Koyu (gece)",
+    "light": "Açık (gündüz)",
+    "midnight": "Gece Mavisi",
+    "forest": "Orman",
+    "sunset": "Gün Batımı",
+    "arcane": "Mor Büyü",
+}
 
 
 class SettingsView(QWidget):

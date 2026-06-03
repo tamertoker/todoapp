@@ -34,7 +34,7 @@ class DashboardView(QWidget):
         title = QLabel("LevelTodo")
         title.setObjectName("Title")
 
-        subtitle = QLabel("Faz 0 — İskelet hazır. Macera birazdan başlıyor.")
+        subtitle = QLabel("Burada güç, gösterdiğin iradeyle ölçülür.")
         subtitle.setObjectName("Subtitle")
 
         self._day_label = QLabel()
@@ -59,4 +59,4 @@ class DashboardView(QWidget):
 
     def _on_event(self, event: DomainEvent) -> None:
         if isinstance(event, AppStarted):
-            self._status_label.setText("Hoş geldin, maceracı. Sistem ayakta. ⚔")
+            self._status_label.setText("Yine buradasın. Çoğu insan dönmez; sen döndün.")

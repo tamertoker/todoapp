@@ -73,7 +73,9 @@ Bu bölüm yukarıdaki dört genel prensibi bu projeye (Seviye Sistemli Görev T
 ### 5.1 İletişim (kullanıcı teknik değildir)
 - **Her kod yazımından sonra**, kritik kısımları **hiç kod bilmeyen birine anlatır gibi** sade Türkçe ile izah et: bu dosya ne işe yarar, neden böyle yazıldı, kullanıcı açısından ne anlama gelir. Jargon kullanman gerekiyorsa parantez içinde günlük dille açıkla.
 - **Soruları da teknik bilmeyen birine sorar gibi sor.** "Hangi ORM?" değil, "veriler bilgisayarda nasıl saklansın" gibi. Seçenekleri sonuç/etki üzerinden anlat, kütüphane adıyla değil.
+- **Her faz sonunda** kodu kısaca, sunuma hazırlar gibi anlat: neyi nerede nasıl yaptın (kullanıcı projeden habersiz kalmasın). Kısa tut, abartma.
 - Arayüz dili ve kullanıcıya görünen tüm metinler **Türkçe**.
+- **Kullanıcıya görünen tüm sistem mesajlarının tonu**: gündelik, doğal Türkçe + epik bir alt ton; zorlama/yavan değil, klişeden ("Hoş geldin maceracı" gibi) kaçın. Uygulamanın "irade" temasıyla örtüşsün.
 
 ### 5.2 Mimari (Think Before Coding + Simplicity First)
 - **Domain ve Application katmanları saf Python kalır; PyQt6 import etmez.** UI'a bağımlılık yalnızca Presentation katmanında.
