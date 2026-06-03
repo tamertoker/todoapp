@@ -59,6 +59,7 @@ class Task(Base):
     title: Mapped[str] = mapped_column(String(200))
     recurrence: Mapped[str] = mapped_column(String(10))  # 'none' | 'daily'
     reward_override: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    stat: Mapped[str | None] = mapped_column(String(20), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
@@ -97,6 +98,7 @@ class XpEvent(Base):
     source: Mapped[str] = mapped_column(String(40))
     ref_id: Mapped[str | None] = mapped_column(String(26), nullable=True)
     amount: Mapped[int] = mapped_column(Integer)
+    stat: Mapped[str | None] = mapped_column(String(20), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 

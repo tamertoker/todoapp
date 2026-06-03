@@ -15,6 +15,13 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from leveltodo.domain.events import TaskCompleted
+from leveltodo.domain.stats.statlar import (
+    SeviyeDurumu,
+    Stat,
+    UnvanDurumu,
+    seviye_hesapla,
+    unvan_hesapla,
+)
 from leveltodo.domain.tasks.kurallar import Odul, Tekrar, canli_sure, odul_hesapla
 from leveltodo.domain.time.gun import Gun
 from leveltodo.domain.time.saat import Saat
@@ -63,7 +70,11 @@ class GorevServisi:
         return Gun.olustur(self._saat.simdi(), self._gun_baslangic()).tarih
 
     def gorev_olustur(
-        self, baslik: str, tekrar: Tekrar, ozel_odul: int | None = None
+        self,
+        baslik: str,
+        tekrar: Tekrar,
+        ozel_odul: int | None = None,
+        stat: Stat | None = None,
     ) -> str:
         gorev_id = new_id()
         self._gorev.add_template(
@@ -72,6 +83,7 @@ class GorevServisi:
             title=baslik.strip(),
             recurrence=tekrar.value,
             reward_override=ozel_odul,
+            stat=stat.value if stat is not None else None,
         )
         if tekrar is Tekrar.YOK:
             self._gorev.add_instance(
@@ -145,6 +157,7 @@ class GorevServisi:
             ref_id=kayit_id,
             xp=odul.xp,
             points=odul.puan,
+            stat=sablon.stat if sablon is not None else None,
         )
         self._olay_hatti.publish(
             TaskCompleted(
@@ -163,3 +176,14 @@ class GorevServisi:
 
     def toplamlar(self) -> tuple[int, int]:
         return self._defter.totals(self._user_id)
+
+    def stat_durumlari(self) -> dict[Stat, SeviyeDurumu]:
+        """Her stat için (seviye, ilerleme) durumu."""
+        toplamlar = self._defter.stat_xp_toplamlari(self._user_id)
+        return {s: seviye_hesapla(toplamlar.get(s.value, 0)) for s in Stat}
+
+    def profil_durumu(self) -> tuple[int, UnvanDurumu]:
+        """Profil seviyesi (stat seviyelerinin toplamı) ve unvan durumu."""
+        durumlar = self.stat_durumlari()
+        profil = sum(d.seviye for d in durumlar.values())
+        return profil, unvan_hesapla(profil)

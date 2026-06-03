@@ -21,7 +21,14 @@ class SqlTaskRepository:
 
     # — Şablonlar —
     def add_template(
-        self, *, id: str, user_id: str, title: str, recurrence: str, reward_override: int | None
+        self,
+        *,
+        id: str,
+        user_id: str,
+        title: str,
+        recurrence: str,
+        reward_override: int | None,
+        stat: str | None,
     ) -> None:
         with self._sf() as s:
             s.add(
@@ -31,6 +38,7 @@ class SqlTaskRepository:
                     title=title,
                     recurrence=recurrence,
                     reward_override=reward_override,
+                    stat=stat,
                 )
             )
             s.commit()

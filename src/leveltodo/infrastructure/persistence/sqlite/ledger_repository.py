@@ -21,16 +21,38 @@ class SqlLedgerRepository:
         self._sf = session_factory
 
     def record(
-        self, *, user_id: str, day: date, source: str, ref_id: str | None, xp: int, points: int
+        self,
+        *,
+        user_id: str,
+        day: date,
+        source: str,
+        ref_id: str | None,
+        xp: int,
+        points: int,
+        stat: str | None = None,
     ) -> None:
         with self._sf() as s:
-            s.add(XpEvent(user_id=user_id, day=day, source=source, ref_id=ref_id, amount=xp))
+            s.add(
+                XpEvent(
+                    user_id=user_id, day=day, source=source, ref_id=ref_id, amount=xp, stat=stat
+                )
+            )
             s.add(
                 PointTransaction(
                     user_id=user_id, day=day, source=source, ref_id=ref_id, amount=points
                 )
             )
             s.commit()
+
+    def stat_xp_toplamlari(self, user_id: str) -> dict[str, int]:
+        """Stata atanmış XP'lerin stat bazında toplamı {stat: xp}."""
+        with self._sf() as s:
+            stmt = (
+                select(XpEvent.stat, func.coalesce(func.sum(XpEvent.amount), 0))
+                .where(XpEvent.user_id == user_id, XpEvent.stat.is_not(None))
+                .group_by(XpEvent.stat)
+            )
+            return {stat: int(toplam) for stat, toplam in s.execute(stmt).all()}
 
     def totals(self, user_id: str) -> tuple[int, int]:
         with self._sf() as s:

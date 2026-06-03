@@ -9,8 +9,6 @@ Not: blinker varsayılan olarak dinleyicileri "zayıf referans"la tutar ve çöp
 toplama (garbage collection) onları silebilir. Bunu engellemek için weak=False
 kullanıyoruz, böylece bağladığımız fonksiyonlar yaşamaya devam eder.
 
-(publish = yayınla, subscribe = abone ol — yaygın mesajlaşma terimleri olduğu
-için İngilizce bırakıldı.)
 """
 
 from __future__ import annotations
