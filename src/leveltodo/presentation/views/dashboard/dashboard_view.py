@@ -1,20 +1,17 @@
-"""Dashboard (ana ekran) — Faz 1.
+"""Dashboard (ana ekran) — Faz 2.
 
-Üstte karşılama + mantıksal gün, ardından iki kasa (XP / Puan), sonra "Görev
-Ekle" düğmesi ve bugünün görev listesi. Her bekleyen görev satırında bir
-kronometre (Başlat/Duraklat), canlı süre, 'Bitir' ve 'Sil' vardır.
-
-Canlı sayaç saniyede bir tazelenir; çalışan kronometre her 30 saniyede bir
-veritabanına yazılır (checkpoint), böylece bir çökmede en fazla ~30 sn kaybolur.
+Üstte profil/unvan barı. Solda avatar (seviyeyle evrilir) ve 4 stat barı.
+Sağda iki kasa (XP/Puan), "Görev Ekle" ve bugünün görev listesi (kronometreli).
 """
 
 from __future__ import annotations
 
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
+    QProgressBar,
     QPushButton,
     QScrollArea,
     QVBoxLayout,
@@ -24,12 +21,17 @@ from PyQt6.QtWidgets import (
 from leveltodo.application.gorev_servisi import GorevSatiri
 from leveltodo.bootstrap import Container
 from leveltodo.domain.events import AppStarted, DomainEvent, TaskCompleted
+from leveltodo.domain.stats.statlar import STAT_ETIKET, Stat
 from leveltodo.domain.tasks.kurallar import canli_sure
 from leveltodo.domain.time.gun import Gun
+from leveltodo.infrastructure.assets.avatar import AvatarOlusturucu, avatar_katmanlari
+from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
 from leveltodo.presentation.views.dashboard.bitir_dialog import BitirDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
+
+_STAT_SIRA = (Stat.ENTELEKTUELLIK, Stat.BEDEN, Stat.FARKINDALIK, Stat.DISIPLIN)
 
 
 def _format_sure(saniye: int) -> str:
@@ -46,11 +48,76 @@ class DashboardView(QWidget):
         super().__init__()
         self._container = container
         self._vm = DashboardViewModel(container.gorevler, container.kronometre)
-        # Çalışan kronometre etiketlerini saniyede bir tazelemek için tutulur.
+        self._avatar = AvatarOlusturucu(paths.assets_dir())
+        self._son_avatar_katmanlari: list[str] | None = None
         self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
 
         title = QLabel("LevelTodo")
         title.setObjectName("Title")
+        self._unvan_label = QLabel()
+        self._unvan_label.setObjectName("ProfileBar")
+
+        sol = self._build_sol_panel()
+        sag = self._build_sag_panel()
+        orta = QHBoxLayout()
+        orta.setSpacing(16)
+        orta.addWidget(sol)
+        orta.addLayout(sag, stretch=1)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(10)
+        layout.addWidget(title)
+        layout.addWidget(self._unvan_label)
+        layout.addLayout(orta, stretch=1)
+
+        self._vm.changed.connect(self._render)
+        bridge.domain_event.connect(self._on_event)
+
+        # Açılışta yarım kalmış kronometre varsa durdur (kaydedilen süre korunur).
+        self._kurtarma_sayisi = self._vm.kurtar()
+
+        self._tick_timer = QTimer(self)
+        self._tick_timer.timeout.connect(self._tick)
+        self._tick_timer.start(1000)
+        self._checkpoint_timer = QTimer(self)
+        self._checkpoint_timer.timeout.connect(self._vm.checkpoint)
+        self._checkpoint_timer.start(30000)
+
+        self.refresh_day()
+        self._render()
+
+    # — Sol panel: avatar + stat barları —
+    def _build_sol_panel(self) -> QWidget:
+        panel = QWidget()
+        panel.setFixedWidth(280)
+        v = QVBoxLayout(panel)
+        v.setContentsMargins(0, 0, 0, 0)
+        v.setSpacing(12)
+
+        avatar_frame = QFrame()
+        avatar_frame.setObjectName("AvatarFrame")
+        af = QVBoxLayout(avatar_frame)
+        self._avatar_label = QLabel()
+        self._avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        af.addWidget(self._avatar_label)
+        v.addWidget(avatar_frame)
+
+        self._stat_seviye_label: dict[Stat, QLabel] = {}
+        self._stat_bar: dict[Stat, QProgressBar] = {}
+        for stat in _STAT_SIRA:
+            etiket = QLabel()
+            bar = QProgressBar()
+            bar.setTextVisible(False)
+            self._stat_seviye_label[stat] = etiket
+            self._stat_bar[stat] = bar
+            v.addWidget(etiket)
+            v.addWidget(bar)
+        v.addStretch(1)
+        return panel
+
+    # — Sağ panel: kasalar + görev listesi —
+    def _build_sag_panel(self) -> QVBoxLayout:
         subtitle = QLabel("Burada güç, gösterdiğin iradeyle ölçülür.")
         subtitle.setObjectName("Subtitle")
         self._day_label = QLabel()
@@ -79,33 +146,15 @@ class DashboardView(QWidget):
         self._tasks_layout.setSpacing(8)
         scroll.setWidget(tasks_container)
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(10)
-        layout.addWidget(title)
-        layout.addWidget(subtitle)
-        layout.addWidget(self._day_label)
-        layout.addWidget(self._status_label)
-        layout.addLayout(counters)
-        layout.addWidget(add_btn)
-        layout.addWidget(scroll, stretch=1)
-
-        self._vm.changed.connect(self._render)
-        bridge.domain_event.connect(self._on_event)
-
-        # Açılışta yarım kalmış kronometre varsa durdur (kaydedilen süre korunur).
-        self._kurtarma_sayisi = self._vm.kurtar()
-
-        # Canlı sayaç (1 sn) ve periyodik DB kaydı (30 sn) zamanlayıcıları.
-        self._tick_timer = QTimer(self)
-        self._tick_timer.timeout.connect(self._tick)
-        self._tick_timer.start(1000)
-        self._checkpoint_timer = QTimer(self)
-        self._checkpoint_timer.timeout.connect(self._vm.checkpoint)
-        self._checkpoint_timer.start(30000)
-
-        self.refresh_day()
-        self._render()
+        sag = QVBoxLayout()
+        sag.setSpacing(10)
+        sag.addWidget(subtitle)
+        sag.addWidget(self._day_label)
+        sag.addWidget(self._status_label)
+        sag.addLayout(counters)
+        sag.addWidget(add_btn)
+        sag.addWidget(scroll, stretch=1)
+        return sag
 
     def refresh_day(self) -> None:
         gun = Gun.olustur(self._container.saat.simdi(), self._container.settings.day_start_hour)
@@ -121,6 +170,31 @@ class DashboardView(QWidget):
         self._xp_label.setText(f"XP  {xp}")
         self._points_label.setText(f"Puan  {puan}")
 
+        self._render_profil_ve_statlar()
+        self._render_gorevler()
+
+    def _render_profil_ve_statlar(self) -> None:
+        durumlar = self._vm.stat_durumlari()
+        profil, unvan = self._vm.profil_durumu()
+
+        metin = f"{unvan.unvan}  ·  Profil Sv {profil}"
+        if unvan.sonraki_unvan is not None:
+            metin += f"  ·  {unvan.sonraki_unvan}'a {unvan.sonraki_unvana_kalan} sv"
+        self._unvan_label.setText(metin)
+
+        for stat in _STAT_SIRA:
+            durum = durumlar[stat]
+            self._stat_seviye_label[stat].setText(f"{STAT_ETIKET[stat]}  ·  Sv {durum.seviye}")
+            bar = self._stat_bar[stat]
+            bar.setMaximum(max(1, durum.sonraki_seviye_esigi))
+            bar.setValue(durum.bu_seviyedeki_xp)
+
+        katmanlar = avatar_katmanlari(profil)
+        if katmanlar != self._son_avatar_katmanlari:
+            self._son_avatar_katmanlari = katmanlar
+            self._avatar_label.setPixmap(self._avatar.olustur(katmanlar, buyutme=4))
+
+    def _render_gorevler(self) -> None:
         self._sure_etiketleri = {}
         while self._tasks_layout.count():
             item = self._tasks_layout.takeAt(0)
@@ -195,9 +269,9 @@ class DashboardView(QWidget):
     def _on_add(self) -> None:
         dialog = AddTaskDialog(self)
         if dialog.exec():
-            baslik, tekrar, ozel_odul = dialog.result_values()
+            baslik, tekrar, ozel_odul, stat = dialog.result_values()
             if baslik:
-                self._vm.gorev_ekle(baslik, tekrar, ozel_odul)
+                self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat)
 
     def _on_bitir(self, satir: GorevSatiri) -> None:
         on_dakika = round(self._canli_saniye(satir) / 60)

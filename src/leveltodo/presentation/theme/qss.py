@@ -132,4 +132,23 @@ def build_qss(palette: Palette, font_family: str, up_arrow: str, down_arrow: str
         color: {p.text_dim};
         font-weight: bold;
     }}
+    QLabel#ProfileBar {{
+        font-size: 15px;
+        font-weight: bold;
+        color: {p.accent};
+    }}
+    QFrame#AvatarFrame {{
+        background-color: {p.panel};
+        border: 2px solid {p.border};
+    }}
+    QProgressBar {{
+        border: 2px solid {p.border};
+        background-color: {p.bg};
+        text-align: center;
+        color: {p.text};
+        min-height: 14px;
+    }}
+    QProgressBar::chunk {{
+        background-color: {p.accent};
+    }}
     """

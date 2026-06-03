@@ -38,3 +38,11 @@ def logs_dir() -> Path:
     d = data_dir() / "logs"
     d.mkdir(parents=True, exist_ok=True)
     return d
+
+
+def assets_dir() -> Path:
+    """Görsel/ses dosyalarının (Mana Seed sprite'ları vb.) bulunduğu klasör."""
+    override = os.environ.get("LEVELTODO_ASSETS_DIR")
+    if override:
+        return Path(override)
+    return Path(__file__).resolve().parents[4] / "assets"

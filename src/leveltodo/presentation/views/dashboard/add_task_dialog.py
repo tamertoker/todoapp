@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QDialog,
     QDialogButtonBox,
     QLabel,
@@ -19,6 +20,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from leveltodo.domain.stats.statlar import GOREV_STATLARI, STAT_ETIKET, Stat
 from leveltodo.domain.tasks.kurallar import Tekrar
 
 
@@ -34,6 +36,10 @@ class AddTaskDialog(QDialog):
         self._once = QRadioButton("Tek seferlik")
         self._daily = QRadioButton("Her gün")
         self._once.setChecked(True)
+
+        self._stat = QComboBox()
+        for stat in GOREV_STATLARI:
+            self._stat.addItem(STAT_ETIKET[stat], stat.value)
 
         self._override_check = QCheckBox("Özel ödül belirle")
         self._override = QSpinBox()
@@ -60,6 +66,8 @@ class AddTaskDialog(QDialog):
         layout.addWidget(QLabel("Tekrar"))
         layout.addWidget(self._once)
         layout.addWidget(self._daily)
+        layout.addWidget(QLabel("Hangi alanı geliştirir?"))
+        layout.addWidget(self._stat)
         layout.addWidget(self._override_check)
         layout.addWidget(self._override)
         layout.addWidget(self._warning)
@@ -71,7 +79,8 @@ class AddTaskDialog(QDialog):
             return
         super().accept()
 
-    def result_values(self) -> tuple[str, Tekrar, int | None]:
+    def result_values(self) -> tuple[str, Tekrar, int | None, Stat]:
         tekrar = Tekrar.GUNLUK if self._daily.isChecked() else Tekrar.YOK
         ozel_odul = self._override.value() if self._override_check.isChecked() else None
-        return self._title.text().strip(), tekrar, ozel_odul
+        stat = Stat(self._stat.currentData())
+        return self._title.text().strip(), tekrar, ozel_odul, stat
