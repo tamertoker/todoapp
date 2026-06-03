@@ -24,7 +24,11 @@ from leveltodo.domain.events import AppStarted, DomainEvent, TaskCompleted
 from leveltodo.domain.stats.statlar import STAT_ETIKET, Stat
 from leveltodo.domain.tasks.kurallar import canli_sure
 from leveltodo.domain.time.gun import Gun
-from leveltodo.infrastructure.assets.avatar import AvatarOlusturucu, avatar_katmanlari
+from leveltodo.infrastructure.assets.avatar import (
+    AvatarOlusturucu,
+    ai_avatar_yolu,
+    avatar_katmanlari,
+)
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
@@ -49,7 +53,7 @@ class DashboardView(QWidget):
         self._container = container
         self._vm = DashboardViewModel(container.gorevler, container.kronometre)
         self._avatar = AvatarOlusturucu(paths.assets_dir())
-        self._son_avatar_katmanlari: list[str] | None = None
+        self._son_avatar_anahtar: tuple | None = None
         self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
 
         title = QLabel("LevelTodo")
@@ -190,10 +194,19 @@ class DashboardView(QWidget):
             bar.setMaximum(max(1, durum.sonraki_seviye_esigi))
             bar.setValue(durum.bu_seviyedeki_xp)
 
-        katmanlar = avatar_katmanlari(profil)
-        if katmanlar != self._son_avatar_katmanlari:
-            self._son_avatar_katmanlari = katmanlar
-            self._avatar_label.setPixmap(self._avatar.olustur(katmanlar, buyutme=4))
+        # Kullanıcı o unvan için AI avatar ürettiyse onu göster; yoksa Mana Seed avatarı.
+        ai_yol = ai_avatar_yolu(paths.assets_dir(), unvan.unvan)
+        if ai_yol is not None:
+            anahtar: tuple = ("ai", str(ai_yol))
+            if anahtar != self._son_avatar_anahtar:
+                self._son_avatar_anahtar = anahtar
+                self._avatar_label.setPixmap(self._avatar.ai_resmi(ai_yol, 256))
+        else:
+            katmanlar = avatar_katmanlari(profil)
+            anahtar = ("seed", tuple(katmanlar))
+            if anahtar != self._son_avatar_anahtar:
+                self._son_avatar_anahtar = anahtar
+                self._avatar_label.setPixmap(self._avatar.olustur(katmanlar, buyutme=4))
 
     def _render_gorevler(self) -> None:
         self._sure_etiketleri = {}

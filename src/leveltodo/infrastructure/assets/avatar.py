@@ -19,6 +19,16 @@ class AvatarOlusturucu:
     def __init__(self, assets_dizini: Path) -> None:
         self._p1 = assets_dizini / "char_a_p1"
 
+    def ai_resmi(self, yol: Path, hedef: int = 256) -> QPixmap:
+        """Kullanıcının ürettiği hazır avatar resmini (tek PNG) net büyütür."""
+        pixmap = QPixmap(str(yol))
+        return pixmap.scaled(
+            hedef,
+            hedef,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.FastTransformation,
+        )
+
     def olustur(self, katman_dosyalari: list[str], buyutme: int = 4) -> QPixmap:
         sonuc = QPixmap(_KARE, _KARE)
         sonuc.fill(Qt.GlobalColor.transparent)
@@ -65,4 +75,28 @@ def avatar_katmanlari(profil_seviye: int) -> list[str]:
     return [
         f"char_a_p1_0bas_humn_v{bas_v:02d}.png",
         f"1out/char_a_p1_1out_fstr_v{kiyafet_v:02d}.png",
+        "4har/char_a_p1_4har_bob1_v00.png",
     ]
+
+
+# Unvan -> AI avatar dosya adı (kullanıcının üreteceği resimler).
+UNVAN_DOSYA: dict[str, str] = {
+    "Çırak": "cirak",
+    "Yolcu": "yolcu",
+    "Cevher": "cevher",
+    "Makine": "makine",
+    "Usta": "usta",
+    "Bilge": "bilge",
+    "Aydın": "aydin",
+    "Efsane": "efsane",
+}
+
+
+def ai_avatar_yolu(assets_dizini: Path, unvan: str) -> Path | None:
+    """Kullanıcının o unvan için ürettiği AI avatar resmi varsa yolu, yoksa None.
+    Beklenen dosya: assets/avatar_ai/<unvan>.png (ör. cirak.png, efsane.png)."""
+    ad = UNVAN_DOSYA.get(unvan)
+    if ad is None:
+        return None
+    yol = assets_dizini / "avatar_ai" / f"{ad}.png"
+    return yol if yol.is_file() else None
