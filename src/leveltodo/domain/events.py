@@ -23,3 +23,12 @@ class DomainEvent:
 @dataclass(frozen=True, slots=True)
 class AppStarted(DomainEvent):
     """Uygulama açıldığında yayınlanır. Faz 0'da event hattını kanıtlar."""
+
+
+@dataclass(frozen=True, slots=True)
+class TaskCompleted(DomainEvent):
+    """Bir görev tamamlandığında yayınlanır; kazanılan XP ve puanı taşır."""
+
+    instance_id: str
+    xp: int
+    points: int

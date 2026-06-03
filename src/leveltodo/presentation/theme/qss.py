@@ -71,4 +71,16 @@ def build_qss(palette: Palette, font_family: str) -> str:
     QCheckBox {{
         spacing: 8px;
     }}
+    QLabel#Counter {{
+        font-size: 16px;
+        font-weight: bold;
+        color: {p.accent};
+    }}
+    QFrame#TaskRow {{
+        background-color: {p.panel};
+        border: 2px solid {p.border};
+    }}
+    QLabel#Tag {{
+        color: {p.text_dim};
+    }}
     """
