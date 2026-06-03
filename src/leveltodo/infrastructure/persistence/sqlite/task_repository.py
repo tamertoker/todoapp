@@ -97,6 +97,7 @@ class SqlTaskRepository:
         self,
         *,
         instance_id: str,
+        committed_seconds: int,
         reward_xp: int,
         reward_points: int,
         completed_at: datetime,
@@ -107,6 +108,7 @@ class SqlTaskRepository:
             if inst is None or inst.status == "done":
                 return False
             inst.status = "done"
+            inst.committed_seconds = committed_seconds
             inst.reward_xp = reward_xp
             inst.reward_points = reward_points
             inst.completed_at = completed_at
@@ -114,3 +116,60 @@ class SqlTaskRepository:
             inst.segment_started_at = None
             s.commit()
             return True
+
+    # — Kronometre —
+    def calisan_kayitlar(self, user_id: str) -> list[TaskInstance]:
+        with self._sf() as s:
+            stmt = select(TaskInstance).where(
+                TaskInstance.user_id == user_id, TaskInstance.timer_running.is_(True)
+            )
+            return list(s.scalars(stmt))
+
+    def timer_baslat(self, kayit_id: str, simdi: datetime) -> None:
+        with self._sf() as s:
+            inst = s.get(TaskInstance, kayit_id)
+            if inst is not None and inst.status == "pending" and not inst.timer_running:
+                inst.timer_running = True
+                inst.segment_started_at = simdi
+                s.commit()
+
+    def timer_duraklat(self, kayit_id: str, simdi: datetime) -> None:
+        """Çalışan segmenti kaydedilmiş süreye ekler ve durdurur."""
+        with self._sf() as s:
+            inst = s.get(TaskInstance, kayit_id)
+            if inst is not None and inst.timer_running and inst.segment_started_at is not None:
+                inst.committed_seconds += max(
+                    0, int((simdi - inst.segment_started_at).total_seconds())
+                )
+                inst.timer_running = False
+                inst.segment_started_at = None
+                s.commit()
+
+    def timer_checkpoint(self, simdi: datetime, user_id: str) -> None:
+        """Çalışan kronometrenin o ana kadarki süresini DB'ye yazar ama durdurmaz.
+        Böylece çökme olursa en fazla son checkpoint'ten beri geçen süre kaybolur."""
+        with self._sf() as s:
+            stmt = select(TaskInstance).where(
+                TaskInstance.user_id == user_id, TaskInstance.timer_running.is_(True)
+            )
+            for inst in s.scalars(stmt):
+                if inst.segment_started_at is not None:
+                    inst.committed_seconds += max(
+                        0, int((simdi - inst.segment_started_at).total_seconds())
+                    )
+                    inst.segment_started_at = simdi
+            s.commit()
+
+    def timer_kurtar(self, user_id: str) -> int:
+        """Açılışta yarım kalmış kronometreleri durdurur. Çökme/kapanma süresini
+        sayamayacağımız için askıdaki segment atılır; kaydedilmiş süre korunur."""
+        with self._sf() as s:
+            stmt = select(TaskInstance).where(
+                TaskInstance.user_id == user_id, TaskInstance.timer_running.is_(True)
+            )
+            kayitlar = list(s.scalars(stmt))
+            for inst in kayitlar:
+                inst.timer_running = False
+                inst.segment_started_at = None
+            s.commit()
+            return len(kayitlar)

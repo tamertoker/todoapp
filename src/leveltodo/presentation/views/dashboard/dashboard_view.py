@@ -1,12 +1,16 @@
 """Dashboard (ana ekran) — Faz 1.
 
 Üstte karşılama + mantıksal gün, ardından iki kasa (XP / Puan), sonra "Görev
-Ekle" düğmesi ve bugünün görev listesi. Her görev satırında 'Bitir' (ödülü
-kazandırır) ve 'Sil' düğmeleri var; tamamlananlar kazanılan XP ile işaretlenir.
+Ekle" düğmesi ve bugünün görev listesi. Her bekleyen görev satırında bir
+kronometre (Başlat/Duraklat), canlı süre, 'Bitir' ve 'Sil' vardır.
+
+Canlı sayaç saniyede bir tazelenir; çalışan kronometre her 30 saniyede bir
+veritabanına yazılır (checkpoint), böylece bir çökmede en fazla ~30 sn kaybolur.
 """
 
 from __future__ import annotations
 
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -20,17 +24,29 @@ from PyQt6.QtWidgets import (
 from leveltodo.application.gorev_servisi import GorevSatiri
 from leveltodo.bootstrap import Container
 from leveltodo.domain.events import AppStarted, DomainEvent, TaskCompleted
+from leveltodo.domain.tasks.kurallar import canli_sure
 from leveltodo.domain.time.gun import Gun
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
 
 
+def _format_sure(saniye: int) -> str:
+    saniye = max(0, saniye)
+    saat, kalan = divmod(saniye, 3600)
+    dakika, sn = divmod(kalan, 60)
+    if saat:
+        return f"{saat:02d}:{dakika:02d}:{sn:02d}"
+    return f"{dakika:02d}:{sn:02d}"
+
+
 class DashboardView(QWidget):
     def __init__(self, container: Container, bridge: QtEventBridge) -> None:
         super().__init__()
         self._container = container
-        self._vm = DashboardViewModel(container.gorevler)
+        self._vm = DashboardViewModel(container.gorevler, container.kronometre)
+        # Çalışan kronometre etiketlerini saniyede bir tazelemek için tutulur.
+        self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
 
         title = QLabel("LevelTodo")
         title.setObjectName("Title")
@@ -76,6 +92,17 @@ class DashboardView(QWidget):
         self._vm.changed.connect(self._render)
         bridge.domain_event.connect(self._on_event)
 
+        # Açılışta yarım kalmış kronometre varsa durdur (kaydedilen süre korunur).
+        self._kurtarma_sayisi = self._vm.kurtar()
+
+        # Canlı sayaç (1 sn) ve periyodik DB kaydı (30 sn) zamanlayıcıları.
+        self._tick_timer = QTimer(self)
+        self._tick_timer.timeout.connect(self._tick)
+        self._tick_timer.start(1000)
+        self._checkpoint_timer = QTimer(self)
+        self._checkpoint_timer.timeout.connect(self._vm.checkpoint)
+        self._checkpoint_timer.start(30000)
+
         self.refresh_day()
         self._render()
 
@@ -89,6 +116,7 @@ class DashboardView(QWidget):
         self._xp_label.setText(f"XP  {xp}")
         self._points_label.setText(f"Puan  {puan}")
 
+        self._sure_etiketleri = {}
         while self._tasks_layout.count():
             item = self._tasks_layout.takeAt(0)
             widget = item.widget()
@@ -119,18 +147,45 @@ class DashboardView(QWidget):
         h.addWidget(tag)
 
         if satir.durum == "pending":
+            sure_etiketi = QLabel(_format_sure(self._canli_saniye(satir)))
+            sure_etiketi.setObjectName("Timer")
+            h.addWidget(sure_etiketi)
+            self._sure_etiketleri[satir.kayit_id] = (sure_etiketi, satir)
+
+            if satir.calisiyor:
+                toggle = QPushButton("Duraklat")
+                toggle.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.duraklat(i))
+            else:
+                toggle = QPushButton("Başlat")
+                toggle.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.baslat(i))
             done_btn = QPushButton("Bitir")
-            done_btn.clicked.connect(lambda _checked, i=satir.kayit_id: self._vm.tamamla(i))
+            done_btn.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.tamamla(i))
             del_btn = QPushButton("Sil")
-            del_btn.clicked.connect(lambda _checked, i=satir.kayit_id: self._vm.sil(i))
+            del_btn.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.sil(i))
+            h.addWidget(toggle)
             h.addWidget(done_btn)
             h.addWidget(del_btn)
         else:
+            sure_etiketi = QLabel(_format_sure(satir.calisilan_saniye))
+            sure_etiketi.setObjectName("Timer")
             done = QLabel(f"✓ +{satir.odul_xp} XP")
             done.setObjectName("Counter")
+            h.addWidget(sure_etiketi)
             h.addWidget(done)
 
         return frame
+
+    def _canli_saniye(self, satir: GorevSatiri) -> int:
+        return canli_sure(
+            satir.calisilan_saniye,
+            satir.segment_baslangici if satir.calisiyor else None,
+            self._container.saat.simdi(),
+        )
+
+    def _tick(self) -> None:
+        for _kayit_id, (etiket, satir) in self._sure_etiketleri.items():
+            if satir.calisiyor:
+                etiket.setText(_format_sure(self._canli_saniye(satir)))
 
     def _on_add(self) -> None:
         dialog = AddTaskDialog(self)
@@ -141,7 +196,10 @@ class DashboardView(QWidget):
 
     def _on_event(self, event: DomainEvent) -> None:
         if isinstance(event, AppStarted):
-            self._status_label.setText("Yine buradasın. Çoğu insan dönmez; sen döndün.")
+            mesaj = "Yine buradasın. Çoğu insan dönmez; sen döndün."
+            if self._kurtarma_sayisi:
+                mesaj = "Yarım kalmış kronometre vardı, durdurdum — kayıtlı süre duruyor. " + mesaj
+            self._status_label.setText(mesaj)
         elif isinstance(event, TaskCompleted):
             self._status_label.setText(f"+{event.xp} XP kazandın. Sırada ne var?")
             self._render()

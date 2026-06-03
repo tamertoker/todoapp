@@ -114,4 +114,8 @@ def build_qss(palette: Palette, font_family: str) -> str:
     QLabel#Tag {{
         color: {p.text_dim};
     }}
+    QLabel#Timer {{
+        color: {p.text_dim};
+        font-weight: bold;
+    }}
     """

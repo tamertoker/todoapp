@@ -16,6 +16,7 @@ from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
 
 from leveltodo.application.gorev_servisi import GorevServisi
+from leveltodo.application.kronometre_servisi import KronometreServisi
 from leveltodo.application.settings_service import SettingsService
 from leveltodo.domain.time.saat import Saat
 from leveltodo.infrastructure.config import paths
@@ -38,6 +39,7 @@ class Container:
     session_factory: sessionmaker
     settings: SettingsService
     gorevler: GorevServisi
+    kronometre: KronometreServisi
 
 
 def build_container(db_url: str | None = None, saat: Saat | None = None) -> Container:
@@ -62,6 +64,7 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
         olay_hatti=olay_hatti,
         gun_baslangic_getir=lambda: settings.day_start_hour,
     )
+    kronometre = KronometreServisi(gorev_repo, aktif_saat)
 
     return Container(
         saat=aktif_saat,
@@ -70,4 +73,5 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
         session_factory=session_factory,
         settings=settings,
         gorevler=gorevler,
+        kronometre=kronometre,
     )

@@ -1,8 +1,8 @@
 """Dashboard'un ViewModel'i.
 
-Ekran ile görev servisi arasındaki aracı. Görev ekleme/bitirme/silme
-isteklerini servise iletir ve "veri değişti" sinyali yayar; ekran bu sinyali
-duyup listeyi yeniden çizer.
+Ekran ile servisler arasındaki aracı. Görev ve kronometre isteklerini ilgili
+servise iletir ve "veri değişti" sinyali yayar; ekran bu sinyali duyup listeyi
+yeniden çizer.
 """
 
 from __future__ import annotations
@@ -10,15 +10,17 @@ from __future__ import annotations
 from PyQt6.QtCore import QObject, pyqtSignal
 
 from leveltodo.application.gorev_servisi import GorevSatiri, GorevServisi
+from leveltodo.application.kronometre_servisi import KronometreServisi
 from leveltodo.domain.tasks.kurallar import Tekrar
 
 
 class DashboardViewModel(QObject):
     changed = pyqtSignal()
 
-    def __init__(self, gorevler: GorevServisi) -> None:
+    def __init__(self, gorevler: GorevServisi, kronometre: KronometreServisi) -> None:
         super().__init__()
         self._gorevler = gorevler
+        self._kronometre = kronometre
 
     def satirlar(self) -> list[GorevSatiri]:
         return self._gorevler.bugunku_gorevler()
@@ -37,3 +39,18 @@ class DashboardViewModel(QObject):
     def sil(self, kayit_id: str) -> None:
         self._gorevler.gorev_sil(kayit_id)
         self.changed.emit()
+
+    # — Kronometre —
+    def baslat(self, kayit_id: str) -> None:
+        self._kronometre.baslat(kayit_id)
+        self.changed.emit()
+
+    def duraklat(self, kayit_id: str) -> None:
+        self._kronometre.duraklat(kayit_id)
+        self.changed.emit()
+
+    def checkpoint(self) -> None:
+        self._kronometre.checkpoint()
+
+    def kurtar(self) -> int:
+        return self._kronometre.kurtar()

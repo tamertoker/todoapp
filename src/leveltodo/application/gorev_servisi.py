@@ -12,9 +12,10 @@ today_rows, record...) — bunlar yerleşik altyapı terimleridir.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 
 from leveltodo.domain.events import TaskCompleted
-from leveltodo.domain.tasks.kurallar import Odul, Tekrar, odul_hesapla
+from leveltodo.domain.tasks.kurallar import Odul, Tekrar, canli_sure, odul_hesapla
 from leveltodo.domain.time.gun import Gun
 from leveltodo.domain.time.saat import Saat
 from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
@@ -35,6 +36,8 @@ class GorevSatiri:
     durum: str
     tekrar: str
     calisilan_saniye: int
+    calisiyor: bool
+    segment_baslangici: datetime | None
     odul_xp: int | None
     odul_puan: int | None
 
@@ -91,6 +94,8 @@ class GorevServisi:
                 durum=kayit.status,
                 tekrar=tekrar,
                 calisilan_saniye=kayit.committed_seconds,
+                calisiyor=kayit.timer_running,
+                segment_baslangici=kayit.segment_started_at,
                 odul_xp=kayit.reward_xp,
                 odul_puan=kayit.reward_points,
             )
@@ -112,13 +117,20 @@ class GorevServisi:
         kayit = self._gorev.get_instance(kayit_id)
         if kayit is None:
             return None
+        simdi = self._saat.simdi()
+        # Kronometre çalışıyorsa o anki segmenti de süreye katarak ödülü hesapla.
+        islenmis_saniye = canli_sure(
+            kayit.committed_seconds,
+            kayit.segment_started_at if kayit.timer_running else None,
+            simdi,
+        )
         sablon = self._gorev.get_template(kayit.task_id)
         ozel = sablon.reward_override if sablon is not None else None
 
-        odul = odul_hesapla(kayit.committed_seconds, ozel)
-        simdi = self._saat.simdi()
+        odul = odul_hesapla(islenmis_saniye, ozel)
         ok = self._gorev.complete_instance(
             instance_id=kayit_id,
+            committed_seconds=islenmis_saniye,
             reward_xp=odul.xp,
             reward_points=odul.puan,
             completed_at=simdi,
