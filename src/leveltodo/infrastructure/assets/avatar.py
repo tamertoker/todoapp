@@ -38,6 +38,25 @@ class AvatarOlusturucu:
         )
 
 
+def kategori_secenekleri(assets_dizini: Path) -> dict[str, list[str]]:
+    """Avatar editörü için her kategorideki katman dosyalarını listeler.
+    Anahtarlar: vucut, kiyafet, sac, sapka. Değerler char_a_p1'e göreli yollar."""
+    p1 = assets_dizini / "char_a_p1"
+
+    def alt(klasor: str, on_ek: str) -> list[str]:
+        dizin = p1 / klasor
+        if not dizin.is_dir():
+            return []
+        return sorted(on_ek + dosya.name for dosya in dizin.glob("*.png"))
+
+    return {
+        "vucut": sorted(d.name for d in p1.glob("char_a_p1_0bas_*.png")),
+        "kiyafet": alt("1out", "1out/"),
+        "sac": alt("4har", "4har/"),
+        "sapka": alt("5hat", "5hat/"),
+    }
+
+
 def avatar_katmanlari(profil_seviye: int) -> list[str]:
     """Profil seviyesine göre hangi katmanların gösterileceği.
     Seviye yükseldikçe vücut paleti (v00→v10) ve kıyafet (v01→v05) ilerler."""

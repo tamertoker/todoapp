@@ -145,7 +145,7 @@ def build_qss(palette: Palette, font_family: str, up_arrow: str, down_arrow: str
         border: 2px solid {p.border};
         background-color: {p.bg};
         text-align: center;
-        color: {p.text};
+        color: {p.text_dim};
         min-height: 14px;
     }}
     QProgressBar::chunk {{

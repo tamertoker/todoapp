@@ -55,6 +55,21 @@ def test_iki_kez_tamamlamak_cift_odul_vermez(db_url):
     assert svc.toplamlar() == (5, 5)
 
 
+def test_biten_gorevi_silmek_listeden_cikarir(db_url):
+    saat = SahteSaat(datetime(2026, 6, 3, 10, 0))
+    svc = _gorevler(db_url, saat)
+    svc.gorev_olustur("Her gün koş", Tekrar.GUNLUK)
+    satir = svc.bugunku_gorevler()[0]
+
+    svc.tamamla(satir.kayit_id)
+    # Biten her-gün görevi bugün hâlâ listede (✓ ile).
+    assert any(s.kayit_id == satir.kayit_id for s in svc.bugunku_gorevler())
+
+    svc.gorev_sil(satir.kayit_id)
+    # Silinince listeden çıkar.
+    assert all(s.kayit_id != satir.kayit_id for s in svc.bugunku_gorevler())
+
+
 def test_veri_yeniden_baslatmada_kalir(db_url):
     saat = SahteSaat(datetime(2026, 6, 3, 10, 0))
     svc = _gorevler(db_url, saat)

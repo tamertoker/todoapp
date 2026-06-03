@@ -57,6 +57,17 @@ class DashboardView(QWidget):
         self._unvan_label = QLabel()
         self._unvan_label.setObjectName("ProfileBar")
 
+        self._xp_label = QLabel()
+        self._xp_label.setObjectName("Counter")
+        self._points_label = QLabel()
+        self._points_label.setObjectName("Counter")
+        ust = QHBoxLayout()
+        ust.addWidget(title)
+        ust.addStretch(1)
+        ust.addWidget(self._xp_label)
+        ust.addSpacing(20)
+        ust.addWidget(self._points_label)
+
         sol = self._build_sol_panel()
         sag = self._build_sag_panel()
         orta = QHBoxLayout()
@@ -67,7 +78,7 @@ class DashboardView(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
-        layout.addWidget(title)
+        layout.addLayout(ust)
         layout.addWidget(self._unvan_label)
         layout.addLayout(orta, stretch=1)
 
@@ -108,7 +119,8 @@ class DashboardView(QWidget):
         for stat in _STAT_SIRA:
             etiket = QLabel()
             bar = QProgressBar()
-            bar.setTextVisible(False)
+            bar.setTextVisible(True)
+            bar.setFormat("%v / %m")
             self._stat_seviye_label[stat] = etiket
             self._stat_bar[stat] = bar
             v.addWidget(etiket)
@@ -123,16 +135,6 @@ class DashboardView(QWidget):
         self._day_label = QLabel()
         self._status_label = QLabel("…")
         self._status_label.setObjectName("Subtitle")
-
-        self._xp_label = QLabel()
-        self._xp_label.setObjectName("Counter")
-        self._points_label = QLabel()
-        self._points_label.setObjectName("Counter")
-        counters = QHBoxLayout()
-        counters.addWidget(self._xp_label)
-        counters.addSpacing(24)
-        counters.addWidget(self._points_label)
-        counters.addStretch(1)
 
         add_btn = QPushButton("+ Görev Ekle")
         add_btn.clicked.connect(self._on_add)
@@ -151,7 +153,6 @@ class DashboardView(QWidget):
         sag.addWidget(subtitle)
         sag.addWidget(self._day_label)
         sag.addWidget(self._status_label)
-        sag.addLayout(counters)
         sag.addWidget(add_btn)
         sag.addWidget(scroll, stretch=1)
         return sag
@@ -249,8 +250,11 @@ class DashboardView(QWidget):
             sure_etiketi.setObjectName("Timer")
             done = QLabel(f"✓ +{satir.odul_xp} XP")
             done.setObjectName("Counter")
+            del_btn = QPushButton("Sil")
+            del_btn.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.sil(i))
             h.addWidget(sure_etiketi)
             h.addWidget(done)
+            h.addWidget(del_btn)
 
         return frame
 

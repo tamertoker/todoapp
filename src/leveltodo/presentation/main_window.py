@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import (
 
 from leveltodo.bootstrap import Container
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
+from leveltodo.presentation.views.avatar.avatar_view import AvatarEditorView
 from leveltodo.presentation.views.dashboard.dashboard_view import DashboardView
 from leveltodo.presentation.views.settings.settings_view import SettingsView
 from leveltodo.presentation.views.settings.settings_viewmodel import SettingsViewModel
@@ -36,15 +37,17 @@ class MainWindow(QWidget):
         super().__init__()
         self._container = container
         self.setWindowTitle("LevelTodo")
-        self.resize(820, 560)
+        self.resize(1180, 760)
 
         # — Sayfalar —
         self._dashboard = DashboardView(container, bridge)
+        self._avatar_editor = AvatarEditorView()
         settings_vm = SettingsViewModel(container.settings)
         self._settings = SettingsView(settings_vm)
 
         self._stack = QStackedWidget()
         self._stack.addWidget(self._dashboard)
+        self._stack.addWidget(self._avatar_editor)
         self._stack.addWidget(self._settings)
 
         # — Sol menü —
@@ -68,7 +71,7 @@ class MainWindow(QWidget):
         nav.setSpacing(4)
 
         group = QButtonGroup(self)
-        for index, label in enumerate(("Anasayfa", "Ayarlar")):
+        for index, label in enumerate(("Anasayfa", "Avatar", "Ayarlar")):
             btn = QPushButton(label)
             btn.setObjectName("NavButton")
             btn.setCheckable(True)
