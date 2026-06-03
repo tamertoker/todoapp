@@ -42,6 +42,10 @@ class AddTaskDialog(QDialog):
         self._override.setEnabled(False)
         self._override_check.toggled.connect(self._override.setEnabled)
 
+        self._warning = QLabel("Lütfen bir görev başlığı gir.")
+        self._warning.setStyleSheet("color: #ff6b6b;")
+        self._warning.setVisible(False)
+
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
@@ -58,7 +62,14 @@ class AddTaskDialog(QDialog):
         layout.addWidget(self._daily)
         layout.addWidget(self._override_check)
         layout.addWidget(self._override)
+        layout.addWidget(self._warning)
         layout.addWidget(buttons)
+
+    def accept(self) -> None:
+        if not self._title.text().strip():
+            self._warning.setVisible(True)
+            return
+        super().accept()
 
     def result_values(self) -> tuple[str, Recurrence, int | None]:
         recurrence = Recurrence.DAILY if self._daily.isChecked() else Recurrence.NONE

@@ -68,8 +68,39 @@ def build_qss(palette: Palette, font_family: str) -> str:
         selection-background-color: {p.accent};
         selection-color: {p.accent_text};
     }}
-    QCheckBox {{
+    QRadioButton, QCheckBox {{
         spacing: 8px;
+        color: {p.text};
+    }}
+    QRadioButton::indicator, QCheckBox::indicator {{
+        width: 16px;
+        height: 16px;
+        border: 2px solid {p.border};
+        background-color: {p.bg};
+    }}
+    QRadioButton::indicator:checked, QCheckBox::indicator:checked {{
+        background-color: {p.accent};
+        border: 2px solid {p.accent};
+    }}
+    QRadioButton::indicator:hover, QCheckBox::indicator:hover {{
+        border-color: {p.accent};
+    }}
+    QSpinBox::up-button {{
+        subcontrol-origin: border;
+        subcontrol-position: top right;
+        width: 18px;
+        border-left: 2px solid {p.border};
+        background-color: {p.panel};
+    }}
+    QSpinBox::down-button {{
+        subcontrol-origin: border;
+        subcontrol-position: bottom right;
+        width: 18px;
+        border-left: 2px solid {p.border};
+        background-color: {p.panel};
+    }}
+    QSpinBox::up-button:hover, QSpinBox::down-button:hover {{
+        background-color: {p.accent};
     }}
     QLabel#Counter {{
         font-size: 16px;

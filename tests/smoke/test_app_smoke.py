@@ -42,3 +42,18 @@ def test_dashboard_task_flow_updates_counter(db_url, qapp):
     dashboard._vm.complete(rows[0].instance_id)
     assert container.tasks.totals() == (5, 5)
     assert "5" in dashboard._xp_label.text()
+
+
+def test_add_task_dialog_blocks_empty_title(qapp):
+    from PyQt6.QtWidgets import QDialog
+
+    from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
+
+    dialog = AddTaskDialog()
+    dialog.accept()  # boş başlık → kabul edilmemeli
+    assert dialog.result() != QDialog.DialogCode.Accepted
+    assert dialog._warning.isVisibleTo(dialog)
+
+    dialog._title.setText("Bir görev")
+    dialog.accept()  # başlık dolu → kabul edilir
+    assert dialog.result() == QDialog.DialogCode.Accepted
