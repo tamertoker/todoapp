@@ -6,7 +6,10 @@ Sağda iki kasa (XP/Puan), "Görev Ekle" ve bugünün görev listesi (kronometre
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -21,13 +24,14 @@ from PyQt6.QtWidgets import (
 from leveltodo.application.gorev_servisi import GorevSatiri
 from leveltodo.bootstrap import Container
 from leveltodo.domain.events import AppStarted, DomainEvent, TaskCompleted
-from leveltodo.domain.stats.statlar import STAT_ETIKET, Stat
+from leveltodo.domain.stats.statlar import STAT_ETIKET, Stat, unvan_listesi
 from leveltodo.domain.tasks.kurallar import canli_sure
 from leveltodo.domain.time.gun import Gun
 from leveltodo.infrastructure.assets.avatar import (
     AvatarOlusturucu,
     ai_avatar_yolu,
     avatar_katmanlari,
+    kilitli_goruntu,
 )
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
@@ -53,7 +57,10 @@ class DashboardView(QWidget):
         self._container = container
         self._vm = DashboardViewModel(container.gorevler, container.kronometre)
         self._avatar = AvatarOlusturucu(paths.assets_dir())
-        self._son_avatar_anahtar: tuple | None = None
+        self._unvan_listesi = unvan_listesi()
+        self._onizleme_indeks = 0
+        self._mevcut_rank_indeks: int | None = None
+        self._pixmap_cache: dict[str, QPixmap] = {}
         self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
 
         title = QLabel("LevelTodo")
@@ -113,9 +120,26 @@ class DashboardView(QWidget):
         avatar_frame = QFrame()
         avatar_frame.setObjectName("AvatarFrame")
         af = QVBoxLayout(avatar_frame)
+
+        self._geri_btn = QPushButton("◀")
+        self._geri_btn.setFixedWidth(36)
+        self._geri_btn.clicked.connect(lambda: self._onizleme_kaydir(-1))
+        self._ileri_btn = QPushButton("▶")
+        self._ileri_btn.setFixedWidth(36)
+        self._ileri_btn.clicked.connect(lambda: self._onizleme_kaydir(+1))
         self._avatar_label = QLabel()
         self._avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        af.addWidget(self._avatar_label)
+        ok_satiri = QHBoxLayout()
+        ok_satiri.addWidget(self._geri_btn)
+        ok_satiri.addWidget(self._avatar_label, stretch=1)
+        ok_satiri.addWidget(self._ileri_btn)
+        af.addLayout(ok_satiri)
+
+        self._onizleme_unvan_label = QLabel()
+        self._onizleme_unvan_label.setObjectName("Counter")
+        self._onizleme_unvan_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        af.addWidget(self._onizleme_unvan_label)
+
         v.addWidget(avatar_frame)
 
         self._stat_seviye_label: dict[Stat, QLabel] = {}
@@ -194,19 +218,7 @@ class DashboardView(QWidget):
             bar.setMaximum(max(1, durum.sonraki_seviye_esigi))
             bar.setValue(durum.bu_seviyedeki_xp)
 
-        # Kullanıcı o unvan için AI avatar ürettiyse onu göster; yoksa Mana Seed avatarı.
-        ai_yol = ai_avatar_yolu(paths.assets_dir(), unvan.unvan)
-        if ai_yol is not None:
-            anahtar: tuple = ("ai", str(ai_yol))
-            if anahtar != self._son_avatar_anahtar:
-                self._son_avatar_anahtar = anahtar
-                self._avatar_label.setPixmap(self._avatar.ai_resmi(ai_yol, 256))
-        else:
-            katmanlar = avatar_katmanlari(profil)
-            anahtar = ("seed", tuple(katmanlar))
-            if anahtar != self._son_avatar_anahtar:
-                self._son_avatar_anahtar = anahtar
-                self._avatar_label.setPixmap(self._avatar.olustur(katmanlar, buyutme=4))
+        self._avatar_onizleme_ciz()
 
     def _render_gorevler(self) -> None:
         self._sure_etiketleri = {}
@@ -282,6 +294,54 @@ class DashboardView(QWidget):
         for _kayit_id, (etiket, satir) in self._sure_etiketleri.items():
             if satir.calisiyor:
                 etiket.setText(_format_sure(self._canli_saniye(satir)))
+
+    # — Avatar önizleme (ok'larla gelecek seviyeleri gözetleme) —
+    def _kilit_yolu(self) -> Path:
+        return paths.assets_dir() / "ui" / "kilit.png"
+
+    def _rank_pixmap(self, ad: str, min_seviye: int) -> QPixmap:
+        if ad not in self._pixmap_cache:
+            ai_yol = ai_avatar_yolu(paths.assets_dir(), ad)
+            if ai_yol is not None:
+                self._pixmap_cache[ad] = self._avatar.ai_resmi(ai_yol, 240)
+            else:
+                self._pixmap_cache[ad] = self._avatar.olustur(
+                    avatar_katmanlari(min_seviye), buyutme=4
+                )
+        return self._pixmap_cache[ad]
+
+    def _onizleme_kaydir(self, yon: int) -> None:
+        yeni = self._onizleme_indeks + yon
+        if 0 <= yeni < len(self._unvan_listesi):
+            self._onizleme_indeks = yeni
+            self._avatar_onizleme_ciz()
+
+    def _avatar_onizleme_ciz(self) -> None:
+        liste = self._unvan_listesi
+        profil, _ = self._vm.profil_durumu()
+        mevcut_idx = 0
+        for i, (_ad, min_lv) in enumerate(liste):
+            if profil >= min_lv:
+                mevcut_idx = i
+        # Seviye atlayıp yeni bir unvana geçilince önizleme oraya kayar.
+        if mevcut_idx != self._mevcut_rank_indeks:
+            self._mevcut_rank_indeks = mevcut_idx
+            self._onizleme_indeks = mevcut_idx
+
+        indeks = self._onizleme_indeks
+        ad, min_lv = liste[indeks]
+        kilitli = indeks > mevcut_idx
+        pixmap = self._rank_pixmap(ad, min_lv)
+        if kilitli:
+            pixmap = kilitli_goruntu(pixmap, self._kilit_yolu())
+        self._avatar_label.setPixmap(pixmap)
+
+        etiket = f"{ad} · Sv {min_lv}+"
+        if kilitli:
+            etiket += "  · 🔒"
+        self._onizleme_unvan_label.setText(etiket)
+        self._geri_btn.setEnabled(indeks > 0)
+        self._ileri_btn.setEnabled(indeks < len(liste) - 1)
 
     def _on_add(self) -> None:
         dialog = AddTaskDialog(self)

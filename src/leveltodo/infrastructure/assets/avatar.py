@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PyQt6.QtCore import QRect, Qt
-from PyQt6.QtGui import QPainter, QPixmap
+from PyQt6.QtGui import QColor, QPainter, QPen, QPixmap
 
 _KARE = 64
 
@@ -94,9 +94,53 @@ UNVAN_DOSYA: dict[str, str] = {
 
 def ai_avatar_yolu(assets_dizini: Path, unvan: str) -> Path | None:
     """Kullanıcının o unvan için ürettiği AI avatar resmi varsa yolu, yoksa None.
-    Beklenen dosya: assets/avatar_ai/<unvan>.png (ör. cirak.png, efsane.png)."""
-    ad = UNVAN_DOSYA.get(unvan)
-    if ad is None:
-        return None
-    yol = assets_dizini / "avatar_ai" / f"{ad}.png"
-    return yol if yol.is_file() else None
+    Beklenen dosya: assets/avatar_ai/<unvan>.png. Hem ASCII (aydin) hem Türkçe
+    (aydın) yazımı kabul edilir."""
+    adaylar = []
+    ascii_ad = UNVAN_DOSYA.get(unvan)
+    if ascii_ad is not None:
+        adaylar.append(ascii_ad)
+    adaylar.append(unvan.lower())  # Türkçe küçük harf, ör. "aydın"
+    for ad in adaylar:
+        yol = assets_dizini / "avatar_ai" / f"{ad}.png"
+        if yol.is_file():
+            return yol
+    return None
+
+
+def kilitli_goruntu(pixmap: QPixmap, kilit_yolu: Path | None = None) -> QPixmap:
+    """Avatarı hafif karartır ve üstüne kilit işareti koyar (henüz açılmamış
+    seviyeler için). kilit_yolu verilip dosya varsa o PNG kullanılır; yoksa
+    basit bir asma kilit çizilir."""
+    sonuc = QPixmap(pixmap)
+    painter = QPainter(sonuc)
+    painter.fillRect(sonuc.rect(), QColor(0, 0, 0, 150))
+    if kilit_yolu is not None and kilit_yolu.is_file():
+        kilit = QPixmap(str(kilit_yolu)).scaled(
+            sonuc.width() // 3,
+            sonuc.height() // 3,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+        painter.drawPixmap(
+            (sonuc.width() - kilit.width()) // 2,
+            (sonuc.height() - kilit.height()) // 2,
+            kilit,
+        )
+    else:
+        _kilit_ciz(painter, sonuc.width(), sonuc.height())
+    painter.end()
+    return sonuc
+
+
+def _kilit_ciz(painter: QPainter, genislik: int, yukseklik: int) -> None:
+    boyut = min(genislik, yukseklik) // 4
+    cx, cy = genislik // 2, yukseklik // 2
+    renk = QColor("#f0e6c0")
+    painter.setPen(QPen(renk, max(2, boyut // 7)))
+    painter.setBrush(Qt.BrushStyle.NoBrush)
+    kanca = QRect(cx - boyut // 3, cy - boyut // 2, (boyut * 2) // 3, boyut)
+    painter.drawArc(kanca, 0, 180 * 16)
+    painter.setBrush(renk)
+    govde = QRect(cx - boyut // 2, cy, boyut, (boyut * 4) // 5)
+    painter.drawRoundedRect(govde, 3, 3)

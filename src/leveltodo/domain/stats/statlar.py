@@ -92,3 +92,15 @@ def unvan_hesapla(profil_seviye: int) -> UnvanDurumu:
                 sonraki_unvana_kalan=ust_sinir + 1 - profil_seviye,
             )
     return UnvanDurumu(unvan=_SON_UNVAN, sonraki_unvan=None, sonraki_unvana_kalan=None)
+
+
+def unvan_listesi() -> list[tuple[str, int]]:
+    """Tüm unvanlar ve her birinin başladığı (minimum) profil seviyesi, sırayla.
+    Örn: [("Çırak", 0), ("Yolcu", 4), ... ("Efsane", 87)]."""
+    sonuc: list[tuple[str, int]] = []
+    alt = 0
+    for ust_sinir, ad in _UNVAN_BANTLARI:
+        sonuc.append((ad, alt))
+        alt = ust_sinir + 1
+    sonuc.append((_SON_UNVAN, alt))
+    return sonuc
