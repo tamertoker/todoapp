@@ -27,7 +27,7 @@ class LevelTodoApp:
         self.qapp = QApplication.instance() or QApplication(sys.argv)
         self._font_family = load_pixel_font()
 
-        self.bridge = QtEventBridge(container.event_bus)
+        self.bridge = QtEventBridge(container.olay_hatti)
         self.window = MainWindow(container, self.bridge)
 
         self._apply_theme(container.settings.theme)
@@ -42,5 +42,5 @@ class LevelTodoApp:
 
     def run(self) -> int:
         self.window.show()
-        self.container.event_bus.publish(AppStarted(occurred_at=self.container.clock.now()))
+        self.container.olay_hatti.publish(AppStarted(occurred_at=self.container.saat.simdi()))
         return self.qapp.exec()

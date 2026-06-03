@@ -17,10 +17,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from leveltodo.application.task_service import TaskRow
+from leveltodo.application.gorev_servisi import GorevSatiri
 from leveltodo.bootstrap import Container
 from leveltodo.domain.events import AppStarted, DomainEvent, TaskCompleted
-from leveltodo.domain.time.day import DayId
+from leveltodo.domain.time.gun import Gun
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
@@ -30,7 +30,7 @@ class DashboardView(QWidget):
     def __init__(self, container: Container, bridge: QtEventBridge) -> None:
         super().__init__()
         self._container = container
-        self._vm = DashboardViewModel(container.tasks)
+        self._vm = DashboardViewModel(container.gorevler)
 
         title = QLabel("LevelTodo")
         title.setObjectName("Title")
@@ -80,14 +80,14 @@ class DashboardView(QWidget):
         self._render()
 
     def refresh_day(self) -> None:
-        day = DayId.of(self._container.clock.now(), self._container.settings.day_start_hour)
-        self._day_label.setText(f"Bugün (mantıksal gün): {day}")
+        gun = Gun.olustur(self._container.saat.simdi(), self._container.settings.day_start_hour)
+        self._day_label.setText(f"Bugün (mantıksal gün): {gun}")
         self._render()
 
     def _render(self) -> None:
-        xp, points = self._vm.totals()
+        xp, puan = self._vm.toplamlar()
         self._xp_label.setText(f"XP  {xp}")
-        self._points_label.setText(f"Puan  {points}")
+        self._points_label.setText(f"Puan  {puan}")
 
         while self._tasks_layout.count():
             item = self._tasks_layout.takeAt(0)
@@ -95,38 +95,38 @@ class DashboardView(QWidget):
             if widget is not None:
                 widget.deleteLater()
 
-        rows = self._vm.rows()
-        if not rows:
+        satirlar = self._vm.satirlar()
+        if not satirlar:
             empty = QLabel("Bugün için görev yok. Başlamak için bir görev ekle.")
             empty.setObjectName("Subtitle")
             self._tasks_layout.addWidget(empty)
         else:
-            for row in rows:
-                self._tasks_layout.addWidget(self._build_row(row))
+            for satir in satirlar:
+                self._tasks_layout.addWidget(self._build_row(satir))
         self._tasks_layout.addStretch(1)
 
-    def _build_row(self, row: TaskRow) -> QFrame:
+    def _build_row(self, satir: GorevSatiri) -> QFrame:
         frame = QFrame()
         frame.setObjectName("TaskRow")
         h = QHBoxLayout(frame)
         h.setContentsMargins(12, 8, 12, 8)
         h.setSpacing(8)
 
-        title = QLabel(row.title)
-        tag = QLabel("Her gün" if row.recurrence == "daily" else "Tek seferlik")
+        title = QLabel(satir.baslik)
+        tag = QLabel("Her gün" if satir.tekrar == "daily" else "Tek seferlik")
         tag.setObjectName("Tag")
         h.addWidget(title, stretch=1)
         h.addWidget(tag)
 
-        if row.status == "pending":
+        if satir.durum == "pending":
             done_btn = QPushButton("Bitir")
-            done_btn.clicked.connect(lambda _checked, i=row.instance_id: self._vm.complete(i))
+            done_btn.clicked.connect(lambda _checked, i=satir.kayit_id: self._vm.tamamla(i))
             del_btn = QPushButton("Sil")
-            del_btn.clicked.connect(lambda _checked, i=row.instance_id: self._vm.delete(i))
+            del_btn.clicked.connect(lambda _checked, i=satir.kayit_id: self._vm.sil(i))
             h.addWidget(done_btn)
             h.addWidget(del_btn)
         else:
-            done = QLabel(f"✓ +{row.reward_xp} XP")
+            done = QLabel(f"✓ +{satir.odul_xp} XP")
             done.setObjectName("Counter")
             h.addWidget(done)
 
@@ -135,9 +135,9 @@ class DashboardView(QWidget):
     def _on_add(self) -> None:
         dialog = AddTaskDialog(self)
         if dialog.exec():
-            title, recurrence, override = dialog.result_values()
-            if title:
-                self._vm.add_task(title, recurrence, override)
+            baslik, tekrar, ozel_odul = dialog.result_values()
+            if baslik:
+                self._vm.gorev_ekle(baslik, tekrar, ozel_odul)
 
     def _on_event(self, event: DomainEvent) -> None:
         if isinstance(event, AppStarted):

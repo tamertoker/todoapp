@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from leveltodo.domain.tasks.rules import Recurrence
+from leveltodo.domain.tasks.kurallar import Tekrar
 
 
 class AddTaskDialog(QDialog):
@@ -71,7 +71,7 @@ class AddTaskDialog(QDialog):
             return
         super().accept()
 
-    def result_values(self) -> tuple[str, Recurrence, int | None]:
-        recurrence = Recurrence.DAILY if self._daily.isChecked() else Recurrence.NONE
-        override = self._override.value() if self._override_check.isChecked() else None
-        return self._title.text().strip(), recurrence, override
+    def result_values(self) -> tuple[str, Tekrar, int | None]:
+        tekrar = Tekrar.GUNLUK if self._daily.isChecked() else Tekrar.YOK
+        ozel_odul = self._override.value() if self._override_check.isChecked() else None
+        return self._title.text().strip(), tekrar, ozel_odul

@@ -12,15 +12,15 @@ from __future__ import annotations
 from PyQt6.QtCore import QObject, pyqtSignal
 
 from leveltodo.domain.events import DomainEvent
-from leveltodo.infrastructure.eventbus.bus import EventBus
+from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
 
 
 class QtEventBridge(QObject):
     domain_event = pyqtSignal(object)
 
-    def __init__(self, bus: EventBus, parent: QObject | None = None) -> None:
+    def __init__(self, olay_hatti: OlayHatti, parent: QObject | None = None) -> None:
         super().__init__(parent)
-        bus.subscribe_all(self._forward)
+        olay_hatti.subscribe_all(self._forward)
 
     def _forward(self, event: DomainEvent) -> None:
         self.domain_event.emit(event)

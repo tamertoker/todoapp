@@ -1,4 +1,4 @@
-"""DayId — "mantıksal gün" kavramı.
+"""Gun — "mantıksal gün" kavramı.
 
 Sorun: Gece 03:00'te uygulamayı açan biri için bu hâlâ "dünkü gün" olmalı.
 Çözüm: Kullanıcının belirlediği bir "gün başlangıç saati" (varsayılan 04:00)
@@ -16,14 +16,14 @@ from datetime import date, datetime, timedelta
 
 
 @dataclass(frozen=True, slots=True, order=True)
-class DayId:
-    value: date
+class Gun:
+    tarih: date
 
     @classmethod
-    def of(cls, moment: datetime, day_start_hour: int) -> DayId:
-        if not 0 <= day_start_hour <= 23:
-            raise ValueError("day_start_hour 0 ile 23 arasında olmalı")
-        return cls((moment - timedelta(hours=day_start_hour)).date())
+    def olustur(cls, an: datetime, gun_baslangic_saati: int) -> Gun:
+        if not 0 <= gun_baslangic_saati <= 23:
+            raise ValueError("gun_baslangic_saati 0 ile 23 arasında olmalı")
+        return cls((an - timedelta(hours=gun_baslangic_saati)).date())
 
     def __str__(self) -> str:
-        return self.value.isoformat()
+        return self.tarih.isoformat()

@@ -9,31 +9,31 @@ from __future__ import annotations
 
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from leveltodo.application.task_service import TaskRow, TaskService
-from leveltodo.domain.tasks.rules import Recurrence
+from leveltodo.application.gorev_servisi import GorevSatiri, GorevServisi
+from leveltodo.domain.tasks.kurallar import Tekrar
 
 
 class DashboardViewModel(QObject):
     changed = pyqtSignal()
 
-    def __init__(self, tasks: TaskService) -> None:
+    def __init__(self, gorevler: GorevServisi) -> None:
         super().__init__()
-        self._tasks = tasks
+        self._gorevler = gorevler
 
-    def rows(self) -> list[TaskRow]:
-        return self._tasks.list_today()
+    def satirlar(self) -> list[GorevSatiri]:
+        return self._gorevler.bugunku_gorevler()
 
-    def totals(self) -> tuple[int, int]:
-        return self._tasks.totals()
+    def toplamlar(self) -> tuple[int, int]:
+        return self._gorevler.toplamlar()
 
-    def add_task(self, title: str, recurrence: Recurrence, override: int | None) -> None:
-        self._tasks.create_task(title, recurrence, override)
+    def gorev_ekle(self, baslik: str, tekrar: Tekrar, ozel_odul: int | None) -> None:
+        self._gorevler.gorev_olustur(baslik, tekrar, ozel_odul)
         self.changed.emit()
 
-    def complete(self, instance_id: str) -> None:
-        self._tasks.complete(instance_id)
+    def tamamla(self, kayit_id: str) -> None:
+        self._gorevler.tamamla(kayit_id)
         self.changed.emit()
 
-    def delete(self, instance_id: str) -> None:
-        self._tasks.delete_task(instance_id)
+    def sil(self, kayit_id: str) -> None:
+        self._gorevler.gorev_sil(kayit_id)
         self.changed.emit()

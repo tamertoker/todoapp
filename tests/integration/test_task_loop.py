@@ -4,64 +4,63 @@ ekle → listele → bitir → ödül → toplamlar → günlük tekrar → kal�
 from datetime import datetime
 
 from leveltodo.bootstrap import build_container
-from leveltodo.domain.tasks.rules import Recurrence
-from leveltodo.infrastructure.clock import FakeClock
+from leveltodo.domain.tasks.kurallar import Tekrar
+from leveltodo.infrastructure.saat import SahteSaat
 
 
-def _container(db_url, clock):
-    return build_container(db_url=db_url, clock=clock)
+def _gorevler(db_url, saat):
+    return build_container(db_url=db_url, saat=saat).gorevler
 
 
-def test_full_loop(db_url):
-    clock = FakeClock(datetime(2026, 6, 3, 10, 0))
-    svc = _container(db_url, clock).tasks
+def test_tam_dongu(db_url):
+    saat = SahteSaat(datetime(2026, 6, 3, 10, 0))
+    svc = _gorevler(db_url, saat)
 
-    svc.create_task("Kitap oku", Recurrence.DAILY)
-    svc.create_task("Faturayı öde", Recurrence.NONE, reward_override=20)
+    svc.gorev_olustur("Kitap oku", Tekrar.GUNLUK)
+    svc.gorev_olustur("Faturayı öde", Tekrar.YOK, ozel_odul=20)
 
-    rows = svc.list_today()
-    assert len(rows) == 2
+    satirlar = svc.bugunku_gorevler()
+    assert len(satirlar) == 2
 
-    onetime = next(r for r in rows if r.recurrence == "none")
-    reward = svc.complete(onetime.instance_id)
-    assert reward is not None and reward.xp == 20 and reward.points == 20
-    assert svc.totals() == (20, 20)
+    tek = next(s for s in satirlar if s.tekrar == "none")
+    odul = svc.tamamla(tek.kayit_id)
+    assert odul is not None and odul.xp == 20 and odul.puan == 20
+    assert svc.toplamlar() == (20, 20)
 
     # Tek seferlik görev bitince listeden düşer.
-    titles_after = [r.title for r in svc.list_today()]
-    assert "Faturayı öde" not in titles_after
+    basliklar = [s.baslik for s in svc.bugunku_gorevler()]
+    assert "Faturayı öde" not in basliklar
 
     # Her-gün görevi hâlâ bekliyor; bitir (kronometresiz → sabit 5).
-    daily = next(r for r in svc.list_today() if r.recurrence == "daily")
-    assert svc.complete(daily.instance_id).xp == 5
-    assert svc.totals() == (25, 25)
+    gunluk = next(s for s in svc.bugunku_gorevler() if s.tekrar == "daily")
+    assert svc.tamamla(gunluk.kayit_id).xp == 5
+    assert svc.toplamlar() == (25, 25)
 
     # Ertesi mantıksal günde her-gün görevi yeniden bekliyor olarak gelir.
-    clock.advance(days=1)
-    rows_tomorrow = svc.list_today()
-    assert any(r.recurrence == "daily" and r.status == "pending" for r in rows_tomorrow)
-    # Toplamlar korunur.
-    assert svc.totals() == (25, 25)
+    saat.ilerlet(days=1)
+    yarin = svc.bugunku_gorevler()
+    assert any(s.tekrar == "daily" and s.durum == "pending" for s in yarin)
+    assert svc.toplamlar() == (25, 25)
 
 
-def test_completing_twice_does_not_double_reward(db_url):
-    clock = FakeClock(datetime(2026, 6, 3, 10, 0))
-    svc = _container(db_url, clock).tasks
+def test_iki_kez_tamamlamak_cift_odul_vermez(db_url):
+    saat = SahteSaat(datetime(2026, 6, 3, 10, 0))
+    svc = _gorevler(db_url, saat)
 
-    svc.create_task("Tek iş", Recurrence.NONE)
-    row = svc.list_today()[0]
+    svc.gorev_olustur("Tek iş", Tekrar.YOK)
+    satir = svc.bugunku_gorevler()[0]
 
-    assert svc.complete(row.instance_id) is not None
-    assert svc.complete(row.instance_id) is None  # ikinci kez ödül yok
-    assert svc.totals() == (5, 5)
+    assert svc.tamamla(satir.kayit_id) is not None
+    assert svc.tamamla(satir.kayit_id) is None  # ikinci kez ödül yok
+    assert svc.toplamlar() == (5, 5)
 
 
-def test_data_persists_across_restart(db_url):
-    clock = FakeClock(datetime(2026, 6, 3, 10, 0))
-    svc = _container(db_url, clock).tasks
-    svc.create_task("Kalıcı görev", Recurrence.DAILY)
-    svc.complete(svc.list_today()[0].instance_id)
+def test_veri_yeniden_baslatmada_kalir(db_url):
+    saat = SahteSaat(datetime(2026, 6, 3, 10, 0))
+    svc = _gorevler(db_url, saat)
+    svc.gorev_olustur("Kalıcı görev", Tekrar.GUNLUK)
+    svc.tamamla(svc.bugunku_gorevler()[0].kayit_id)
 
     # Aynı veritabanıyla yeni container (uygulamayı kapatıp açmak gibi).
-    svc2 = _container(db_url, clock).tasks
-    assert svc2.totals() == (5, 5)
+    svc2 = _gorevler(db_url, saat)
+    assert svc2.toplamlar() == (5, 5)

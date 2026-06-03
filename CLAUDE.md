@@ -87,6 +87,7 @@ Bu bölüm yukarıdaki dört genel prensibi bu projeye (Seviye Sistemli Görev T
 - Her faz **planın faz tablosundaki kapsamla** sınırlı; bir fazın kodu başka fazın işini yapmaz.
 - **Her fazın başında** o fazın ölçülebilir başarı kriterlerini net cümlelerle yaz ("çalışır kanıt").
 - **Her faz sonunda** doğrulama: `pytest` (domain+application unit + integration) yeşil + Windows'ta manuel smoke senaryosu. Bunlar geçmeden faz "bitti" sayılmaz.
+- **Her faz sonunda** çalışması gereken her şeyi **tik-kutucukları (checklist)** halinde yaz; kullanıcı her maddeyi tek tek elle doğrulayabilsin.
 - Faz bitince yeni branch'te commit; push kullanıcı onayıyla.
 
 ### 5.4 Asset (görsel/ses) eksikliği
@@ -96,3 +97,9 @@ Bu bölüm yukarıdaki dört genel prensibi bu projeye (Seviye Sistemli Görev T
 ### 5.5 Test ortamı
 - GUI Windows'ta test edilir; domain/application testleri headless çalışır (`QT_QPA_PLATFORM=offscreen`).
 - Testler gerçek veri dizinine dokunmaz; geçici DB kullanır.
+
+### 5.6 İsimlendirme (Türkçe kod)
+- Kod içindeki **değişken / metod / sınıf / dosya isimleri mümkün olduğunca Türkçe**. ASCII kullan: ç/ş/ğ/ı/ö/ü yerine c/s/g/i/o/u (ör. `odul_hesapla`, `gun`, `saat`, `gorev`). Kullanıcıya görünen metinler tam Türkçe kalır (ASCII şart değil).
+- Yalnızca **kalıplaşmış yazılım terimleri İngilizce**: repository, service, session, commit, engine, persistence, bootstrap, event, publish/subscribe, id, handler vb.
+- **Veritabanı/ORM tabloları-kolonları** ve **çatı API'leri** (Qt, SQLAlchemy, Alembic) İngilizce kalır — bunları çevirmek hata/karışıklık üretir.
+- Örnek eşleme: `compute_reward → odul_hesapla`, `DayId → Gun`, `IClock → Saat`, `EventBus → OlayHatti`, `TaskService → GorevServisi`.

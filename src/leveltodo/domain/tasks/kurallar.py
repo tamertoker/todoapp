@@ -18,39 +18,39 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 
-UNTIMED_DEFAULT_REWARD = 5
+SURESIZ_VARSAYILAN_ODUL = 5
 
 
-class Recurrence(StrEnum):
-    NONE = "none"   # tek seferlik
-    DAILY = "daily"  # her gün tekrar
+class Tekrar(StrEnum):
+    YOK = "none"      # tek seferlik
+    GUNLUK = "daily"  # her gün tekrar
 
 
-class TaskStatus(StrEnum):
-    PENDING = "pending"
-    DONE = "done"
+class GorevDurumu(StrEnum):
+    BEKLIYOR = "pending"
+    BITTI = "done"
 
 
 @dataclass(frozen=True, slots=True)
-class Reward:
+class Odul:
     xp: int
-    points: int
+    puan: int
 
 
-def compute_reward(elapsed_seconds: int, override: int | None) -> Reward:
-    if override is not None:
-        base = override
-    elif elapsed_seconds > 0:
-        base = max(1, round(elapsed_seconds / 60))
+def odul_hesapla(calisilan_saniye: int, ozel_deger: int | None) -> Odul:
+    if ozel_deger is not None:
+        taban = ozel_deger
+    elif calisilan_saniye > 0:
+        taban = max(1, round(calisilan_saniye / 60))
     else:
-        base = UNTIMED_DEFAULT_REWARD
-    return Reward(xp=base, points=base)
+        taban = SURESIZ_VARSAYILAN_ODUL
+    return Odul(xp=taban, puan=taban)
 
 
-def live_elapsed(
-    committed_seconds: int, segment_started_at: datetime | None, now: datetime
+def canli_sure(
+    islenmis_saniye: int, segment_baslangici: datetime | None, simdi: datetime
 ) -> int:
     """Kronometre çalışıyorsa, kaydedilmiş süreye o anki segmenti ekler."""
-    if segment_started_at is None:
-        return committed_seconds
-    return committed_seconds + max(0, int((now - segment_started_at).total_seconds()))
+    if segment_baslangici is None:
+        return islenmis_saniye
+    return islenmis_saniye + max(0, int((simdi - segment_baslangici).total_seconds()))

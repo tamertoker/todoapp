@@ -1,12 +1,16 @@
-"""Domain olay veriyolu (event bus).
+"""Domain olay hattı (OlayHatti).
 
-"blinker" kütüphanesi üzerine ince bir sarmalayıcı. İki tür abonelik sunar:
-- subscribe(EventType, handler): yalnızca o türdeki olaylarda çağrılır.
+"blinker" kütüphanesi üzerine ince bir sarmalayıcı. Olaylar buradan yayınlanır
+(publish) ve dinleyiciler buraya abone olur (subscribe). İki tür abonelik:
+- subscribe(OlayTuru, handler): yalnızca o türdeki olaylarda çağrılır.
 - subscribe_all(handler): her olayda çağrılır (Qt köprüsü bunu kullanır).
 
 Not: blinker varsayılan olarak dinleyicileri "zayıf referans"la tutar ve çöp
 toplama (garbage collection) onları silebilir. Bunu engellemek için weak=False
 kullanıyoruz, böylece bağladığımız fonksiyonlar yaşamaya devam eder.
+
+(publish = yayınla, subscribe = abone ol — yaygın mesajlaşma terimleri olduğu
+için İngilizce bırakıldı.)
 """
 
 from __future__ import annotations
@@ -21,7 +25,7 @@ from leveltodo.domain.events import DomainEvent
 E = TypeVar("E", bound=DomainEvent)
 
 
-class EventBus:
+class OlayHatti:
     def __init__(self) -> None:
         self._signals: dict[type, blinker.Signal] = {}
         self._any = blinker.Signal()

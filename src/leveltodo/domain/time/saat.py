@@ -1,7 +1,7 @@
-"""Saat arayüzü (IClock).
+"""Saat arayüzü (Saat).
 
-Kod hiçbir yerde doğrudan `datetime.now()` çağırmaz; her zaman bir IClock
-üzerinden zamanı sorar. Böylece testlerde "sahte saat" (FakeClock) verip
+Kod hiçbir yerde doğrudan `datetime.now()` çağırmaz; her zaman bir Saat
+üzerinden zamanı sorar. Böylece testlerde "sahte saat" (SahteSaat) verip
 zamanı istediğimiz güne ilerletebiliriz — gerçek saatin geçmesini beklemeden.
 """
 
@@ -12,7 +12,7 @@ from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
-class IClock(Protocol):
-    def now(self) -> datetime:
+class Saat(Protocol):
+    def simdi(self) -> datetime:
         """Şu anki yerel tarih-saati döndürür."""
         ...

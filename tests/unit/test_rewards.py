@@ -1,18 +1,18 @@
-from leveltodo.domain.tasks.rules import Reward, compute_reward
+from leveltodo.domain.tasks.kurallar import Odul, odul_hesapla
 
 
-def test_override_overrides_everything():
-    assert compute_reward(elapsed_seconds=9999, override=20) == Reward(xp=20, points=20)
+def test_ozel_deger_her_seyi_ezer():
+    assert odul_hesapla(calisilan_saniye=9999, ozel_deger=20) == Odul(xp=20, puan=20)
 
 
-def test_time_based_one_per_minute():
-    assert compute_reward(elapsed_seconds=120, override=None) == Reward(xp=2, points=2)
+def test_sureye_gore_dakikada_bir():
+    assert odul_hesapla(calisilan_saniye=120, ozel_deger=None) == Odul(xp=2, puan=2)
 
 
-def test_short_timer_still_gives_at_least_one():
+def test_kisa_sure_yine_de_en_az_bir_verir():
     # 20 saniye yuvarlanınca 0 eder ama en az 1 verilir.
-    assert compute_reward(elapsed_seconds=20, override=None).xp == 1
+    assert odul_hesapla(calisilan_saniye=20, ozel_deger=None).xp == 1
 
 
-def test_untimed_completion_gives_flat_default():
-    assert compute_reward(elapsed_seconds=0, override=None) == Reward(xp=5, points=5)
+def test_suresiz_tamamlama_sabit_varsayilan_verir():
+    assert odul_hesapla(calisilan_saniye=0, ozel_deger=None) == Odul(xp=5, puan=5)
