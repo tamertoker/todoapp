@@ -27,8 +27,10 @@ class SqlTaskRepository:
         user_id: str,
         title: str,
         recurrence: str,
+        recurrence_param: str | None,
         reward_override: int | None,
         stat: str | None,
+        created_at: datetime,
     ) -> None:
         with self._sf() as s:
             s.add(
@@ -37,8 +39,10 @@ class SqlTaskRepository:
                     user_id=user_id,
                     title=title,
                     recurrence=recurrence,
+                    recurrence_param=recurrence_param,
                     reward_override=reward_override,
                     stat=stat,
+                    created_at=created_at,
                 )
             )
             s.commit()
@@ -54,12 +58,13 @@ class SqlTaskRepository:
                 task.is_active = False
                 s.commit()
 
-    def active_daily_templates(self, user_id: str) -> list[Task]:
+    def aktif_tekrarli_sablonlar(self, user_id: str) -> list[Task]:
+        """Tek seferlik olmayan (tekrar eden), aktif tüm görev şablonları."""
         with self._sf() as s:
             stmt = select(Task).where(
                 Task.user_id == user_id,
-                Task.recurrence == "daily",
                 Task.is_active.is_(True),
+                Task.recurrence != "none",
             )
             return list(s.scalars(stmt))
 
@@ -93,7 +98,7 @@ class SqlTaskRepository:
                     TaskInstance.user_id == user_id,
                     Task.is_active.is_(True),
                     or_(
-                        and_(Task.recurrence == "daily", TaskInstance.day == day),
+                        and_(Task.recurrence != "none", TaskInstance.day == day),
                         and_(Task.recurrence == "none", TaskInstance.status == "pending"),
                     ),
                 )

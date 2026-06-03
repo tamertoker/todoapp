@@ -1,0 +1,51 @@
+"""Esnek tekrar: görevler doğru günlerde listede belirir (FakeClock ile)."""
+
+from datetime import datetime
+
+from leveltodo.bootstrap import build_container
+from leveltodo.domain.tasks.kurallar import Tekrar
+from leveltodo.infrastructure.saat import SahteSaat
+
+
+def _svc(db_url, saat):
+    return build_container(db_url=db_url, saat=saat).gorevler
+
+
+def _var_mi(svc, baslik):
+    return any(s.baslik == baslik for s in svc.bugunku_gorevler())
+
+
+def test_her_x_gun_dogru_gunlerde(db_url):
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    svc = _svc(db_url, saat)
+    svc.gorev_olustur("Her 3 günde", Tekrar.HER_X_GUN, parametre="3")
+
+    assert _var_mi(svc, "Her 3 günde")       # gün 0
+    saat.ilerlet(days=1)
+    assert not _var_mi(svc, "Her 3 günde")   # gün 1
+    saat.ilerlet(days=2)
+    assert _var_mi(svc, "Her 3 günde")       # gün 3
+
+
+def test_haftalik_secili_gunlerde(db_url):
+    baslangic = datetime(2026, 6, 1, 10, 0)
+    saat = SahteSaat(baslangic)
+    svc = _svc(db_url, saat)
+    bugun_wd = baslangic.date().weekday()
+    svc.gorev_olustur("Haftalık iş", Tekrar.HAFTALIK, parametre=str(bugun_wd))
+
+    assert _var_mi(svc, "Haftalık iş")       # bugün (seçili gün)
+    saat.ilerlet(days=1)
+    assert not _var_mi(svc, "Haftalık iş")   # ertesi gün (farklı haftagünü)
+    saat.ilerlet(days=6)
+    assert _var_mi(svc, "Haftalık iş")       # +7 gün = aynı haftagünü
+
+
+def test_aylik_belirli_gun(db_url):
+    saat = SahteSaat(datetime(2026, 6, 14, 10, 0))
+    svc = _svc(db_url, saat)
+    svc.gorev_olustur("Ayın 15'i", Tekrar.AYLIK, parametre="15")
+
+    assert not _var_mi(svc, "Ayın 15'i")     # 14'ü
+    saat.ilerlet(days=1)
+    assert _var_mi(svc, "Ayın 15'i")         # 15'i

@@ -40,6 +40,13 @@ from leveltodo.presentation.views.dashboard.bitir_dialog import BitirDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
 
 _STAT_SIRA = (Stat.ENTELEKTUELLIK, Stat.BEDEN, Stat.FARKINDALIK, Stat.DISIPLIN)
+_TEKRAR_ETIKET = {
+    "none": "Tek seferlik",
+    "daily": "Her gün",
+    "every_x": "Her X günde",
+    "weekly": "Haftalık",
+    "monthly": "Aylık",
+}
 
 
 def _format_sure(saniye: int) -> str:
@@ -246,7 +253,7 @@ class DashboardView(QWidget):
         h.setSpacing(8)
 
         title = QLabel(satir.baslik)
-        tag = QLabel("Her gün" if satir.tekrar == "daily" else "Tek seferlik")
+        tag = QLabel(_TEKRAR_ETIKET.get(satir.tekrar, satir.tekrar))
         tag.setObjectName("Tag")
         h.addWidget(title, stretch=1)
         h.addWidget(tag)
@@ -346,9 +353,9 @@ class DashboardView(QWidget):
     def _on_add(self) -> None:
         dialog = AddTaskDialog(self)
         if dialog.exec():
-            baslik, tekrar, ozel_odul, stat = dialog.result_values()
+            baslik, tekrar, parametre, ozel_odul, stat = dialog.result_values()
             if baslik:
-                self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat)
+                self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat, parametre)
 
     def _on_bitir(self, satir: GorevSatiri) -> None:
         on_dakika = round(self._canli_saniye(satir) / 60)

@@ -50,3 +50,17 @@ def test_add_task_dialog_blocks_empty_title(qapp):
     dialog._title.setText("Bir görev")
     dialog.accept()  # başlık dolu → kabul edilir
     assert dialog.result() == QDialog.DialogCode.Accepted
+
+
+def test_add_task_dialog_esnek_tekrar(qapp):
+    from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
+
+    dialog = AddTaskDialog()
+    dialog._title.setText("Her 5 günde")
+    dialog._tekrar.setCurrentIndex(2)  # "Her X günde bir"
+    dialog._x_spin.setValue(5)
+
+    baslik, tekrar, parametre, _ozel, _stat = dialog.result_values()
+    assert baslik == "Her 5 günde"
+    assert tekrar is Tekrar.HER_X_GUN
+    assert parametre == "5"

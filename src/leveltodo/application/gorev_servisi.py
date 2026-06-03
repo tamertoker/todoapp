@@ -22,7 +22,13 @@ from leveltodo.domain.stats.statlar import (
     seviye_hesapla,
     unvan_hesapla,
 )
-from leveltodo.domain.tasks.kurallar import Odul, Tekrar, canli_sure, odul_hesapla
+from leveltodo.domain.tasks.kurallar import (
+    Odul,
+    Tekrar,
+    canli_sure,
+    gunde_olusur_mu,
+    odul_hesapla,
+)
 from leveltodo.domain.time.gun import Gun
 from leveltodo.domain.time.saat import Saat
 from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
@@ -75,6 +81,7 @@ class GorevServisi:
         tekrar: Tekrar,
         ozel_odul: int | None = None,
         stat: Stat | None = None,
+        parametre: str = "",
     ) -> str:
         gorev_id = new_id()
         self._gorev.add_template(
@@ -82,8 +89,10 @@ class GorevServisi:
             user_id=self._user_id,
             title=baslik.strip(),
             recurrence=tekrar.value,
+            recurrence_param=parametre or None,
             reward_override=ozel_odul,
             stat=stat.value if stat is not None else None,
+            created_at=self._saat.simdi(),
         )
         if tekrar is Tekrar.YOK:
             self._gorev.add_instance(
@@ -115,8 +124,14 @@ class GorevServisi:
         ]
 
     def _gunluk_kayitlari_uret(self, gun) -> None:
-        for sablon in self._gorev.active_daily_templates(self._user_id):
-            if not self._gorev.instance_exists(sablon.id, gun):
+        for sablon in self._gorev.aktif_tekrarli_sablonlar(self._user_id):
+            olusur = gunde_olusur_mu(
+                Tekrar(sablon.recurrence),
+                sablon.recurrence_param or "",
+                sablon.created_at.date(),
+                gun,
+            )
+            if olusur and not self._gorev.instance_exists(sablon.id, gun):
                 self._gorev.add_instance(
                     id=new_id(),
                     task_id=sablon.id,

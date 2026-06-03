@@ -30,9 +30,14 @@ class DashboardViewModel(QObject):
         return self._gorevler.toplamlar()
 
     def gorev_ekle(
-        self, baslik: str, tekrar: Tekrar, ozel_odul: int | None, stat: Stat | None = None
+        self,
+        baslik: str,
+        tekrar: Tekrar,
+        ozel_odul: int | None,
+        stat: Stat | None = None,
+        parametre: str = "",
     ) -> None:
-        self._gorevler.gorev_olustur(baslik, tekrar, ozel_odul, stat)
+        self._gorevler.gorev_olustur(baslik, tekrar, ozel_odul, stat, parametre)
         self.changed.emit()
 
     def stat_durumlari(self) -> dict[Stat, SeviyeDurumu]:

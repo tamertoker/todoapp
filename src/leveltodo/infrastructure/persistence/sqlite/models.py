@@ -57,7 +57,8 @@ class Task(Base):
     id: Mapped[str] = mapped_column(String(26), primary_key=True)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     title: Mapped[str] = mapped_column(String(200))
-    recurrence: Mapped[str] = mapped_column(String(10))  # 'none' | 'daily'
+    recurrence: Mapped[str] = mapped_column(String(10))  # none|daily|every_x|weekly|monthly
+    recurrence_param: Mapped[str | None] = mapped_column(String(60), nullable=True)
     reward_override: Mapped[int | None] = mapped_column(Integer, nullable=True)
     stat: Mapped[str | None] = mapped_column(String(20), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
