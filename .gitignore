@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual env
+.venv/
+venv/
+
+# Runtime data (SQLite DB, logs) — never commit
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Test / tooling caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+
+# OS
+.DS_Store
+Thumbs.db
