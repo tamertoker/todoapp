@@ -10,5 +10,13 @@ def test_unknown_theme_falls_back_to_dark():
     assert get_palette("olmayan-tema") is DARK
 
 
-def test_six_themes_available():
-    assert set(THEMES) == {"dark", "light", "midnight", "forest", "sunset", "arcane"}
+def test_themes_available():
+    assert set(THEMES) == {
+        "dark",
+        "light",
+        "midnight",
+        "forest",
+        "sunset",
+        "arcane",
+        "kadim",
+    }

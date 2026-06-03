@@ -10,7 +10,7 @@ from __future__ import annotations
 from leveltodo.presentation.theme.palette import Palette
 
 
-def build_qss(palette: Palette, font_family: str) -> str:
+def build_qss(palette: Palette, font_family: str, up_arrow: str, down_arrow: str) -> str:
     p = palette
     return f"""
     * {{
@@ -102,6 +102,16 @@ def build_qss(palette: Palette, font_family: str) -> str:
     QSpinBox::up-button:hover, QSpinBox::down-button:hover {{
         background-color: {p.accent};
     }}
+    QSpinBox::up-arrow {{
+        image: url("{up_arrow}");
+        width: 10px;
+        height: 10px;
+    }}
+    QSpinBox::down-arrow {{
+        image: url("{down_arrow}");
+        width: 10px;
+        height: 10px;
+    }}
     QLabel#Counter {{
         font-size: 16px;
         font-weight: bold;
@@ -110,6 +120,10 @@ def build_qss(palette: Palette, font_family: str) -> str:
     QFrame#TaskRow {{
         background-color: {p.panel};
         border: 2px solid {p.border};
+    }}
+    QFrame#TaskRowActive {{
+        background-color: {p.panel};
+        border: 3px solid {p.accent};
     }}
     QLabel#Tag {{
         color: {p.text_dim};

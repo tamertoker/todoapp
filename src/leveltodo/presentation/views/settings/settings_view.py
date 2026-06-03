@@ -32,6 +32,7 @@ _THEME_LABELS = {
     "forest": "Orman",
     "sunset": "Gün Batımı",
     "arcane": "Mor Büyü",
+    "kadim": "Kadim Meşe",
 }
 
 

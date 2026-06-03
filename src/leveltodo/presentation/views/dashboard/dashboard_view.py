@@ -28,6 +28,7 @@ from leveltodo.domain.tasks.kurallar import canli_sure
 from leveltodo.domain.time.gun import Gun
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
+from leveltodo.presentation.views.dashboard.bitir_dialog import BitirDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
 
 
@@ -108,7 +109,11 @@ class DashboardView(QWidget):
 
     def refresh_day(self) -> None:
         gun = Gun.olustur(self._container.saat.simdi(), self._container.settings.day_start_hour)
-        self._day_label.setText(f"Bugün (mantıksal gün): {gun}")
+        self._day_label.setText(f"Bugün: {gun}")
+        self._day_label.setToolTip(
+            "Gün, senin belirlediğin 'gün başlangıcı' saatine göre sayılır (varsayılan 04:00). "
+            "Örneğin gece 02:00 hâlâ dünkü güne sayılır."
+        )
         self._render()
 
     def _render(self) -> None:
@@ -135,7 +140,7 @@ class DashboardView(QWidget):
 
     def _build_row(self, satir: GorevSatiri) -> QFrame:
         frame = QFrame()
-        frame.setObjectName("TaskRow")
+        frame.setObjectName("TaskRowActive" if satir.calisiyor else "TaskRow")
         h = QHBoxLayout(frame)
         h.setContentsMargins(12, 8, 12, 8)
         h.setSpacing(8)
@@ -159,7 +164,7 @@ class DashboardView(QWidget):
                 toggle = QPushButton("Başlat")
                 toggle.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.baslat(i))
             done_btn = QPushButton("Bitir")
-            done_btn.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.tamamla(i))
+            done_btn.clicked.connect(lambda _c, s=satir: self._on_bitir(s))
             del_btn = QPushButton("Sil")
             del_btn.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.sil(i))
             h.addWidget(toggle)
@@ -193,6 +198,12 @@ class DashboardView(QWidget):
             baslik, tekrar, ozel_odul = dialog.result_values()
             if baslik:
                 self._vm.gorev_ekle(baslik, tekrar, ozel_odul)
+
+    def _on_bitir(self, satir: GorevSatiri) -> None:
+        on_dakika = round(self._canli_saniye(satir) / 60)
+        dialog = BitirDialog(on_dakika, self)
+        if dialog.exec():
+            self._vm.tamamla(satir.kayit_id, dialog.dakika())
 
     def _on_event(self, event: DomainEvent) -> None:
         if isinstance(event, AppStarted):

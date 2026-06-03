@@ -32,8 +32,8 @@ class DashboardViewModel(QObject):
         self._gorevler.gorev_olustur(baslik, tekrar, ozel_odul)
         self.changed.emit()
 
-    def tamamla(self, kayit_id: str) -> None:
-        self._gorevler.tamamla(kayit_id)
+    def tamamla(self, kayit_id: str, elle_dakika: int | None = None) -> None:
+        self._gorevler.tamamla(kayit_id, elle_dakika)
         self.changed.emit()
 
     def sil(self, kayit_id: str) -> None:

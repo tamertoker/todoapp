@@ -80,6 +80,16 @@ ARCANE = Palette(
     accent_text="#1b1230",
 )
 
+KADIM = Palette(
+    bg="#241a12",
+    panel="#33261a",
+    border="#5c4326",
+    text="#efe2c8",
+    text_dim="#b09a72",
+    accent="#c9a24a",
+    accent_text="#241a12",
+)
+
 THEMES = {
     "dark": DARK,
     "light": LIGHT,
@@ -87,6 +97,7 @@ THEMES = {
     "forest": FOREST,
     "sunset": SUNSET,
     "arcane": ARCANE,
+    "kadim": KADIM,
 }
 
 

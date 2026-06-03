@@ -125,17 +125,21 @@ class GorevServisi:
                     title=sablon.title,
                 )
 
-    def tamamla(self, kayit_id: str) -> Odul | None:
+    def tamamla(self, kayit_id: str, elle_dakika: int | None = None) -> Odul | None:
         kayit = self._gorev.get_instance(kayit_id)
         if kayit is None:
             return None
         simdi = self._saat.simdi()
-        # Kronometre çalışıyorsa o anki segmenti de süreye katarak ödülü hesapla.
-        islenmis_saniye = canli_sure(
-            kayit.committed_seconds,
-            kayit.segment_started_at if kayit.timer_running else None,
-            simdi,
-        )
+        if elle_dakika is not None:
+            # Kullanıcı süreyi elle girdi (ör. kronometresiz çalıştı).
+            islenmis_saniye = max(0, elle_dakika) * 60
+        else:
+            # Kronometre çalışıyorsa o anki segmenti de süreye katarak hesapla.
+            islenmis_saniye = canli_sure(
+                kayit.committed_seconds,
+                kayit.segment_started_at if kayit.timer_running else None,
+                simdi,
+            )
         sablon = self._gorev.get_template(kayit.task_id)
         ozel = sablon.reward_override if sablon is not None else None
 

@@ -71,6 +71,17 @@ def test_tek_kronometre_digerini_durdurur(db_url):
     assert durum[b.kayit_id].calisiyor is True
 
 
+def test_elle_dakika_odulu_belirler(db_url):
+    saat = SahteSaat(datetime(2026, 6, 3, 10, 0, 0))
+    c = _container(db_url, saat)
+    c.gorevler.gorev_olustur("Kronometresiz çalıştım", Tekrar.YOK)
+    satir = c.gorevler.bugunku_gorevler()[0]
+
+    odul = c.gorevler.tamamla(satir.kayit_id, elle_dakika=3)  # elle 3 dakika
+    assert odul is not None and odul.xp == 3
+    assert c.gorevler.toplamlar() == (3, 3)
+
+
 def test_checkpoint_sonrasi_kurtarma_kayitli_sureyi_korur(db_url):
     saat = SahteSaat(datetime(2026, 6, 3, 10, 0, 0))
     c = _container(db_url, saat)
