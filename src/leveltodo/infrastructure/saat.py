@@ -15,6 +15,26 @@ class SistemSaati:
         return datetime.now()
 
 
+class AyarlanabilirSaat:
+    """Gerçek saati kullanır ama gün/zaman kaydırılabilir (debug menüsü için).
+    Varsayılan kaydırma 0 olduğundan normalde sistem saatiyle aynıdır."""
+
+    def __init__(self) -> None:
+        self._ofset = timedelta()
+
+    def simdi(self) -> datetime:
+        return datetime.now() + self._ofset
+
+    def gun_kaydir(self, gun: int) -> None:
+        self._ofset += timedelta(days=gun)
+
+    def sifirla(self) -> None:
+        self._ofset = timedelta()
+
+    def ofset_gun(self) -> int:
+        return self._ofset.days
+
+
 class SahteSaat:
     def __init__(self, baslangic: datetime) -> None:
         self._an = baslangic

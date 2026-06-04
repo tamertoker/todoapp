@@ -125,10 +125,13 @@ class GorevServisi:
 
     def _gunluk_kayitlari_uret(self, gun) -> None:
         for sablon in self._gorev.aktif_tekrarli_sablonlar(self._user_id):
+            # Çapa, takvim tarihi değil mantıksal oluşturma günü olmalı; böylece
+            # gün başlangıç saatinden önce eklenen görev de o gün görünür.
+            olusturma_gunu = Gun.olustur(sablon.created_at, self._gun_baslangic()).tarih
             olusur = gunde_olusur_mu(
                 Tekrar(sablon.recurrence),
                 sablon.recurrence_param or "",
-                sablon.created_at.date(),
+                olusturma_gunu,
                 gun,
             )
             if olusur and not self._gorev.instance_exists(sablon.id, gun):
@@ -206,3 +209,15 @@ class GorevServisi:
         durumlar = self.stat_durumlari()
         profil = sum(d.seviye for d in durumlar.values())
         return profil, unvan_hesapla(profil)
+
+    def gelistirme_xp_ekle(self, stat: Stat, miktar: int) -> None:
+        """Debug: bir stata doğrudan XP ekler (yalnızca geliştirme/test için)."""
+        self._defter.record(
+            user_id=self._user_id,
+            day=self._bugun(),
+            source="debug",
+            ref_id=None,
+            xp=miktar,
+            points=0,
+            stat=stat.value,
+        )

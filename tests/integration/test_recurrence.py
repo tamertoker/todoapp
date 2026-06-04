@@ -41,6 +41,14 @@ def test_haftalik_secili_gunlerde(db_url):
     assert _var_mi(svc, "Haftalık iş")       # +7 gün = aynı haftagünü
 
 
+def test_her_x_gun_gece_eklenince_bugun_gorunur(db_url):
+    # Gün başlangıcı 4; saat 02:00 → mantıksal bugün önceki gün. Görev yine de bugün görünmeli.
+    saat = SahteSaat(datetime(2026, 6, 4, 2, 0))
+    svc = _svc(db_url, saat)
+    svc.gorev_olustur("Gece her 2", Tekrar.HER_X_GUN, parametre="2")
+    assert _var_mi(svc, "Gece her 2")
+
+
 def test_aylik_belirli_gun(db_url):
     saat = SahteSaat(datetime(2026, 6, 14, 10, 0))
     svc = _svc(db_url, saat)

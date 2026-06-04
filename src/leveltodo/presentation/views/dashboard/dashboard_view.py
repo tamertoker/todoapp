@@ -127,27 +127,26 @@ class DashboardView(QWidget):
         avatar_frame = QFrame()
         avatar_frame.setObjectName("AvatarFrame")
         af = QVBoxLayout(avatar_frame)
-
-        self._geri_btn = QPushButton("◀")
-        self._geri_btn.setFixedWidth(36)
-        self._geri_btn.clicked.connect(lambda: self._onizleme_kaydir(-1))
-        self._ileri_btn = QPushButton("▶")
-        self._ileri_btn.setFixedWidth(36)
-        self._ileri_btn.clicked.connect(lambda: self._onizleme_kaydir(+1))
         self._avatar_label = QLabel()
         self._avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        ok_satiri = QHBoxLayout()
-        ok_satiri.addWidget(self._geri_btn)
-        ok_satiri.addWidget(self._avatar_label, stretch=1)
-        ok_satiri.addWidget(self._ileri_btn)
-        af.addLayout(ok_satiri)
+        af.addWidget(self._avatar_label)
+        v.addWidget(avatar_frame)
 
+        # Oklar avatarın altındaki unvan yazısının iki yanında (üst panele dokunmaz).
+        self._geri_btn = QPushButton("◀")
+        self._geri_btn.setFixedWidth(40)
+        self._geri_btn.clicked.connect(lambda: self._onizleme_kaydir(-1))
+        self._ileri_btn = QPushButton("▶")
+        self._ileri_btn.setFixedWidth(40)
+        self._ileri_btn.clicked.connect(lambda: self._onizleme_kaydir(+1))
         self._onizleme_unvan_label = QLabel()
         self._onizleme_unvan_label.setObjectName("Counter")
         self._onizleme_unvan_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        af.addWidget(self._onizleme_unvan_label)
-
-        v.addWidget(avatar_frame)
+        alt_satir = QHBoxLayout()
+        alt_satir.addWidget(self._geri_btn)
+        alt_satir.addWidget(self._onizleme_unvan_label, stretch=1)
+        alt_satir.addWidget(self._ileri_btn)
+        v.addLayout(alt_satir)
 
         self._stat_seviye_label: dict[Stat, QLabel] = {}
         self._stat_bar: dict[Stat, QProgressBar] = {}

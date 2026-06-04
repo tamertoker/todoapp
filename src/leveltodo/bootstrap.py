@@ -28,7 +28,7 @@ from leveltodo.infrastructure.persistence.sqlite.migrations import upgrade_to_he
 from leveltodo.infrastructure.persistence.sqlite.models import DEFAULT_USER_ID
 from leveltodo.infrastructure.persistence.sqlite.settings_repository import SqlSettingsRepository
 from leveltodo.infrastructure.persistence.sqlite.task_repository import SqlTaskRepository
-from leveltodo.infrastructure.saat import SistemSaati
+from leveltodo.infrastructure.saat import AyarlanabilirSaat
 
 
 @dataclass
@@ -50,7 +50,7 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
     ensure_default_user(session_factory)
 
     olay_hatti = OlayHatti()
-    aktif_saat = saat or SistemSaati()
+    aktif_saat = saat or AyarlanabilirSaat()
 
     settings_repo = SqlSettingsRepository(session_factory)
     settings = SettingsService(settings_repo, DEFAULT_USER_ID)

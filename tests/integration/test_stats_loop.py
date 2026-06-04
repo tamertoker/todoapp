@@ -29,6 +29,12 @@ def test_gorev_stata_xp_yazar_ve_seviye_olusur(db_url):
     assert unvan.sonraki_unvana_kalan == 3  # 3 + 1 - 1
 
 
+def test_gelistirme_xp_ekle_seviye_artirir(db_url):
+    svc = _svc(db_url)
+    svc.gelistirme_xp_ekle(Stat.BEDEN, 600)
+    assert svc.stat_durumlari()[Stat.BEDEN].seviye == 1
+
+
 def test_statsiz_gorev_stata_yazmaz_ama_genel_xp_artar(db_url):
     svc = _svc(db_url)
     svc.gorev_olustur("Genel iş", Tekrar.YOK, ozel_odul=600)  # stat seçilmedi
