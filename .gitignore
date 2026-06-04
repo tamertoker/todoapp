@@ -21,6 +21,7 @@ data/
 .pytest_cache/
 .ruff_cache/
 .coverage
+.understand-anything/
 
 # OS
 .DS_Store
