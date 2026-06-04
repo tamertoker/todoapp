@@ -1,0 +1,1149 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "louvain",
+  "totalFiles": 105,
+  "totalBatches": 6,
+  "exportsByPath": {
+    ".DS_Store": [],
+    ".understand-anything/.understandignore": [],
+    "src/leveltodo/__init__.py": [],
+    "src/leveltodo/__main__.py": [
+      "main"
+    ],
+    "src/leveltodo/application/__init__.py": [],
+    "src/leveltodo/application/gorev_servisi.py": [
+      "GorevSatiri",
+      "TekrarliGorevOzeti",
+      "GorevServisi"
+    ],
+    "src/leveltodo/application/kronometre_servisi.py": [
+      "KronometreServisi"
+    ],
+    "src/leveltodo/application/seri_servisi.py": [
+      "SeriServisi"
+    ],
+    "src/leveltodo/application/settings_service.py": [
+      "SettingsService"
+    ],
+    "src/leveltodo/bootstrap.py": [
+      "Container",
+      "build_container"
+    ],
+    "src/leveltodo/domain/__init__.py": [],
+    "src/leveltodo/domain/events.py": [
+      "DomainEvent",
+      "AppStarted",
+      "TaskCompleted"
+    ],
+    "src/leveltodo/domain/settings/__init__.py": [],
+    "src/leveltodo/domain/settings/repository.py": [
+      "ISettingsRepository"
+    ],
+    "src/leveltodo/domain/stats/__init__.py": [],
+    "src/leveltodo/domain/stats/statlar.py": [
+      "Stat",
+      "_seviye_esigi",
+      "SeviyeDurumu",
+      "seviye_hesapla",
+      "UnvanDurumu",
+      "unvan_hesapla",
+      "unvan_listesi"
+    ],
+    "src/leveltodo/domain/streaks/__init__.py": [],
+    "src/leveltodo/domain/streaks/seriler.py": [
+      "SeriTipi",
+      "seri_ilerlet",
+      "seri_rengi"
+    ],
+    "src/leveltodo/domain/tasks/__init__.py": [],
+    "src/leveltodo/domain/tasks/kurallar.py": [
+      "Tekrar",
+      "GorevDurumu",
+      "Odul",
+      "gunde_olusur_mu",
+      "onceki_olusum",
+      "sonraki_olusum",
+      "odul_hesapla",
+      "canli_sure"
+    ],
+    "src/leveltodo/domain/tasks/rules.py": [
+      "Recurrence",
+      "TaskStatus",
+      "Reward",
+      "compute_reward",
+      "live_elapsed"
+    ],
+    "src/leveltodo/domain/time/__init__.py": [],
+    "src/leveltodo/domain/time/gun.py": [
+      "Gun"
+    ],
+    "src/leveltodo/domain/time/saat.py": [
+      "Saat"
+    ],
+    "src/leveltodo/infrastructure/__init__.py": [],
+    "src/leveltodo/infrastructure/assets/__init__.py": [],
+    "src/leveltodo/infrastructure/assets/avatar.py": [
+      "AvatarOlusturucu",
+      "kategori_secenekleri",
+      "avatar_katmanlari",
+      "ai_avatar_yolu",
+      "kilitli_goruntu",
+      "_kilit_ciz"
+    ],
+    "src/leveltodo/infrastructure/config/__init__.py": [],
+    "src/leveltodo/infrastructure/config/paths.py": [
+      "data_dir",
+      "db_path",
+      "db_url",
+      "logs_dir",
+      "assets_dir"
+    ],
+    "src/leveltodo/infrastructure/eventbus/__init__.py": [],
+    "src/leveltodo/infrastructure/eventbus/olay_hatti.py": [
+      "OlayHatti"
+    ],
+    "src/leveltodo/infrastructure/eventbus/qt_bridge.py": [
+      "QtEventBridge"
+    ],
+    "src/leveltodo/infrastructure/persistence/__init__.py": [],
+    "src/leveltodo/infrastructure/persistence/sqlite/__init__.py": [],
+    "src/leveltodo/infrastructure/persistence/sqlite/base.py": [
+      "Base"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/bootstrap_data.py": [
+      "ensure_default_user"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/engine.py": [
+      "create_engine_and_factory"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/ledger_repository.py": [
+      "SqlLedgerRepository"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/migrations.py": [
+      "_alembic_config",
+      "upgrade_to_head"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/migrations/env.py": [
+      "_url",
+      "run_migrations_offline",
+      "run_migrations_online"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/migrations/script.py.mako": [],
+    "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0001_initial.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0002_tasks.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0003_stats.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0004_recurrence_param.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0005_streaks.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0006_task_streak.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/models.py": [
+      "User",
+      "Setting",
+      "Task",
+      "TaskInstance",
+      "XpEvent",
+      "Streak",
+      "PointTransaction"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/settings_repository.py": [
+      "SqlSettingsRepository"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/streak_repository.py": [
+      "SqlStreakRepository"
+    ],
+    "src/leveltodo/infrastructure/persistence/sqlite/task_repository.py": [
+      "SqlTaskRepository"
+    ],
+    "src/leveltodo/infrastructure/saat.py": [
+      "SistemSaati",
+      "AyarlanabilirSaat",
+      "SahteSaat"
+    ],
+    "src/leveltodo/presentation/__init__.py": [],
+    "src/leveltodo/presentation/app.py": [
+      "LevelTodoApp"
+    ],
+    "src/leveltodo/presentation/common/__init__.py": [],
+    "src/leveltodo/presentation/common/icon.py": [
+      "make_app_icon"
+    ],
+    "src/leveltodo/presentation/main_window.py": [
+      "MainWindow"
+    ],
+    "src/leveltodo/presentation/theme/__init__.py": [],
+    "src/leveltodo/presentation/theme/arrows.py": [
+      "_ok_ciz",
+      "ok_yollari"
+    ],
+    "src/leveltodo/presentation/theme/fonts.py": [
+      "load_pixel_font"
+    ],
+    "src/leveltodo/presentation/theme/palette.py": [
+      "Palette",
+      "get_palette"
+    ],
+    "src/leveltodo/presentation/theme/qss.py": [
+      "build_qss"
+    ],
+    "src/leveltodo/presentation/views/__init__.py": [],
+    "src/leveltodo/presentation/views/admin/__init__.py": [],
+    "src/leveltodo/presentation/views/admin/admin_view.py": [
+      "AdminView"
+    ],
+    "src/leveltodo/presentation/views/avatar/__init__.py": [],
+    "src/leveltodo/presentation/views/avatar/avatar_view.py": [
+      "_kisa_ad",
+      "AvatarEditorView"
+    ],
+    "src/leveltodo/presentation/views/dashboard/__init__.py": [],
+    "src/leveltodo/presentation/views/dashboard/add_task_dialog.py": [
+      "AddTaskDialog"
+    ],
+    "src/leveltodo/presentation/views/dashboard/bitir_dialog.py": [
+      "BitirDialog"
+    ],
+    "src/leveltodo/presentation/views/dashboard/dashboard_view.py": [
+      "_tekrar_aciklama",
+      "_format_sure",
+      "DashboardView"
+    ],
+    "src/leveltodo/presentation/views/dashboard/dashboard_viewmodel.py": [
+      "DashboardViewModel"
+    ],
+    "src/leveltodo/presentation/views/settings/__init__.py": [],
+    "src/leveltodo/presentation/views/settings/settings_view.py": [
+      "SettingsView"
+    ],
+    "src/leveltodo/presentation/views/settings/settings_viewmodel.py": [
+      "SettingsViewModel"
+    ],
+    "src/leveltodo/shared/__init__.py": [],
+    "src/leveltodo/shared/ids.py": [
+      "new_id"
+    ],
+    "src/leveltodo/shared/logging.py": [
+      "setup_logging"
+    ],
+    "src/leveltodo/shared/result.py": [
+      "Ok",
+      "Err"
+    ],
+    "tests/conftest.py": [
+      "db_url"
+    ],
+    "tests/integration/test_migrations.py": [
+      "test_upgrade_creates_tables"
+    ],
+    "tests/integration/test_recurrence.py": [
+      "_svc",
+      "_var_mi",
+      "test_her_x_gun_dogru_gunlerde",
+      "test_haftalik_secili_gunlerde",
+      "test_tum_tekrarli_gorevler_ve_sonraki_tarih",
+      "test_her_x_gun_gece_eklenince_bugun_gorunur",
+      "test_aylik_belirli_gun"
+    ],
+    "tests/integration/test_settings_persistence.py": [
+      "test_setting_survives_new_container",
+      "test_defaults_when_unset"
+    ],
+    "tests/integration/test_stats_loop.py": [
+      "_svc",
+      "test_gorev_stata_xp_yazar_ve_seviye_olusur",
+      "test_gelistirme_xp_ekle_seviye_artirir",
+      "test_statsiz_gorev_stata_yazmaz_ama_genel_xp_artar"
+    ],
+    "tests/integration/test_streaks.py": [
+      "test_giris_serisi_ardisik_gun_ve_bosluk",
+      "test_gorev_serisi_her_goreve_ozel"
+    ],
+    "tests/integration/test_task_loop.py": [
+      "_gorevler",
+      "test_tam_dongu",
+      "test_iki_kez_tamamlamak_cift_odul_vermez",
+      "test_biten_gorevi_silmek_listeden_cikarir",
+      "test_veri_yeniden_baslatmada_kalir"
+    ],
+    "tests/integration/test_timer.py": [
+      "test_canli_sure_durmusken_kayitli_sureyi_dondurur",
+      "test_canli_sure_calisirken_segmenti_ekler",
+      "_container",
+      "test_baslat_duraklat_sure_biriktirir",
+      "test_calisirken_bitir_sureyi_sayar",
+      "test_tek_kronometre_digerini_durdurur",
+      "test_elle_dakika_odulu_belirler",
+      "test_checkpoint_sonrasi_kurtarma_kayitli_sureyi_korur"
+    ],
+    "tests/smoke/test_app_smoke.py": [
+      "test_app_constructs_and_handles_started_event",
+      "test_theme_toggle_changes_stylesheet",
+      "test_dashboard_task_flow_updates_counter",
+      "test_add_task_dialog_blocks_empty_title",
+      "test_add_task_dialog_esnek_tekrar"
+    ],
+    "tests/unit/test_avatar.py": [
+      "test_avatar_katmanlari_sac_icerir",
+      "test_ai_avatar_yolu_yoksa_none",
+      "test_ai_avatar_yolu_varsa_dondurur",
+      "test_ai_avatar_bilinmeyen_unvan_none"
+    ],
+    "tests/unit/test_day_id.py": [
+      "test_before_day_start_counts_as_previous_day",
+      "test_after_day_start_counts_as_same_day",
+      "test_exact_day_start_is_new_day",
+      "test_midnight_with_zero_start_is_same_day",
+      "test_invalid_hour_raises"
+    ],
+    "tests/unit/test_event_bus.py": [
+      "_Other",
+      "test_typed_subscriber_only_gets_its_type",
+      "test_subscribe_all_gets_every_event"
+    ],
+    "tests/unit/test_fake_clock.py": [
+      "test_sahte_saat_verilen_zamani_dondurur",
+      "test_sahte_saat_ilerler",
+      "test_sahte_saat_ayarla",
+      "test_ayarlanabilir_saat_kaydirma_ve_sifirla"
+    ],
+    "tests/unit/test_palette.py": [
+      "test_all_themes_resolve_to_their_palette",
+      "test_unknown_theme_falls_back_to_dark",
+      "test_themes_available"
+    ],
+    "tests/unit/test_rewards.py": [
+      "test_ozel_deger_her_seyi_ezer",
+      "test_sureye_gore_dakikada_bir",
+      "test_kisa_sure_yine_de_en_az_bir_verir",
+      "test_suresiz_tamamlama_sabit_varsayilan_verir"
+    ],
+    "tests/unit/test_seriler.py": [
+      "test_ilk_isaret_seri_bir",
+      "test_ardisik_gun_artar",
+      "test_yeni_rekor",
+      "test_ayni_gun_degismez",
+      "test_bosluk_sifirlar",
+      "test_renk_esikleri"
+    ],
+    "tests/unit/test_statlar.py": [
+      "test_sifir_xp_seviye_sifir",
+      "test_ilk_seviye_esiginde_seviye_atlar",
+      "test_esik_alti_seviye_atlamaz",
+      "test_unvan_baslangic_cirak",
+      "test_unvan_bantlari",
+      "test_efsane_sonrasi_unvan_yok",
+      "test_dort_stat_var"
+    ],
+    "tests/unit/test_tekrar.py": [
+      "test_gunluk_her_gun_olusur",
+      "test_olusturmadan_once_olusmaz",
+      "test_her_x_gun",
+      "test_haftalik_secili_gun",
+      "test_haftalik_coklu_gun",
+      "test_aylik",
+      "test_sonraki_olusum_her_x_gun",
+      "test_sonraki_olusum_aylik"
+    ]
+  },
+  "batches": [
+    {
+      "batchIndex": 1,
+      "files": [
+        {
+          "path": "CLAUDE.md",
+          "language": "markdown",
+          "sizeLines": 105,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "sizeLines": 0,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "alembic.ini",
+          "language": "config",
+          "sizeLines": 43,
+          "fileCategory": "config"
+        },
+        {
+          "path": "pyproject.toml",
+          "language": "toml",
+          "sizeLines": 44,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        "CLAUDE.md": [],
+        "README.md": [],
+        "alembic.ini": [],
+        "pyproject.toml": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 2,
+      "files": [
+        {
+          "path": ".DS_Store",
+          "language": "unknown",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": ".understand-anything/.understandignore",
+          "language": "unknown",
+          "sizeLines": 33,
+          "fileCategory": "code"
+        },
+        {
+          "path": "assets/guides/using sword & shield.txt",
+          "language": "txt",
+          "sizeLines": 90,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "assets/guides/using this base.txt",
+          "language": "txt",
+          "sizeLines": 165,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "assets/readme.txt",
+          "language": "txt",
+          "sizeLines": 10,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "assets/this is only a demo.txt",
+          "language": "txt",
+          "sizeLines": 25,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "src/leveltodo/__init__.py",
+          "language": "python",
+          "sizeLines": 3,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/__main__.py",
+          "language": "python",
+          "sizeLines": 23,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/application/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/application/gorev_servisi.py",
+          "language": "python",
+          "sizeLines": 273,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/application/kronometre_servisi.py",
+          "language": "python",
+          "sizeLines": 37,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/application/seri_servisi.py",
+          "language": "python",
+          "sizeLines": 47,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/application/settings_service.py",
+          "language": "python",
+          "sizeLines": 54,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/bootstrap.py",
+          "language": "python",
+          "sizeLines": 84,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/events.py",
+          "language": "python",
+          "sizeLines": 34,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/settings/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/settings/repository.py",
+          "language": "python",
+          "sizeLines": 21,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/stats/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/stats/statlar.py",
+          "language": "python",
+          "sizeLines": 106,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/streaks/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/streaks/seriler.py",
+          "language": "python",
+          "sizeLines": 46,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/tasks/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/tasks/kurallar.py",
+          "language": "python",
+          "sizeLines": 110,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/tasks/rules.py",
+          "language": "python",
+          "sizeLines": 56,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        ".DS_Store": [],
+        ".understand-anything/.understandignore": [],
+        "assets/guides/using sword & shield.txt": [],
+        "assets/guides/using this base.txt": [],
+        "assets/readme.txt": [],
+        "assets/this is only a demo.txt": [],
+        "src/leveltodo/__init__.py": [],
+        "src/leveltodo/__main__.py": [],
+        "src/leveltodo/application/__init__.py": [],
+        "src/leveltodo/application/gorev_servisi.py": [],
+        "src/leveltodo/application/kronometre_servisi.py": [],
+        "src/leveltodo/application/seri_servisi.py": [],
+        "src/leveltodo/application/settings_service.py": [],
+        "src/leveltodo/bootstrap.py": [],
+        "src/leveltodo/domain/__init__.py": [],
+        "src/leveltodo/domain/events.py": [],
+        "src/leveltodo/domain/settings/__init__.py": [],
+        "src/leveltodo/domain/settings/repository.py": [],
+        "src/leveltodo/domain/stats/__init__.py": [],
+        "src/leveltodo/domain/stats/statlar.py": [],
+        "src/leveltodo/domain/streaks/__init__.py": [],
+        "src/leveltodo/domain/streaks/seriler.py": [],
+        "src/leveltodo/domain/tasks/__init__.py": [],
+        "src/leveltodo/domain/tasks/kurallar.py": [],
+        "src/leveltodo/domain/tasks/rules.py": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 3,
+      "files": [
+        {
+          "path": "src/leveltodo/domain/time/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/time/gun.py",
+          "language": "python",
+          "sizeLines": 29,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/domain/time/saat.py",
+          "language": "python",
+          "sizeLines": 18,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/assets/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/assets/avatar.py",
+          "language": "python",
+          "sizeLines": 146,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/config/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/config/paths.py",
+          "language": "python",
+          "sizeLines": 48,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/eventbus/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/eventbus/olay_hatti.py",
+          "language": "python",
+          "sizeLines": 44,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/eventbus/qt_bridge.py",
+          "language": "python",
+          "sizeLines": 26,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/base.py",
+          "language": "python",
+          "sizeLines": 13,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/bootstrap_data.py",
+          "language": "python",
+          "sizeLines": 19,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/engine.py",
+          "language": "python",
+          "sizeLines": 25,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/ledger_repository.py",
+          "language": "python",
+          "sizeLines": 69,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/migrations.py",
+          "language": "python",
+          "sizeLines": 25,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/migrations/env.py",
+          "language": "python",
+          "sizeLines": 55,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/migrations/script.py.mako",
+          "language": "mako",
+          "sizeLines": 26,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0001_initial.py",
+          "language": "python",
+          "sizeLines": 40,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0002_tasks.py",
+          "language": "python",
+          "sizeLines": 68,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0003_stats.py",
+          "language": "python",
+          "sizeLines": 27,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0004_recurrence_param.py",
+          "language": "python",
+          "sizeLines": 25,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0005_streaks.py",
+          "language": "python",
+          "sizeLines": 36,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/leveltodo/domain/time/__init__.py": [],
+        "src/leveltodo/domain/time/gun.py": [],
+        "src/leveltodo/domain/time/saat.py": [],
+        "src/leveltodo/infrastructure/__init__.py": [],
+        "src/leveltodo/infrastructure/assets/__init__.py": [],
+        "src/leveltodo/infrastructure/assets/avatar.py": [],
+        "src/leveltodo/infrastructure/config/__init__.py": [],
+        "src/leveltodo/infrastructure/config/paths.py": [],
+        "src/leveltodo/infrastructure/eventbus/__init__.py": [],
+        "src/leveltodo/infrastructure/eventbus/olay_hatti.py": [],
+        "src/leveltodo/infrastructure/eventbus/qt_bridge.py": [],
+        "src/leveltodo/infrastructure/persistence/__init__.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/__init__.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/base.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/bootstrap_data.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/engine.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/ledger_repository.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/migrations.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/migrations/env.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/migrations/script.py.mako": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0001_initial.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0002_tasks.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0003_stats.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0004_recurrence_param.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0005_streaks.py": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 4,
+      "files": [
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0006_task_streak.py",
+          "language": "python",
+          "sizeLines": 29,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/models.py",
+          "language": "python",
+          "sizeLines": 135,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/settings_repository.py",
+          "language": "python",
+          "sizeLines": 35,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/streak_repository.py",
+          "language": "python",
+          "sizeLines": 50,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/persistence/sqlite/task_repository.py",
+          "language": "python",
+          "sizeLines": 195,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/infrastructure/saat.py",
+          "language": "python",
+          "sizeLines": 50,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/app.py",
+          "language": "python",
+          "sizeLines": 52,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/common/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/common/icon.py",
+          "language": "python",
+          "sizeLines": 34,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/main_window.py",
+          "language": "python",
+          "sizeLines": 127,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/theme/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/theme/arrows.py",
+          "language": "python",
+          "sizeLines": 40,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/theme/fonts.py",
+          "language": "python",
+          "sizeLines": 26,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/theme/palette.py",
+          "language": "python",
+          "sizeLines": 105,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/theme/qss.py",
+          "language": "python",
+          "sizeLines": 154,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/admin/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/admin/admin_view.py",
+          "language": "python",
+          "sizeLines": 102,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/avatar/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/avatar/avatar_view.py",
+          "language": "python",
+          "sizeLines": 124,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/dashboard/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/dashboard/add_task_dialog.py",
+          "language": "python",
+          "sizeLines": 163,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/dashboard/bitir_dialog.py",
+          "language": "python",
+          "sizeLines": 45,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/dashboard/dashboard_view.py",
+          "language": "python",
+          "sizeLines": 464,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0006_task_streak.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/models.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/settings_repository.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/streak_repository.py": [],
+        "src/leveltodo/infrastructure/persistence/sqlite/task_repository.py": [],
+        "src/leveltodo/infrastructure/saat.py": [],
+        "src/leveltodo/presentation/__init__.py": [],
+        "src/leveltodo/presentation/app.py": [],
+        "src/leveltodo/presentation/common/__init__.py": [],
+        "src/leveltodo/presentation/common/icon.py": [],
+        "src/leveltodo/presentation/main_window.py": [],
+        "src/leveltodo/presentation/theme/__init__.py": [],
+        "src/leveltodo/presentation/theme/arrows.py": [],
+        "src/leveltodo/presentation/theme/fonts.py": [],
+        "src/leveltodo/presentation/theme/palette.py": [],
+        "src/leveltodo/presentation/theme/qss.py": [],
+        "src/leveltodo/presentation/views/__init__.py": [],
+        "src/leveltodo/presentation/views/admin/__init__.py": [],
+        "src/leveltodo/presentation/views/admin/admin_view.py": [],
+        "src/leveltodo/presentation/views/avatar/__init__.py": [],
+        "src/leveltodo/presentation/views/avatar/avatar_view.py": [],
+        "src/leveltodo/presentation/views/dashboard/__init__.py": [],
+        "src/leveltodo/presentation/views/dashboard/add_task_dialog.py": [],
+        "src/leveltodo/presentation/views/dashboard/bitir_dialog.py": [],
+        "src/leveltodo/presentation/views/dashboard/dashboard_view.py": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 5,
+      "files": [
+        {
+          "path": "src/leveltodo/presentation/views/dashboard/dashboard_viewmodel.py",
+          "language": "python",
+          "sizeLines": 73,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/settings/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/settings/settings_view.py",
+          "language": "python",
+          "sizeLines": 90,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/presentation/views/settings/settings_viewmodel.py",
+          "language": "python",
+          "sizeLines": 49,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/shared/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/shared/ids.py",
+          "language": "python",
+          "sizeLines": 14,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/shared/logging.py",
+          "language": "python",
+          "sizeLines": 23,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/leveltodo/shared/result.py",
+          "language": "python",
+          "sizeLines": 31,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/conftest.py",
+          "language": "python",
+          "sizeLines": 20,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/integration/test_migrations.py",
+          "language": "python",
+          "sizeLines": 13,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/integration/test_recurrence.py",
+          "language": "python",
+          "sizeLines": 72,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/integration/test_settings_persistence.py",
+          "language": "python",
+          "sizeLines": 26,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/integration/test_stats_loop.py",
+          "language": "python",
+          "sizeLines": 45,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/integration/test_streaks.py",
+          "language": "python",
+          "sizeLines": 48,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/integration/test_task_loop.py",
+          "language": "python",
+          "sizeLines": 81,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/integration/test_timer.py",
+          "language": "python",
+          "sizeLines": 102,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/smoke/test_app_smoke.py",
+          "language": "python",
+          "sizeLines": 66,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/unit/test_avatar.py",
+          "language": "python",
+          "sizeLines": 22,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/unit/test_day_id.py",
+          "language": "python",
+          "sizeLines": 31,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/unit/test_event_bus.py",
+          "language": "python",
+          "sizeLines": 33,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/unit/test_fake_clock.py",
+          "language": "python",
+          "sizeLines": 31,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/unit/test_palette.py",
+          "language": "python",
+          "sizeLines": 22,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/unit/test_rewards.py",
+          "language": "python",
+          "sizeLines": 18,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/unit/test_seriler.py",
+          "language": "python",
+          "sizeLines": 29,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/unit/test_statlar.py",
+          "language": "python",
+          "sizeLines": 47,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/leveltodo/presentation/views/dashboard/dashboard_viewmodel.py": [],
+        "src/leveltodo/presentation/views/settings/__init__.py": [],
+        "src/leveltodo/presentation/views/settings/settings_view.py": [],
+        "src/leveltodo/presentation/views/settings/settings_viewmodel.py": [],
+        "src/leveltodo/shared/__init__.py": [],
+        "src/leveltodo/shared/ids.py": [],
+        "src/leveltodo/shared/logging.py": [],
+        "src/leveltodo/shared/result.py": [],
+        "tests/conftest.py": [],
+        "tests/integration/test_migrations.py": [],
+        "tests/integration/test_recurrence.py": [],
+        "tests/integration/test_settings_persistence.py": [],
+        "tests/integration/test_stats_loop.py": [],
+        "tests/integration/test_streaks.py": [],
+        "tests/integration/test_task_loop.py": [],
+        "tests/integration/test_timer.py": [],
+        "tests/smoke/test_app_smoke.py": [],
+        "tests/unit/test_avatar.py": [],
+        "tests/unit/test_day_id.py": [],
+        "tests/unit/test_event_bus.py": [],
+        "tests/unit/test_fake_clock.py": [],
+        "tests/unit/test_palette.py": [],
+        "tests/unit/test_rewards.py": [],
+        "tests/unit/test_seriler.py": [],
+        "tests/unit/test_statlar.py": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 6,
+      "files": [
+        {
+          "path": "tests/unit/test_tekrar.py",
+          "language": "python",
+          "sizeLines": 52,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "tests/unit/test_tekrar.py": []
+      },
+      "neighborMap": {}
+    }
+  ]
+}

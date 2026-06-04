@@ -54,6 +54,15 @@ def test_tum_tekrarli_gorevler_ve_sonraki_tarih(db_url):
     assert aylik.sonraki == date(2026, 6, 15)
 
 
+def test_sablon_sil_tumu_listesinden_cikarir(db_url):
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    svc = _svc(db_url, saat)
+    svc.gorev_olustur("Spor", Tekrar.HER_X_GUN, parametre="3")
+    ozet = svc.tum_tekrarli_gorevler()[0]
+    svc.sablon_sil(ozet.task_id)
+    assert svc.tum_tekrarli_gorevler() == []
+
+
 def test_her_x_gun_gece_eklenince_bugun_gorunur(db_url):
     # Gün başlangıcı 4; saat 02:00 → mantıksal bugün önceki gün. Görev yine de bugün görünmeli.
     saat = SahteSaat(datetime(2026, 6, 4, 2, 0))

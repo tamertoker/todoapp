@@ -62,6 +62,7 @@ class GorevSatiri:
 class TekrarliGorevOzeti:
     """'Tümü' görünümü için: tekrarlı görevin düzeni ve bir sonraki gelişi."""
 
+    task_id: str
     baslik: str
     tekrar: str
     parametre: str
@@ -149,6 +150,7 @@ class GorevServisi:
             )
             ozetler.append(
                 TekrarliGorevOzeti(
+                    task_id=sablon.id,
                     baslik=sablon.title,
                     tekrar=sablon.recurrence,
                     parametre=sablon.recurrence_param or "",
@@ -245,6 +247,10 @@ class GorevServisi:
         kayit = self._gorev.get_instance(kayit_id)
         if kayit is not None:
             self._gorev.deactivate_template(kayit.task_id)
+
+    def sablon_sil(self, task_id: str) -> None:
+        """'Tümü' görünümünden doğrudan tekrarlı görevi (şablonu) kaldırır."""
+        self._gorev.deactivate_template(task_id)
 
     def toplamlar(self) -> tuple[int, int]:
         return self._defter.totals(self._user_id)

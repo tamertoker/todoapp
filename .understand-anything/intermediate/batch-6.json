@@ -1,0 +1,190 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/unit/test_tekrar.py",
+      "type": "file",
+      "name": "test_tekrar.py",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Unit tests for recurrence rules and date calculations, verifying daily, weekly, and monthly occurrence logic.",
+      "tags": ["test", "unit-test", "python", "recurrence"],
+      "complexity": "simple",
+      "languageNotes": "Uses pytest-style assertions to validate domain logic for task recurrence."
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_gunluk_her_gun_olusur",
+      "type": "function",
+      "name": "test_gunluk_her_gun_olusur",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests that a daily recurrence rule triggers correctly for any given date after creation.",
+      "tags": ["test", "python"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_olusturmadan_once_olusmaz",
+      "type": "function",
+      "name": "test_olusturmadan_once_olusmaz",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Verifies that recurrence calculations correctly return false for dates preceding the task's creation date.",
+      "tags": ["test", "python"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_her_x_gun",
+      "type": "function",
+      "name": "test_her_x_gun",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Validates the interval-based recurrence logic (e.g., every 3 days).",
+      "tags": ["test", "python"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_haftalik_secili_gun",
+      "type": "function",
+      "name": "test_haftalik_secili_gun",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests weekly recurrence limited to a single specific day of the week.",
+      "tags": ["test", "python"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_haftalik_coklu_gun",
+      "type": "function",
+      "name": "test_haftalik_coklu_gun",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests weekly recurrence rules that apply to multiple selected days (e.g., Mon, Wed, Fri).",
+      "tags": ["test", "python"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_aylik",
+      "type": "function",
+      "name": "test_aylik",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Validates monthly recurrence logic triggering on a specific day of each month.",
+      "tags": ["test", "python"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_her_x_gun",
+      "type": "function",
+      "name": "test_sonraki_olusum_her_x_gun",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests the calculation of the next valid occurrence date for interval-based recurrence.",
+      "tags": ["test", "python"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_aylik",
+      "type": "function",
+      "name": "test_sonraki_olusum_aylik",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests the calculation of the next valid occurrence date for monthly recurrence rules.",
+      "tags": ["test", "python"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_gunluk_her_gun_olusur",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_olusturmadan_once_olusmaz",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_her_x_gun",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_haftalik_secili_gun",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_haftalik_coklu_gun",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_aylik",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_her_x_gun",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_aylik",
+      "type": "contains",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "target": "file:tests/unit/test_tekrar.py",
+      "type": "tested_by",
+      "weight": 0.5
+    },
+    {
+      "source": "function:tests/unit/test_tekrar.py:test_gunluk_her_gun_olusur",
+      "target": "function:src/leveltodo/domain/tasks/kurallar.py:gunde_olusur_mu",
+      "type": "calls",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/unit/test_tekrar.py:test_olusturmadan_once_olusmaz",
+      "target": "function:src/leveltodo/domain/tasks/kurallar.py:gunde_olusur_mu",
+      "type": "calls",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/unit/test_tekrar.py:test_her_x_gun",
+      "target": "function:src/leveltodo/domain/tasks/kurallar.py:gunde_olusur_mu",
+      "type": "calls",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/unit/test_tekrar.py:test_haftalik_secili_gun",
+      "target": "function:src/leveltodo/domain/tasks/kurallar.py:gunde_olusur_mu",
+      "type": "calls",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/unit/test_tekrar.py:test_haftalik_coklu_gun",
+      "target": "function:src/leveltodo/domain/tasks/kurallar.py:gunde_olusur_mu",
+      "type": "calls",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/unit/test_tekrar.py:test_aylik",
+      "target": "function:src/leveltodo/domain/tasks/kurallar.py:gunde_olusur_mu",
+      "type": "calls",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_her_x_gun",
+      "target": "function:src/leveltodo/domain/tasks/kurallar.py:sonraki_olusum",
+      "type": "calls",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_aylik",
+      "target": "function:src/leveltodo/domain/tasks/kurallar.py:sonraki_olusum",
+      "type": "calls",
+      "weight": 0.8
+    }
+  ]
+}

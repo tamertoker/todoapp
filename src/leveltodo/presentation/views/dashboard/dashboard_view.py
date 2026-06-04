@@ -324,10 +324,14 @@ class DashboardView(QWidget):
         sonraki = QLabel(sonraki_metin)
         sonraki.setObjectName("Tag")
 
+        sil = QPushButton("Sil")
+        sil.clicked.connect(lambda _c, i=ozet.task_id: self._vm.sablon_sil(i))
+
         h.addWidget(baslik, stretch=1)
         h.addWidget(aciklama)
         h.addWidget(seri)
         h.addWidget(sonraki)
+        h.addWidget(sil)
         return frame
 
     def _build_row(self, satir: GorevSatiri) -> QFrame:

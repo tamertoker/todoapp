@@ -57,6 +57,10 @@ class DashboardViewModel(QObject):
         self._gorevler.gorev_sil(kayit_id)
         self.changed.emit()
 
+    def sablon_sil(self, task_id: str) -> None:
+        self._gorevler.sablon_sil(task_id)
+        self.changed.emit()
+
     # — Kronometre —
     def baslat(self, kayit_id: str) -> None:
         self._kronometre.baslat(kayit_id)

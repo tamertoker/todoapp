@@ -1,0 +1,2439 @@
+{
+  "nodes": [
+    {
+      "id": "file:CLAUDE.md",
+      "title": "Behavioral Guidelines and Project Rules",
+      "summary": "Core project documentation defining coding standards, architectural constraints, and a Turkish-English naming convention.",
+      "description": "This document serves as the primary technical and behavioral guide for the LevelTodo project. It outlines four general principles: thinking before coding, simplicity, surgical changes, and goal-driven execution. Specifically for LevelTodo, it mandates that Domain and Application layers remain pure Python (no PyQt6 dependencies), enforces the use of a central clock interface (IClock), and establishes a naming convention where domain logic uses Turkish terms (ASCII-safe) while technical infrastructure uses standard English software terms.",
+      "type": "file",
+      "fileCategory": "docs",
+      "language": "markdown",
+      "tags": [
+        "guidelines",
+        "architecture",
+        "naming-conventions",
+        "documentation"
+      ],
+      "languageNotes": "The project uses a hybrid naming strategy: Turkish for domain concepts (e.g., 'gorev' for task) and English for architectural patterns (e.g., 'repository', 'service').",
+      "languageLesson": "Using native language for domain logic helps align code with business requirements, while keeping infrastructure terms in English ensures compatibility with standard libraries and developer expectations.",
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:README.md",
+      "title": "Project Readme",
+      "summary": "The main entry point for project documentation (placeholder).",
+      "description": "A standard Markdown file intended to provide an overview and setup instructions for the LevelTodo project. It currently only contains the project name.",
+      "type": "file",
+      "fileCategory": "docs",
+      "language": "markdown",
+      "tags": [
+        "documentation",
+        "placeholder"
+      ],
+      "languageNotes": "Currently empty, waiting for project overview content.",
+      "languageLesson": "README files are the first point of contact for developers; keeping them updated with the current project state is essential.",
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:alembic.ini",
+      "title": "Alembic Migration Configuration",
+      "summary": "Configuration file for database schema migrations using Alembic.",
+      "description": "Defines the environment for Alembic migrations. It specifies the location of migration scripts within the infrastructure layer and configures logging for the migration process. Note that the database URL is intentionally left empty as it is injected programmatically at runtime.",
+      "type": "file",
+      "fileCategory": "config",
+      "language": "config",
+      "tags": [
+        "database",
+        "migrations",
+        "configuration"
+      ],
+      "languageNotes": "Configures how SQL changes are tracked and applied.",
+      "languageLesson": "Decoupling migration configuration from the specific database URL allows for more flexible environment-based deployments.",
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:pyproject.toml",
+      "title": "Python Project Configuration",
+      "summary": "Central metadata and dependency management for the Python project.",
+      "description": "A standard PEP 518 configuration file that manages build requirements, project metadata, and dependencies (including PyQt6, SQLAlchemy, and Alembic). it also configures development tools like Ruff for linting and Pytest for testing, and defines the 'leveltodo' CLI entry point.",
+      "type": "file",
+      "fileCategory": "config",
+      "language": "toml",
+      "tags": [
+        "build",
+        "dependencies",
+        "python",
+        "configuration"
+      ],
+      "languageNotes": "Lists all external libraries required to run and develop the application.",
+      "languageLesson": "The pyproject.toml file is the modern standard for Python project configuration, replacing older files like setup.py and requirements.txt.",
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.DS_Store",
+      "label": ".DS_Store",
+      "type": "file",
+      "metadata": {
+        "summary": "macOS system metadata file.",
+        "tags": [
+          "system",
+          "ignored"
+        ],
+        "language": "unknown"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.understand-anything/.understandignore",
+      "label": ".understandignore",
+      "type": "file",
+      "metadata": {
+        "summary": "Configuration file defining patterns for files and directories to exclude from analysis.",
+        "tags": [
+          "config",
+          "ignore"
+        ],
+        "language": "markdown"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:assets/guides/using sword & shield.txt",
+      "label": "using sword & shield.txt",
+      "type": "file",
+      "metadata": {
+        "summary": "Guide for equipment layering and animation sequences for one-handed weapons and shields.",
+        "tags": [
+          "asset",
+          "guide",
+          "documentation"
+        ],
+        "language": "txt"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:assets/guides/using this base.txt",
+      "label": "using this base.txt",
+      "type": "file",
+      "metadata": {
+        "summary": "Comprehensive guide for asset naming conventions, animation timing, and specialized movement mechanics.",
+        "tags": [
+          "asset",
+          "guide",
+          "documentation"
+        ],
+        "language": "txt"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:assets/readme.txt",
+      "label": "readme.txt",
+      "type": "file",
+      "metadata": {
+        "summary": "Asset credits and links to the creator's external profiles.",
+        "tags": [
+          "asset",
+          "metadata"
+        ],
+        "language": "txt"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:assets/this is only a demo.txt",
+      "label": "this is only a demo.txt",
+      "type": "file",
+      "metadata": {
+        "summary": "Information about the Mana Seed Character Base demo assets included in the project.",
+        "tags": [
+          "asset",
+          "metadata"
+        ],
+        "language": "txt"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/__init__.py",
+      "label": "__init__.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Package initialization for leveltodo, defining the version.",
+        "exports": [
+          "__version__"
+        ],
+        "tags": [
+          "package",
+          "entry"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/__main__.py",
+      "label": "__main__.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Main entry point of the application. Orchestrates logging setup, container building, and Qt application startup.",
+        "exports": [
+          "main"
+        ],
+        "imports": [
+          "leveltodo.bootstrap.build_container",
+          "leveltodo.infrastructure.config.paths",
+          "leveltodo.presentation.app.LevelTodoApp",
+          "leveltodo.shared.logging.setup_logging"
+        ],
+        "tags": [
+          "entrypoint",
+          "app"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/application/__init__.py",
+      "label": "__init__.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Initialization file for the application layer package.",
+        "tags": [
+          "package"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/application/gorev_servisi.py",
+      "label": "gorev_servisi.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Core application service for task management. Handles creation, listing, completion, and reward distribution logic.",
+        "exports": [
+          "GorevSatiri",
+          "TekrarliGorevOzeti",
+          "GorevServisi"
+        ],
+        "imports": [
+          "leveltodo.domain.events.TaskCompleted",
+          "leveltodo.domain.stats.statlar.SeviyeDurumu",
+          "leveltodo.domain.stats.statlar.Stat",
+          "leveltodo.domain.stats.statlar.UnvanDurumu",
+          "leveltodo.domain.stats.statlar.seviye_hesapla",
+          "leveltodo.domain.stats.statlar.unvan_hesapla",
+          "leveltodo.domain.tasks.kurallar.Odul",
+          "leveltodo.domain.tasks.kurallar.Tekrar",
+          "leveltodo.domain.tasks.kurallar.canli_sure",
+          "leveltodo.domain.tasks.kurallar.gunde_olusur_mu",
+          "leveltodo.domain.tasks.kurallar.odul_hesapla",
+          "leveltodo.domain.tasks.kurallar.onceki_olusum",
+          "leveltodo.domain.tasks.kurallar.sonraki_olusum",
+          "leveltodo.domain.time.gun.Gun",
+          "leveltodo.domain.time.saat.Saat",
+          "leveltodo.infrastructure.eventbus.olay_hatti.OlayHatti",
+          "leveltodo.infrastructure.persistence.sqlite.ledger_repository.SqlLedgerRepository",
+          "leveltodo.infrastructure.persistence.sqlite.models.DEFAULT_USER_ID",
+          "leveltodo.infrastructure.persistence.sqlite.task_repository.SqlTaskRepository",
+          "leveltodo.shared.ids.new_id"
+        ],
+        "tags": [
+          "service",
+          "application",
+          "task"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/application/kronometre_servisi.py",
+      "label": "kronometre_servisi.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Service for managing task timers. Ensures only one timer runs at a time and handles periodic checkpoints.",
+        "exports": [
+          "KronometreServisi"
+        ],
+        "imports": [
+          "leveltodo.domain.time.saat.Saat",
+          "leveltodo.infrastructure.persistence.sqlite.models.DEFAULT_USER_ID",
+          "leveltodo.infrastructure.persistence.sqlite.task_repository.SqlTaskRepository"
+        ],
+        "tags": [
+          "service",
+          "application",
+          "timer"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/application/seri_servisi.py",
+      "label": "seri_servisi.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Service for managing login and task streaks. Tracks daily activity and updates personal records.",
+        "exports": [
+          "SeriServisi"
+        ],
+        "imports": [
+          "leveltodo.domain.streaks.seriler.SeriTipi",
+          "leveltodo.domain.streaks.seriler.seri_ilerlet",
+          "leveltodo.domain.time.gun.Gun",
+          "leveltodo.domain.time.saat.Saat",
+          "leveltodo.infrastructure.persistence.sqlite.models.DEFAULT_USER_ID",
+          "leveltodo.infrastructure.persistence.sqlite.streak_repository.SqlStreakRepository"
+        ],
+        "tags": [
+          "service",
+          "application",
+          "streak"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/application/settings_service.py",
+      "label": "settings_service.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Application service for user settings. Manages default values, JSON serialization, and in-memory caching of configurations.",
+        "exports": [
+          "DEFAULTS",
+          "SettingsService"
+        ],
+        "imports": [
+          "leveltodo.domain.settings.repository.ISettingsRepository"
+        ],
+        "tags": [
+          "service",
+          "application",
+          "settings"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/bootstrap.py",
+      "label": "bootstrap.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Composition root that wires all dependencies together into a single container for the application.",
+        "exports": [
+          "Container",
+          "build_container"
+        ],
+        "imports": [
+          "leveltodo.application.gorev_servisi.GorevServisi",
+          "leveltodo.application.kronometre_servisi.KronometreServisi",
+          "leveltodo.application.seri_servisi.SeriServisi",
+          "leveltodo.application.settings_service.SettingsService",
+          "leveltodo.domain.time.saat.Saat",
+          "leveltodo.infrastructure.config.paths",
+          "leveltodo.infrastructure.eventbus.olay_hatti.OlayHatti",
+          "leveltodo.infrastructure.persistence.sqlite.bootstrap_data.ensure_default_user",
+          "leveltodo.infrastructure.persistence.sqlite.engine.create_engine_and_factory",
+          "leveltodo.infrastructure.persistence.sqlite.ledger_repository.SqlLedgerRepository",
+          "leveltodo.infrastructure.persistence.sqlite.migrations.upgrade_to_head",
+          "leveltodo.infrastructure.persistence.sqlite.models.DEFAULT_USER_ID",
+          "leveltodo.infrastructure.persistence.sqlite.settings_repository.SqlSettingsRepository",
+          "leveltodo.infrastructure.persistence.sqlite.streak_repository.SqlStreakRepository",
+          "leveltodo.infrastructure.persistence.sqlite.task_repository.SqlTaskRepository",
+          "leveltodo.infrastructure.saat.AyarlanabilirSaat"
+        ],
+        "tags": [
+          "bootstrap",
+          "dependency-injection"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/__init__.py",
+      "label": "__init__.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Initialization file for the domain layer package.",
+        "tags": [
+          "package",
+          "domain"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/events.py",
+      "label": "events.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Defines domain events that capture significant system occurrences as immutable data structures.",
+        "exports": [
+          "DomainEvent",
+          "AppStarted",
+          "TaskCompleted"
+        ],
+        "tags": [
+          "domain",
+          "event"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/settings/__init__.py",
+      "label": "__init__.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Initialization file for the settings domain package.",
+        "tags": [
+          "package",
+          "domain"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/settings/repository.py",
+      "label": "repository.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Defines the abstract interface (Protocol) for settings storage, decoupling domain logic from infrastructure details.",
+        "exports": [
+          "ISettingsRepository"
+        ],
+        "tags": [
+          "domain",
+          "interface",
+          "repository"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/stats/__init__.py",
+      "label": "__init__.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Initialization file for the stats domain package.",
+        "tags": [
+          "package",
+          "domain"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/stats/statlar.py",
+      "label": "statlar.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Domain rules for character stats, XP curves, leveling logic, and titles based on total progress.",
+        "exports": [
+          "Stat",
+          "STAT_ETIKET",
+          "GOREV_STATLARI",
+          "SeviyeDurumu",
+          "seviye_hesapla",
+          "UnvanDurumu",
+          "unvan_hesapla",
+          "unvan_listesi"
+        ],
+        "tags": [
+          "domain",
+          "rules",
+          "stats"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/streaks/__init__.py",
+      "label": "__init__.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Initialization file for the streaks domain package.",
+        "tags": [
+          "package",
+          "domain"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/streaks/seriler.py",
+      "label": "seriler.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Domain rules for activity streaks, defining how they advance and how their visual representation changes over time.",
+        "exports": [
+          "SeriTipi",
+          "seri_ilerlet",
+          "seri_rengi"
+        ],
+        "tags": [
+          "domain",
+          "rules",
+          "streaks"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/tasks/__init__.py",
+      "label": "__init__.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Initialization file for the tasks domain package.",
+        "tags": [
+          "package",
+          "domain"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "label": "kurallar.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Core domain logic for task recurrence patterns, reward calculations, and active duration tracking.",
+        "exports": [
+          "Tekrar",
+          "GorevDurumu",
+          "Odul",
+          "gunde_olusur_mu",
+          "onceki_olusum",
+          "sonraki_olusum",
+          "odul_hesapla",
+          "canli_sure"
+        ],
+        "tags": [
+          "domain",
+          "rules",
+          "tasks"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate",
+      "tags": [
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/leveltodo/domain/tasks/rules.py",
+      "label": "rules.py",
+      "type": "file",
+      "metadata": {
+        "summary": "Simplified English variant of task rules, focusing on recurrence, status, and reward computation.",
+        "exports": [
+          "Recurrence",
+          "TaskStatus",
+          "Reward",
+          "compute_reward",
+          "live_elapsed"
+        ],
+        "tags": [
+          "domain",
+          "rules",
+          "tasks"
+        ],
+        "language": "python"
+      },
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/domain/time/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/leveltodo/domain/time/__init__.py",
+      "summary": "Initializer for the domain time module.",
+      "tags": [
+        "module",
+        "time",
+        "domain"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/domain/time/gun.py",
+      "type": "file",
+      "name": "gun.py",
+      "filePath": "src/leveltodo/domain/time/gun.py",
+      "summary": "Defines the 'Gun' class for logical day calculations based on a custom day start hour.",
+      "tags": [
+        "domain",
+        "time",
+        "logical-day"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/leveltodo/domain/time/gun.py:Gun",
+      "type": "class",
+      "name": "Gun",
+      "filePath": "src/leveltodo/domain/time/gun.py",
+      "summary": "A logical day representation that accounts for late-night activity as part of the previous day.",
+      "tags": [
+        "dataclass",
+        "time"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/leveltodo/domain/time/gun.py:Gun.olustur",
+      "type": "function",
+      "name": "olustur",
+      "filePath": "src/leveltodo/domain/time/gun.py",
+      "summary": "Factory method to create a Gun instance from a datetime and day start hour.",
+      "tags": [
+        "factory",
+        "method"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/domain/time/saat.py",
+      "type": "file",
+      "name": "saat.py",
+      "filePath": "src/leveltodo/domain/time/saat.py",
+      "summary": "Defines the 'Saat' protocol for abstracting time access.",
+      "tags": [
+        "domain",
+        "time",
+        "interface"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/leveltodo/domain/time/saat.py:Saat",
+      "type": "class",
+      "name": "Saat",
+      "filePath": "src/leveltodo/domain/time/saat.py",
+      "summary": "Protocol for time providers, enabling testability through clock mocking.",
+      "tags": [
+        "protocol",
+        "interface"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/leveltodo/infrastructure/__init__.py",
+      "summary": "Initializer for the infrastructure module.",
+      "tags": [
+        "module",
+        "infrastructure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/assets/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/leveltodo/infrastructure/assets/__init__.py",
+      "summary": "Initializer for the infrastructure assets module.",
+      "tags": [
+        "module",
+        "assets"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/assets/avatar.py",
+      "type": "file",
+      "name": "avatar.py",
+      "filePath": "src/leveltodo/infrastructure/assets/avatar.py",
+      "summary": "Avatar generation logic using Mana Seed sprite layers and AI-generated images.",
+      "tags": [
+        "infrastructure",
+        "assets",
+        "avatar",
+        "PyQt6"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/leveltodo/infrastructure/assets/avatar.py:AvatarOlusturucu",
+      "type": "class",
+      "name": "AvatarOlusturucu",
+      "filePath": "src/leveltodo/infrastructure/assets/avatar.py",
+      "summary": "Creates avatars by merging multiple sprite layers from asset files.",
+      "tags": [
+        "graphics",
+        "avatar"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/config/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/leveltodo/infrastructure/config/__init__.py",
+      "summary": "Initializer for the infrastructure config module.",
+      "tags": [
+        "module",
+        "config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/config/paths.py",
+      "type": "file",
+      "name": "paths.py",
+      "filePath": "src/leveltodo/infrastructure/config/paths.py",
+      "summary": "Manages application directory and file paths, including database and asset locations.",
+      "tags": [
+        "infrastructure",
+        "config",
+        "paths"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/eventbus/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/leveltodo/infrastructure/eventbus/__init__.py",
+      "summary": "Initializer for the infrastructure event bus module.",
+      "tags": [
+        "module",
+        "eventbus"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/eventbus/olay_hatti.py",
+      "type": "file",
+      "name": "olay_hatti.py",
+      "filePath": "src/leveltodo/infrastructure/eventbus/olay_hatti.py",
+      "summary": "Domain event bus implementation using the blinker library.",
+      "tags": [
+        "infrastructure",
+        "eventbus",
+        "blinker"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/leveltodo/infrastructure/eventbus/olay_hatti.py:OlayHatti",
+      "type": "class",
+      "name": "OlayHatti",
+      "filePath": "src/leveltodo/infrastructure/eventbus/olay_hatti.py",
+      "summary": "Central event bus for publishing and subscribing to domain events.",
+      "tags": [
+        "eventbus",
+        "blinker"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/eventbus/qt_bridge.py",
+      "type": "file",
+      "name": "qt_bridge.py",
+      "filePath": "src/leveltodo/infrastructure/eventbus/qt_bridge.py",
+      "summary": "Bridges domain events to PyQt6 signals for thread-safe UI updates.",
+      "tags": [
+        "infrastructure",
+        "eventbus",
+        "PyQt6",
+        "bridge"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/leveltodo/infrastructure/eventbus/qt_bridge.py:QtEventBridge",
+      "type": "class",
+      "name": "QtEventBridge",
+      "filePath": "src/leveltodo/infrastructure/eventbus/qt_bridge.py",
+      "summary": "Captures domain events and re-emits them as Qt signals.",
+      "tags": [
+        "bridge",
+        "PyQt6"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/__init__.py",
+      "summary": "Initializer for the infrastructure persistence module.",
+      "tags": [
+        "module",
+        "persistence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/__init__.py",
+      "summary": "Initializer for the SQLite persistence module.",
+      "tags": [
+        "module",
+        "sqlite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/base.py",
+      "type": "file",
+      "name": "base.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/base.py",
+      "summary": "SQLAlchemy declarative base class for database models.",
+      "tags": [
+        "infrastructure",
+        "persistence",
+        "SQLAlchemy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/leveltodo/infrastructure/persistence/sqlite/base.py:Base",
+      "type": "class",
+      "name": "Base",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/base.py",
+      "summary": "Declarative base from which all SQLite models inherit.",
+      "tags": [
+        "SQLAlchemy",
+        "model-base"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/bootstrap_data.py",
+      "type": "file",
+      "name": "bootstrap_data.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/bootstrap_data.py",
+      "summary": "Functions for initializing the database with default data.",
+      "tags": [
+        "infrastructure",
+        "persistence",
+        "initialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/engine.py",
+      "type": "file",
+      "name": "engine.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/engine.py",
+      "summary": "SQLAlchemy engine and session factory configuration.",
+      "tags": [
+        "infrastructure",
+        "persistence",
+        "SQLAlchemy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/ledger_repository.py",
+      "type": "file",
+      "name": "ledger_repository.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/ledger_repository.py",
+      "summary": "Repository for tracking XP and point transactions (ledger events).",
+      "tags": [
+        "infrastructure",
+        "persistence",
+        "repository",
+        "ledger"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/leveltodo/infrastructure/persistence/sqlite/ledger_repository.py:SqlLedgerRepository",
+      "type": "class",
+      "name": "SqlLedgerRepository",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/ledger_repository.py",
+      "summary": "Implementation of a ledger repository using SQLAlchemy for XP and point tracking.",
+      "tags": [
+        "repository",
+        "SQLAlchemy"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations.py",
+      "type": "file",
+      "name": "migrations.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/migrations.py",
+      "summary": "Interface for programmatically running Alembic database migrations.",
+      "tags": [
+        "infrastructure",
+        "persistence",
+        "migrations",
+        "Alembic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations/env.py",
+      "type": "file",
+      "name": "env.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/migrations/env.py",
+      "summary": "Alembic environment configuration for database migrations.",
+      "tags": [
+        "migrations",
+        "Alembic",
+        "config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations/script.py.mako",
+      "type": "file",
+      "name": "script.py.mako",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/migrations/script.py.mako",
+      "summary": "Mako template for generating Alembic migration scripts.",
+      "tags": [
+        "migrations",
+        "Alembic",
+        "template"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0001_initial.py",
+      "type": "file",
+      "name": "0001_initial.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0001_initial.py",
+      "summary": "Initial database migration creating users and settings tables.",
+      "tags": [
+        "migrations",
+        "Alembic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0002_tasks.py",
+      "type": "file",
+      "name": "0002_tasks.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0002_tasks.py",
+      "summary": "Migration for adding tasks, task instances, and transaction tables.",
+      "tags": [
+        "migrations",
+        "Alembic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0003_stats.py",
+      "type": "file",
+      "name": "0003_stats.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0003_stats.py",
+      "summary": "Migration for adding stat columns to tasks and XP events.",
+      "tags": [
+        "migrations",
+        "Alembic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0004_recurrence_param.py",
+      "type": "file",
+      "name": "0004_recurrence_param.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0004_recurrence_param.py",
+      "summary": "Migration for adding recurrence parameters to tasks.",
+      "tags": [
+        "migrations",
+        "Alembic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0005_streaks.py",
+      "type": "file",
+      "name": "0005_streaks.py",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0005_streaks.py",
+      "summary": "Migration for adding the streaks table.",
+      "tags": [
+        "migrations",
+        "Alembic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0006_task_streak.py",
+      "type": "table",
+      "name": "0006_task_streak",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0006_task_streak.py",
+      "summary": "Database migration that adds streak-related columns (streak_count, streak_last_day) to the tasks table.",
+      "tags": [
+        "migration",
+        "database",
+        "streak"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "schema:src/leveltodo/infrastructure/persistence/sqlite/models.py",
+      "type": "schema",
+      "name": "Models",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/models.py",
+      "summary": "SQLAlchemy database models defining the core tables: User, Setting, Task, TaskInstance, XpEvent, Streak, and PointTransaction.",
+      "tags": [
+        "persistence",
+        "orm",
+        "database",
+        "schema"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/leveltodo/infrastructure/persistence/sqlite/models.py:Task",
+      "type": "class",
+      "name": "Task",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/models.py",
+      "summary": "Database model representing a task template, including recurrence rules and streak information.",
+      "tags": [
+        "model",
+        "task"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/leveltodo/infrastructure/persistence/sqlite/models.py:TaskInstance",
+      "type": "class",
+      "name": "TaskInstance",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/models.py",
+      "summary": "Database model for a specific occurrence of a task on a given day, tracking status and timer progress.",
+      "tags": [
+        "model",
+        "task"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:src/leveltodo/infrastructure/persistence/sqlite/settings_repository.py",
+      "type": "service",
+      "name": "SqlSettingsRepository",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/settings_repository.py",
+      "summary": "SQLite implementation of the settings repository, handling persistence of user configurations via key-value pairs.",
+      "tags": [
+        "persistence",
+        "repository",
+        "settings"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:src/leveltodo/infrastructure/persistence/sqlite/streak_repository.py",
+      "type": "service",
+      "name": "SqlStreakRepository",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/streak_repository.py",
+      "summary": "SQLite implementation of the streak repository, managing persistent storage for login and task streaks.",
+      "tags": [
+        "persistence",
+        "repository",
+        "streak"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:src/leveltodo/infrastructure/persistence/sqlite/task_repository.py",
+      "type": "service",
+      "name": "SqlTaskRepository",
+      "filePath": "src/leveltodo/infrastructure/persistence/sqlite/task_repository.py",
+      "summary": "Comprehensive SQLite repository for tasks and task instances, managing everything from CRUD operations to timer checkpoints and completion logic.",
+      "tags": [
+        "persistence",
+        "repository",
+        "task"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "service:src/leveltodo/infrastructure/saat.py",
+      "type": "service",
+      "name": "Clock",
+      "filePath": "src/leveltodo/infrastructure/saat.py",
+      "summary": "Time-related service providers including a real system clock, an adjustable clock for debugging, and a fake clock for testing.",
+      "tags": [
+        "infrastructure",
+        "time",
+        "testing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/app.py",
+      "type": "file",
+      "name": "LevelTodoApp",
+      "filePath": "src/leveltodo/presentation/app.py",
+      "summary": "Main application class that initializes the Qt environment, applies themes, and sets up the main window and event bridge.",
+      "tags": [
+        "presentation",
+        "ui",
+        "bootstrap"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/common/icon.py",
+      "type": "file",
+      "name": "IconGenerator",
+      "filePath": "src/leveltodo/presentation/common/icon.py",
+      "summary": "Utility for programmatically generating pixel-art application icons using Qt painter.",
+      "tags": [
+        "presentation",
+        "assets",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/main_window.py",
+      "type": "file",
+      "name": "MainWindow",
+      "filePath": "src/leveltodo/presentation/main_window.py",
+      "summary": "The primary window of the application, managing the side navigation menu, view switching, and system tray integration.",
+      "tags": [
+        "presentation",
+        "ui",
+        "navigation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/theme/arrows.py",
+      "type": "file",
+      "name": "ArrowGenerator",
+      "filePath": "src/leveltodo/presentation/theme/arrows.py",
+      "summary": "Generates dynamic arrow icons for UI controls (like spinboxes) based on the current theme colors.",
+      "tags": [
+        "presentation",
+        "theme",
+        "assets"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/theme/fonts.py",
+      "type": "file",
+      "name": "FontLoader",
+      "filePath": "src/leveltodo/presentation/theme/fonts.py",
+      "summary": "Handles loading of pixel-art font assets or falls back to system monospace fonts.",
+      "tags": [
+        "presentation",
+        "theme",
+        "assets"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/theme/palette.py",
+      "type": "file",
+      "name": "Palette",
+      "filePath": "src/leveltodo/presentation/theme/palette.py",
+      "summary": "Defines color palettes for various themes (Dark, Light, Midnight, Forest, etc.) to maintain a consistent pixel-RPG aesthetic.",
+      "tags": [
+        "presentation",
+        "theme",
+        "style"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/theme/qss.py",
+      "type": "file",
+      "name": "QSSBuilder",
+      "filePath": "src/leveltodo/presentation/theme/qss.py",
+      "summary": "Dynamically constructs the Qt Style Sheet (QSS) based on the active palette and font configuration.",
+      "tags": [
+        "presentation",
+        "theme",
+        "style"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/admin/admin_view.py",
+      "type": "file",
+      "name": "AdminView",
+      "filePath": "src/leveltodo/presentation/views/admin/admin_view.py",
+      "summary": "Debug view providing controls to manipulate system time and manually add XP to stats for testing purposes.",
+      "tags": [
+        "presentation",
+        "ui",
+        "debug"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/avatar/avatar_view.py",
+      "type": "file",
+      "name": "AvatarEditorView",
+      "filePath": "src/leveltodo/presentation/views/avatar/avatar_view.py",
+      "summary": "Interface for previewing and customizing the player's avatar by cycling through different layers and parts.",
+      "tags": [
+        "presentation",
+        "ui",
+        "avatar"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/dashboard/add_task_dialog.py",
+      "type": "file",
+      "name": "AddTaskDialog",
+      "filePath": "src/leveltodo/presentation/views/dashboard/add_task_dialog.py",
+      "summary": "A modal dialog for creating new tasks, supporting configuration of recurrence patterns, stats, and rewards.",
+      "tags": [
+        "presentation",
+        "ui",
+        "task"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/dashboard/bitir_dialog.py",
+      "type": "file",
+      "name": "CompleteTaskDialog",
+      "filePath": "src/leveltodo/presentation/views/dashboard/bitir_dialog.py",
+      "summary": "Dialog for finalizing a task, allowing users to verify or manually enter the time spent.",
+      "tags": [
+        "presentation",
+        "ui",
+        "task"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/dashboard/dashboard_view.py",
+      "type": "file",
+      "name": "DashboardView",
+      "filePath": "src/leveltodo/presentation/views/dashboard/dashboard_view.py",
+      "summary": "The central UI view displaying the user's profile, avatar, stats, and the daily task list with interactive timers.",
+      "tags": [
+        "presentation",
+        "ui",
+        "dashboard"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/__init__.py",
+      "type": "file",
+      "name": "presentation_init",
+      "filePath": "src/leveltodo/presentation/__init__.py",
+      "summary": "Initialization file for the presentation package.",
+      "tags": [
+        "presentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/common/__init__.py",
+      "type": "file",
+      "name": "presentation_common_init",
+      "filePath": "src/leveltodo/presentation/common/__init__.py",
+      "summary": "Initialization file for the common presentation utilities.",
+      "tags": [
+        "presentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/theme/__init__.py",
+      "type": "file",
+      "name": "theme_init",
+      "filePath": "src/leveltodo/presentation/theme/__init__.py",
+      "summary": "Initialization file for the theme package.",
+      "tags": [
+        "theme"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/__init__.py",
+      "type": "file",
+      "name": "views_init",
+      "filePath": "src/leveltodo/presentation/views/__init__.py",
+      "summary": "Initialization file for the views package.",
+      "tags": [
+        "presentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/admin/__init__.py",
+      "type": "file",
+      "name": "admin_view_init",
+      "filePath": "src/leveltodo/presentation/views/admin/__init__.py",
+      "summary": "Initialization file for the admin view package.",
+      "tags": [
+        "presentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/avatar/__init__.py",
+      "type": "file",
+      "name": "avatar_view_init",
+      "filePath": "src/leveltodo/presentation/views/avatar/__init__.py",
+      "summary": "Initialization file for the avatar view package.",
+      "tags": [
+        "presentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/dashboard/__init__.py",
+      "type": "file",
+      "name": "dashboard_view_init",
+      "filePath": "src/leveltodo/presentation/views/dashboard/__init__.py",
+      "summary": "Initialization file for the dashboard view package.",
+      "tags": [
+        "presentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/dashboard/dashboard_viewmodel.py",
+      "type": "file",
+      "label": "dashboard_viewmodel.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 73
+      },
+      "summary": "ViewModel for the Dashboard view. Acts as a bridge between the view and services (GorevServisi, KronometreServisi). Manages tasks and timer logic, emitting a 'changed' signal when data updates.",
+      "symbols": [
+        "DashboardViewModel"
+      ],
+      "tags": [
+        "viewmodel",
+        "dashboard",
+        "qt",
+        "presentation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/settings/__init__.py",
+      "type": "file",
+      "label": "__init__.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 0
+      },
+      "summary": "Initialization file for the settings view package.",
+      "symbols": [],
+      "tags": [
+        "package",
+        "settings",
+        "presentation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/settings/settings_view.py",
+      "type": "file",
+      "label": "settings_view.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 90
+      },
+      "summary": "View component for the application settings. Provides UI for changing the theme, day start hour, and tray icon behavior. Connects to SettingsViewModel for data persistence.",
+      "symbols": [
+        "SettingsView"
+      ],
+      "tags": [
+        "view",
+        "settings",
+        "qt",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/presentation/views/settings/settings_viewmodel.py",
+      "type": "file",
+      "label": "settings_viewmodel.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 49
+      },
+      "summary": "ViewModel for the settings view. Manages application settings via SettingsService and emits signals when theme or day start hour changes.",
+      "symbols": [
+        "SettingsViewModel"
+      ],
+      "tags": [
+        "viewmodel",
+        "settings",
+        "qt",
+        "presentation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/shared/__init__.py",
+      "type": "file",
+      "label": "__init__.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 0
+      },
+      "summary": "Initialization file for the shared utility package.",
+      "symbols": [],
+      "tags": [
+        "package",
+        "shared"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/shared/ids.py",
+      "type": "file",
+      "label": "ids.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 14
+      },
+      "summary": "Utility for generating sortable unique identifiers (ULIDs).",
+      "symbols": [
+        "new_id"
+      ],
+      "tags": [
+        "util",
+        "id",
+        "ulid"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/shared/logging.py",
+      "type": "file",
+      "label": "logging.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 23
+      },
+      "summary": "Configures application-wide logging to both console and file.",
+      "symbols": [
+        "setup_logging"
+      ],
+      "tags": [
+        "util",
+        "logging"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/leveltodo/shared/result.py",
+      "type": "file",
+      "label": "result.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 31
+      },
+      "summary": "Provides a functional Result type (Ok/Err) for handling operation outcomes without exceptions.",
+      "symbols": [
+        "Ok",
+        "Err"
+      ],
+      "tags": [
+        "util",
+        "result",
+        "functional"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/conftest.py",
+      "type": "file",
+      "label": "conftest.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 20
+      },
+      "summary": "Pytest configuration file. Defines common fixtures like db_url for isolated test databases and sets the QT platform to offscreen for headless testing.",
+      "symbols": [
+        "db_url"
+      ],
+      "tags": [
+        "test",
+        "config",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/integration/test_migrations.py",
+      "type": "file",
+      "label": "test_migrations.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 13
+      },
+      "summary": "Integration test to verify that database migrations correctly create the required tables (users, settings).",
+      "symbols": [
+        "test_upgrade_creates_tables"
+      ],
+      "tags": [
+        "test",
+        "integration",
+        "migration",
+        "database"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/integration/test_recurrence.py",
+      "type": "file",
+      "label": "test_recurrence.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 72
+      },
+      "summary": "Integration tests for task recurrence rules. Verifies that tasks appear on the correct days (daily, weekly, monthly, etc.) using a fake clock.",
+      "symbols": [
+        "test_her_x_gun_dogru_gunlerde",
+        "test_haftalik_secili_gunlerde",
+        "test_tum_tekrarli_gorevler_ve_sonraki_tarih",
+        "test_her_x_gun_gece_eklenince_bugun_gorunur",
+        "test_aylik_belirli_gun"
+      ],
+      "tags": [
+        "test",
+        "integration",
+        "recurrence",
+        "task"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/integration/test_settings_persistence.py",
+      "type": "file",
+      "label": "test_settings_persistence.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 26
+      },
+      "summary": "Integration tests for settings persistence. Ensures that changed settings survive application restarts by verifying them across different container instances.",
+      "symbols": [
+        "test_setting_survives_new_container",
+        "test_defaults_when_unset"
+      ],
+      "tags": [
+        "test",
+        "integration",
+        "settings",
+        "persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/integration/test_stats_loop.py",
+      "type": "file",
+      "label": "test_stats_loop.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 45
+      },
+      "summary": "Integration tests for the statistics and leveling system. Verifies the end-to-end flow from completing a task to gaining XP, leveling up stats, and updating the user's title.",
+      "symbols": [
+        "test_gorev_stata_xp_yazar_ve_seviye_olusur",
+        "test_gelistirme_xp_ekle_seviye_artirir",
+        "test_statsiz_gorev_stata_yazmaz_ama_genel_xp_artar"
+      ],
+      "tags": [
+        "test",
+        "integration",
+        "stats",
+        "leveling"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/integration/test_streaks.py",
+      "type": "file",
+      "label": "test_streaks.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 48
+      },
+      "summary": "Integration tests for the streak system. Covers both global login streaks and task-specific completion streaks, including consecutive days and gaps.",
+      "symbols": [
+        "test_giris_serisi_ardisik_gun_ve_bosluk",
+        "test_gorev_serisi_her_goreve_ozel"
+      ],
+      "tags": [
+        "test",
+        "integration",
+        "streaks"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/integration/test_task_loop.py",
+      "type": "file",
+      "label": "test_task_loop.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 81
+      },
+      "summary": "Integration tests for the core task lifecycle (creation, listing, completion, rewards, and deletion) and data persistence.",
+      "symbols": [
+        "test_tam_dongu",
+        "test_iki_kez_tamamlamak_cift_odul_vermez",
+        "test_biten_gorevi_silmek_listeden_cikarir",
+        "test_veri_yeniden_baslatmada_kalir"
+      ],
+      "tags": [
+        "test",
+        "integration",
+        "task",
+        "lifecycle"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/integration/test_timer.py",
+      "type": "file",
+      "label": "test_timer.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 102
+      },
+      "summary": "Integration tests for the task timer functionality. Covers starting/pausing timers, reward calculation based on elapsed time, and recovery from checkpoints after crashes.",
+      "symbols": [
+        "test_baslat_duraklat_sure_biriktirir",
+        "test_calisirken_bitir_sureyi_sayar",
+        "test_tek_kronometre_digerini_durdurur",
+        "test_elle_dakika_odulu_belirler",
+        "test_checkpoint_sonrasi_kurtarma_kayitli_sureyi_korur"
+      ],
+      "tags": [
+        "test",
+        "integration",
+        "timer",
+        "kronometre"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/smoke/test_app_smoke.py",
+      "type": "file",
+      "label": "test_app_smoke.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 66
+      },
+      "summary": "Smoke tests for the main application. Verifies application construction, theme toggling, dashboard task flow, and dialog validation logic.",
+      "symbols": [
+        "test_app_constructs_and_handles_started_event",
+        "test_theme_toggle_changes_stylesheet",
+        "test_dashboard_task_flow_updates_counter",
+        "test_add_task_dialog_blocks_empty_title",
+        "test_add_task_dialog_esnek_tekrar"
+      ],
+      "tags": [
+        "test",
+        "smoke",
+        "app"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/unit/test_avatar.py",
+      "type": "file",
+      "label": "test_avatar.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 22
+      },
+      "summary": "Unit tests for avatar asset logic. Verifies layer generation and AI avatar path resolution based on user titles.",
+      "symbols": [
+        "test_avatar_katmanlari_sac_icerir",
+        "test_ai_avatar_yolu_varsa_dondurur"
+      ],
+      "tags": [
+        "test",
+        "unit",
+        "avatar",
+        "assets"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/unit/test_day_id.py",
+      "type": "file",
+      "label": "test_day_id.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 31
+      },
+      "summary": "Unit tests for the custom day logic. Verifies that timestamps are correctly mapped to logical days based on the application's 'day start hour' setting.",
+      "symbols": [
+        "test_before_day_start_counts_as_previous_day",
+        "test_after_day_start_counts_as_same_day",
+        "test_exact_day_start_is_new_day"
+      ],
+      "tags": [
+        "test",
+        "unit",
+        "time",
+        "day"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/unit/test_event_bus.py",
+      "type": "file",
+      "label": "test_event_bus.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 33
+      },
+      "summary": "Unit tests for the internal event bus (OlayHatti). Verifies typed subscriptions and global event listening.",
+      "symbols": [
+        "test_typed_subscriber_only_gets_its_type",
+        "test_subscribe_all_gets_every_event"
+      ],
+      "tags": [
+        "test",
+        "unit",
+        "eventbus"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/unit/test_fake_clock.py",
+      "type": "file",
+      "label": "test_fake_clock.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 31
+      },
+      "summary": "Unit tests for the fake and adjustable clock utilities used in testing. Verifies time advancing, setting, and offset management.",
+      "symbols": [
+        "test_sahte_saat_verilen_zamani_dondurur",
+        "test_sahte_saat_ilerler",
+        "test_sahte_saat_ayarla",
+        "test_ayarlanabilir_saat_kaydirma_ve_sifirla"
+      ],
+      "tags": [
+        "test",
+        "unit",
+        "clock",
+        "fakeclock"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/unit/test_palette.py",
+      "type": "file",
+      "label": "test_palette.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 22
+      },
+      "summary": "Unit tests for the theme palette system. Verifies that all themes resolve to their correct color palettes and handles fallbacks.",
+      "symbols": [
+        "test_all_themes_resolve_to_their_palette",
+        "test_themes_available"
+      ],
+      "tags": [
+        "test",
+        "unit",
+        "theme",
+        "palette"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/unit/test_rewards.py",
+      "type": "file",
+      "label": "test_rewards.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 18
+      },
+      "summary": "Unit tests for the reward calculation logic. Verifies XP and point rewards based on time worked or manual overrides.",
+      "symbols": [
+        "test_ozel_deger_her_seyi_ezer",
+        "test_sureye_gore_dakikada_bir",
+        "test_kisa_sure_yine_de_en_az_bir_verir"
+      ],
+      "tags": [
+        "test",
+        "unit",
+        "rewards",
+        "xp"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/unit/test_seriler.py",
+      "type": "file",
+      "label": "test_seriler.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 29
+      },
+      "summary": "Unit tests for the streak logic. Verifies streak incrementing, record keeping, and color threshold calculations for UI display.",
+      "symbols": [
+        "test_ilk_isaret_seri_bir",
+        "test_ardisik_gun_artar",
+        "test_yeni_rekor",
+        "test_bosluk_sifirlar"
+      ],
+      "tags": [
+        "test",
+        "unit",
+        "streaks"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/unit/test_statlar.py",
+      "type": "file",
+      "label": "test_statlar.py",
+      "metadata": {
+        "category": "code",
+        "language": "python",
+        "sizeLines": 47
+      },
+      "summary": "Unit tests for the statistics and title system. Verifies XP-to-level conversion thresholds and title progression bands.",
+      "symbols": [
+        "test_sifir_xp_seviye_sifir",
+        "test_ilk_seviye_esiginde_seviye_atlar",
+        "test_unvan_bantlari",
+        "test_efsane_sonrasi_unvan_yok"
+      ],
+      "tags": [
+        "test",
+        "unit",
+        "stats",
+        "titles"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/unit/test_tekrar.py",
+      "type": "file",
+      "name": "test_tekrar.py",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Unit tests for recurrence rules and date calculations, verifying daily, weekly, and monthly occurrence logic.",
+      "tags": [
+        "test",
+        "unit-test",
+        "python",
+        "recurrence"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Uses pytest-style assertions to validate domain logic for task recurrence."
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_gunluk_her_gun_olusur",
+      "type": "function",
+      "name": "test_gunluk_her_gun_olusur",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests that a daily recurrence rule triggers correctly for any given date after creation.",
+      "tags": [
+        "test",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_olusturmadan_once_olusmaz",
+      "type": "function",
+      "name": "test_olusturmadan_once_olusmaz",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Verifies that recurrence calculations correctly return false for dates preceding the task's creation date.",
+      "tags": [
+        "test",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_her_x_gun",
+      "type": "function",
+      "name": "test_her_x_gun",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Validates the interval-based recurrence logic (e.g., every 3 days).",
+      "tags": [
+        "test",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_haftalik_secili_gun",
+      "type": "function",
+      "name": "test_haftalik_secili_gun",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests weekly recurrence limited to a single specific day of the week.",
+      "tags": [
+        "test",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_haftalik_coklu_gun",
+      "type": "function",
+      "name": "test_haftalik_coklu_gun",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests weekly recurrence rules that apply to multiple selected days (e.g., Mon, Wed, Fri).",
+      "tags": [
+        "test",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_aylik",
+      "type": "function",
+      "name": "test_aylik",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Validates monthly recurrence logic triggering on a specific day of each month.",
+      "tags": [
+        "test",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_her_x_gun",
+      "type": "function",
+      "name": "test_sonraki_olusum_her_x_gun",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests the calculation of the next valid occurrence date for interval-based recurrence.",
+      "tags": [
+        "test",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_aylik",
+      "type": "function",
+      "name": "test_sonraki_olusum_aylik",
+      "filePath": "tests/unit/test_tekrar.py",
+      "summary": "Tests the calculation of the next valid occurrence date for monthly recurrence rules.",
+      "tags": [
+        "test",
+        "python"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/leveltodo/__main__.py",
+      "target": "file:src/leveltodo/bootstrap.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/application/gorev_servisi.py",
+      "target": "file:src/leveltodo/domain/events.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/application/gorev_servisi.py",
+      "target": "file:src/leveltodo/domain/stats/statlar.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/application/gorev_servisi.py",
+      "target": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/application/seri_servisi.py",
+      "target": "file:src/leveltodo/domain/streaks/seriler.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/application/settings_service.py",
+      "target": "file:src/leveltodo/domain/settings/repository.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/bootstrap.py",
+      "target": "file:src/leveltodo/application/gorev_servisi.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/bootstrap.py",
+      "target": "file:src/leveltodo/application/kronometre_servisi.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/bootstrap.py",
+      "target": "file:src/leveltodo/application/seri_servisi.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/bootstrap.py",
+      "target": "file:src/leveltodo/application/settings_service.py",
+      "type": "imports",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/domain/time/gun.py",
+      "target": "class:src/leveltodo/domain/time/gun.py:Gun",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "class:src/leveltodo/domain/time/gun.py:Gun",
+      "target": "function:src/leveltodo/domain/time/gun.py:Gun.olustur",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/domain/time/saat.py",
+      "target": "class:src/leveltodo/domain/time/saat.py:Saat",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/assets/avatar.py",
+      "target": "class:src/leveltodo/infrastructure/assets/avatar.py:AvatarOlusturucu",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/eventbus/olay_hatti.py",
+      "target": "class:src/leveltodo/infrastructure/eventbus/olay_hatti.py:OlayHatti",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/eventbus/qt_bridge.py",
+      "target": "class:src/leveltodo/infrastructure/eventbus/qt_bridge.py:QtEventBridge",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/persistence/sqlite/base.py",
+      "target": "class:src/leveltodo/infrastructure/persistence/sqlite/base.py:Base",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/persistence/sqlite/ledger_repository.py",
+      "target": "class:src/leveltodo/infrastructure/persistence/sqlite/ledger_repository.py:SqlLedgerRepository",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "class:src/leveltodo/infrastructure/eventbus/qt_bridge.py:QtEventBridge",
+      "target": "class:src/leveltodo/infrastructure/eventbus/olay_hatti.py:OlayHatti",
+      "type": "depends_on",
+      "weight": 0.6,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations/env.py",
+      "target": "file:src/leveltodo/infrastructure/config/paths.py",
+      "type": "imports",
+      "weight": 0.7,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/persistence/sqlite/migrations/env.py",
+      "target": "file:src/leveltodo/infrastructure/persistence/sqlite/base.py",
+      "type": "imports",
+      "weight": 0.7,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/persistence/sqlite/bootstrap_data.py",
+      "target": "file:src/leveltodo/shared/ids.py",
+      "type": "imports",
+      "weight": 0.7,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/eventbus/olay_hatti.py",
+      "target": "file:src/leveltodo/domain/events.py",
+      "type": "imports",
+      "weight": 0.7,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/infrastructure/eventbus/qt_bridge.py",
+      "target": "file:src/leveltodo/domain/events.py",
+      "type": "imports",
+      "weight": 0.7,
+      "direction": "forward"
+    },
+    {
+      "source": "service:src/leveltodo/infrastructure/persistence/sqlite/settings_repository.py",
+      "target": "schema:src/leveltodo/infrastructure/persistence/sqlite/models.py",
+      "type": "imports",
+      "summary": "Uses Setting model for storage operations.",
+      "direction": "forward"
+    },
+    {
+      "source": "service:src/leveltodo/infrastructure/persistence/sqlite/streak_repository.py",
+      "target": "schema:src/leveltodo/infrastructure/persistence/sqlite/models.py",
+      "type": "imports",
+      "summary": "Uses Streak model for storage operations.",
+      "direction": "forward"
+    },
+    {
+      "source": "service:src/leveltodo/infrastructure/persistence/sqlite/task_repository.py",
+      "target": "schema:src/leveltodo/infrastructure/persistence/sqlite/models.py",
+      "type": "imports",
+      "summary": "Uses Task and TaskInstance models for storage operations.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/app.py",
+      "target": "file:src/leveltodo/presentation/main_window.py",
+      "type": "imports",
+      "summary": "Instantiates the main window.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/app.py",
+      "target": "file:src/leveltodo/presentation/theme/qss.py",
+      "type": "calls",
+      "summary": "Builds the QSS stylesheet for the application.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/main_window.py",
+      "target": "file:src/leveltodo/presentation/views/dashboard/dashboard_view.py",
+      "type": "imports",
+      "summary": "Embeds the dashboard view.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/main_window.py",
+      "target": "file:src/leveltodo/presentation/views/settings/settings_view.py",
+      "type": "imports",
+      "summary": "Embeds the settings view.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/main_window.py",
+      "target": "file:src/leveltodo/presentation/views/avatar/avatar_view.py",
+      "type": "imports",
+      "summary": "Embeds the avatar editor view.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/main_window.py",
+      "target": "file:src/leveltodo/presentation/views/admin/admin_view.py",
+      "type": "imports",
+      "summary": "Embeds the admin/debug view.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/views/dashboard/dashboard_view.py",
+      "target": "file:src/leveltodo/presentation/views/dashboard/add_task_dialog.py",
+      "type": "calls",
+      "summary": "Opens the task creation dialog.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/views/dashboard/dashboard_view.py",
+      "target": "file:src/leveltodo/presentation/views/dashboard/bitir_dialog.py",
+      "type": "calls",
+      "summary": "Opens the task completion dialog.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/theme/qss.py",
+      "target": "file:src/leveltodo/presentation/theme/palette.py",
+      "type": "imports",
+      "summary": "Uses palette colors for style definitions.",
+      "direction": "forward"
+    },
+    {
+      "source": "table:src/leveltodo/infrastructure/persistence/sqlite/migrations/versions/0006_task_streak.py",
+      "target": "schema:src/leveltodo/infrastructure/persistence/sqlite/models.py",
+      "type": "related",
+      "summary": "Adds fields to the Task model defined in models.py.",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/views/dashboard/dashboard_viewmodel.py",
+      "target": "file:src/leveltodo/application/gorev_servisi.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/views/dashboard/dashboard_viewmodel.py",
+      "target": "file:src/leveltodo/application/kronometre_servisi.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/views/dashboard/dashboard_viewmodel.py",
+      "target": "file:src/leveltodo/domain/stats/statlar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/views/dashboard/dashboard_viewmodel.py",
+      "target": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/views/settings/settings_view.py",
+      "target": "file:src/leveltodo/presentation/views/settings/settings_viewmodel.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/presentation/views/settings/settings_viewmodel.py",
+      "target": "file:src/leveltodo/application/settings_service.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_recurrence.py",
+      "target": "file:src/leveltodo/bootstrap.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_recurrence.py",
+      "target": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_settings_persistence.py",
+      "target": "file:src/leveltodo/bootstrap.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_stats_loop.py",
+      "target": "file:src/leveltodo/bootstrap.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_stats_loop.py",
+      "target": "file:src/leveltodo/domain/stats/statlar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_stats_loop.py",
+      "target": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_streaks.py",
+      "target": "file:src/leveltodo/bootstrap.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_streaks.py",
+      "target": "file:src/leveltodo/domain/streaks/seriler.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_streaks.py",
+      "target": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_task_loop.py",
+      "target": "file:src/leveltodo/bootstrap.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_task_loop.py",
+      "target": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_timer.py",
+      "target": "file:src/leveltodo/bootstrap.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/integration/test_timer.py",
+      "target": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/smoke/test_app_smoke.py",
+      "target": "file:src/leveltodo/bootstrap.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/smoke/test_app_smoke.py",
+      "target": "file:src/leveltodo/domain/events.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/smoke/test_app_smoke.py",
+      "target": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_event_bus.py",
+      "target": "file:src/leveltodo/domain/events.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_rewards.py",
+      "target": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_seriler.py",
+      "target": "file:src/leveltodo/domain/streaks/seriler.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_statlar.py",
+      "target": "file:src/leveltodo/domain/stats/statlar.py",
+      "type": "import",
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_gunluk_her_gun_olusur",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_olusturmadan_once_olusmaz",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_her_x_gun",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_haftalik_secili_gun",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_haftalik_coklu_gun",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_aylik",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_her_x_gun",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:tests/unit/test_tekrar.py",
+      "target": "function:tests/unit/test_tekrar.py:test_sonraki_olusum_aylik",
+      "type": "contains",
+      "weight": 1.0,
+      "direction": "forward"
+    },
+    {
+      "source": "file:src/leveltodo/domain/tasks/kurallar.py",
+      "target": "file:tests/unit/test_tekrar.py",
+      "type": "tested_by",
+      "weight": 0.5,
+      "direction": "forward"
+    }
+  ]
+}
