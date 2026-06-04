@@ -12,7 +12,7 @@ today_rows, record...) — bunlar yerleşik altyapı terimleridir.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.domain.events import TaskCompleted
@@ -69,6 +69,18 @@ class TekrarliGorevOzeti:
     parametre: str
     seri: int
     sonraki: date | None
+
+
+@dataclass(frozen=True, slots=True)
+class TelafiSatiri:
+    """Kaçırılmış bir tekrarlı oluşum (geç de olsa yapılabilir)."""
+
+    task_id: str
+    baslik: str
+    gun: date
+
+
+_TELAFI_PENCERE_GUN = 21  # son 3 hafta içindeki kaçırılanlar telafi edilebilir
 
 
 class GorevServisi:
@@ -162,6 +174,51 @@ class GorevServisi:
                 )
             )
         return ozetler
+
+    def telafi_listesi(self) -> list[TelafiSatiri]:
+        """Son 3 hafta içinde kaçırılmış (yapılmamış) tekrarlı oluşumlar."""
+        bugun = self._bugun()
+        pencere_basi = bugun - timedelta(days=_TELAFI_PENCERE_GUN)
+        sonuc: list[TelafiSatiri] = []
+        for sablon in self._gorev.aktif_tekrarli_sablonlar(self._user_id):
+            olusturma = Gun.olustur(sablon.created_at, self._gun_baslangic()).tarih
+            gun = max(pencere_basi, olusturma)
+            while gun < bugun:  # bugün hariç, geçmiş günler
+                olusur = gunde_olusur_mu(
+                    Tekrar(sablon.recurrence), sablon.recurrence_param or "", olusturma, gun
+                )
+                if olusur and not self._gorev.done_instance_var_mi(sablon.id, gun):
+                    sonuc.append(TelafiSatiri(task_id=sablon.id, baslik=sablon.title, gun=gun))
+                gun += timedelta(days=1)
+        sonuc.sort(key=lambda t: t.gun, reverse=True)  # en yeni kaçırılan önce
+        return sonuc
+
+    def telafi_yap(self, task_id: str, gun: date) -> Odul | None:
+        sablon = self._gorev.get_template(task_id)
+        if sablon is None or not sablon.is_active:
+            return None
+        odul = odul_hesapla(0, sablon.reward_override)  # geç telafi: sabit/özel ödül
+        simdi = self._saat.simdi()
+        self._gorev.telafi_kaydet(
+            instance_id=new_id(),
+            task_id=task_id,
+            user_id=self._user_id,
+            day=gun,
+            title=sablon.title,
+            reward_xp=odul.xp,
+            reward_points=odul.puan,
+            completed_at=simdi,
+        )
+        self._defter.record(
+            user_id=self._user_id,
+            day=gun,
+            source="catchup",
+            ref_id=task_id,
+            xp=odul.xp,
+            points=odul.puan,
+            stat=sablon.stat,
+        )
+        return odul
 
     def _gunluk_kayitlari_uret(self, gun) -> None:
         for sablon in self._gorev.aktif_tekrarli_sablonlar(self._user_id):

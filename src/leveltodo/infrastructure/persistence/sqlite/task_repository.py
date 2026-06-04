@@ -113,6 +113,50 @@ class SqlTaskRepository:
                 task.streak_last_day = son_gun
                 s.commit()
 
+    # — Telafi (catchup) —
+    def done_instance_var_mi(self, task_id: str, day: date) -> bool:
+        with self._sf() as s:
+            stmt = select(TaskInstance.id).where(
+                TaskInstance.task_id == task_id,
+                TaskInstance.day == day,
+                TaskInstance.status == "done",
+            )
+            return s.scalar(stmt) is not None
+
+    def telafi_kaydet(
+        self,
+        *,
+        instance_id: str,
+        task_id: str,
+        user_id: str,
+        day: date,
+        title: str,
+        reward_xp: int,
+        reward_points: int,
+        completed_at: datetime,
+    ) -> None:
+        """Geçmiş bir günü 'yapıldı' olarak işaretler (varsa o günün kaydını,
+        yoksa yeni bir kayıt oluşturarak)."""
+        with self._sf() as s:
+            inst = s.scalar(
+                select(TaskInstance).where(
+                    TaskInstance.task_id == task_id, TaskInstance.day == day
+                )
+            )
+            if inst is None:
+                inst = TaskInstance(
+                    id=instance_id, task_id=task_id, user_id=user_id, day=day, title=title
+                )
+                s.add(inst)
+            inst.status = "done"
+            inst.committed_seconds = 0
+            inst.reward_xp = reward_xp
+            inst.reward_points = reward_points
+            inst.completed_at = completed_at
+            inst.timer_running = False
+            inst.segment_started_at = None
+            s.commit()
+
     def complete_instance(
         self,
         *,

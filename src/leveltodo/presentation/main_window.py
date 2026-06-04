@@ -29,6 +29,7 @@ from leveltodo.presentation.views.avatar.avatar_view import AvatarEditorView
 from leveltodo.presentation.views.dashboard.dashboard_view import DashboardView
 from leveltodo.presentation.views.settings.settings_view import SettingsView
 from leveltodo.presentation.views.settings.settings_viewmodel import SettingsViewModel
+from leveltodo.presentation.views.telafi.telafi_view import TelafiView
 
 
 class MainWindow(QWidget):
@@ -42,6 +43,7 @@ class MainWindow(QWidget):
 
         # — Sayfalar —
         self._dashboard = DashboardView(container, bridge)
+        self._telafi = TelafiView(container)
         self._avatar_editor = AvatarEditorView()
         settings_vm = SettingsViewModel(container.settings)
         self._settings = SettingsView(settings_vm)
@@ -49,6 +51,7 @@ class MainWindow(QWidget):
 
         self._stack = QStackedWidget()
         self._stack.addWidget(self._dashboard)
+        self._stack.addWidget(self._telafi)
         self._stack.addWidget(self._avatar_editor)
         self._stack.addWidget(self._settings)
         self._stack.addWidget(self._admin)
@@ -66,6 +69,7 @@ class MainWindow(QWidget):
         settings_vm.themeChanged.connect(self.theme_changed)
         settings_vm.dayStartHourChanged.connect(lambda _h: self._dashboard.refresh_day())
         self._admin.degisti.connect(self._dashboard.refresh_day)
+        self._telafi.degisti.connect(self._dashboard.refresh_day)
 
         self._tray = self._build_tray()
 
@@ -75,7 +79,7 @@ class MainWindow(QWidget):
         nav.setSpacing(4)
 
         group = QButtonGroup(self)
-        for index, label in enumerate(("Anasayfa", "Avatar", "Ayarlar", "Debug")):
+        for index, label in enumerate(("Anasayfa", "Telafi", "Avatar", "Ayarlar", "Debug")):
             btn = QPushButton(label)
             btn.setObjectName("NavButton")
             btn.setCheckable(True)
