@@ -34,6 +34,7 @@ from leveltodo.infrastructure.assets.avatar import (
     avatar_katmanlari,
     kilitli_goruntu,
 )
+from leveltodo.infrastructure.assets.dusman import dusman_resmi
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.mesajlar import combo_mesaji, kritik_mesaji, tamamlama_mesaji
@@ -75,6 +76,7 @@ class DashboardView(QWidget):
         self._pixmap_cache: dict[str, QPixmap] = {}
         self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
         self._mod = "bugun"  # "bugun" | "tumu"
+        self._son_dusman: str | None = None
 
         title = QLabel("LevelTodo")
         title.setObjectName("Title")
@@ -110,12 +112,27 @@ class DashboardView(QWidget):
         seri_satiri.addWidget(self._combo_label)
         seri_satiri.addStretch(1)
 
+        self._dusman_sprite = QLabel()
+        self._dusman_ad = QLabel()
+        self._dusman_ad.setObjectName("ProfileBar")
+        self._dusman_hp_bar = QProgressBar()
+        self._dusman_hp_bar.setObjectName("DusmanHpBar")
+        dusman_ic = QVBoxLayout()
+        dusman_ic.addWidget(self._dusman_ad)
+        dusman_ic.addWidget(self._dusman_hp_bar)
+        dusman_frame = QFrame()
+        dusman_frame.setObjectName("AvatarFrame")
+        dusman_h = QHBoxLayout(dusman_frame)
+        dusman_h.addWidget(self._dusman_sprite)
+        dusman_h.addLayout(dusman_ic, stretch=1)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
         layout.addLayout(ust)
         layout.addWidget(self._unvan_label)
         layout.addLayout(seri_satiri)
+        layout.addWidget(dusman_frame)
         layout.addLayout(orta, stretch=1)
 
         self._vm.changed.connect(self._render)
@@ -243,7 +260,19 @@ class DashboardView(QWidget):
 
         self._render_profil_ve_statlar()
         self._render_seriler()
+        self._render_dusman()
         self._render_gorevler()
+
+    def _render_dusman(self) -> None:
+        dusman, hp, maks, tier = self._container.dusman.durum()
+        self._dusman_ad.setText(f"🗡 {dusman.ad}  ·  Tier {tier + 1}")
+        hp = max(0, hp)
+        self._dusman_hp_bar.setMaximum(max(1, maks))
+        self._dusman_hp_bar.setValue(hp)
+        self._dusman_hp_bar.setFormat(f"Can: {hp} / {maks}")
+        if self._son_dusman != dusman.anahtar:
+            self._son_dusman = dusman.anahtar
+            self._dusman_sprite.setPixmap(dusman_resmi(paths.assets_dir(), dusman.anahtar, 96))
 
     def _render_seriler(self) -> None:
         giris, _ = self._container.seri.durumlar()[SeriTipi.GIRIS]

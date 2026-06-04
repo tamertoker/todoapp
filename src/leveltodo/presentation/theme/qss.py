@@ -151,6 +151,9 @@ def build_qss(palette: Palette, font_family: str, up_arrow: str, down_arrow: str
     QProgressBar::chunk {{
         background-color: {p.accent};
     }}
+    QProgressBar#DusmanHpBar::chunk {{
+        background-color: #c0392b;
+    }}
     QFrame#RozetKartAcik {{
         background-color: {p.panel};
         border: 2px solid {p.accent};

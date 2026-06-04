@@ -28,6 +28,8 @@ DEFAULTS: dict[str, Any] = {
     "toplam_tamamlama": 0,
     "kritik_yasandi": False,
     "combo_yasandi": False,
+    "dusman_tier": 0,
+    "dusman_hp": -1,
 }
 
 

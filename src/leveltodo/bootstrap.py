@@ -13,12 +13,14 @@ from sqlalchemy.orm import sessionmaker
 
 from leveltodo.application.combo_servisi import ComboServisi
 from leveltodo.application.dondurma_servisi import DondurmaServisi
+from leveltodo.application.dusman_servisi import DusmanServisi
 from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.irade_servisi import IradeServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
 from leveltodo.application.rozet_servisi import RozetServisi
 from leveltodo.application.seri_servisi import SeriServisi
 from leveltodo.application.settings_service import SettingsService
+from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.sans import Sans
 from leveltodo.domain.time.saat import Saat
 from leveltodo.infrastructure.config import paths
@@ -45,6 +47,7 @@ class Container:
     settings: SettingsService
     dondurma: DondurmaServisi
     combo: ComboServisi
+    dusman: DusmanServisi
     rozet: RozetServisi
     gorevler: GorevServisi
     kronometre: KronometreServisi
@@ -70,6 +73,9 @@ def build_container(
     dondurma = DondurmaServisi(settings)
     combo = ComboServisi(settings)
     rozet = RozetServisi(settings)
+    dusman = DusmanServisi(settings)
+    # Görev tamamlanınca kazanılan XP kadar düşmana hasar (olay tabanlı).
+    olay_hatti.subscribe(TaskCompleted, lambda olay: dusman.hasar_ver(olay.xp))
 
     gorev_repo = SqlTaskRepository(session_factory)
     defter_repo = SqlLedgerRepository(session_factory)
@@ -107,6 +113,7 @@ def build_container(
         settings=settings,
         dondurma=dondurma,
         combo=combo,
+        dusman=dusman,
         rozet=rozet,
         gorevler=gorevler,
         kronometre=kronometre,
