@@ -105,6 +105,19 @@ class XpEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
+class WillAct(Base):
+    """İrade eylemi — Disiplin statını besleyen, iradeyi zorlayan bir eylem kaydı."""
+
+    __tablename__ = "will_acts"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    day: Mapped[date] = mapped_column(Date)
+    title: Mapped[str] = mapped_column(String(200))
+    xp: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class Streak(Base):
     """Seri (streak) kaydı. type='login' giriş serisi, type='task' görev serisi.
     Kullanıcı + tip başına tek satır."""

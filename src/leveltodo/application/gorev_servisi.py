@@ -1,14 +1,3 @@
-"""Görev servisi — çekirdek döngünün beyni.
-
-Görev ekleme, bugünün listesini hazırlama ve görevi tamamlayıp ödül yazma
-işlerini yönetir. Saat ve "gün başlangıcı" ayarını kullanarak hangi mantıksal
-günde olduğumuzu bilir; her-gün görevlerinin bugünkü kaydını tembelce (lazy)
-üretir.
-
-Not: Veritabanı/depo (repository) metotları İngilizce kaldı (add_template,
-today_rows, record...) — bunlar yerleşik altyapı terimleridir.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

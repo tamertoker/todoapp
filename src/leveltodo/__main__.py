@@ -1,8 +1,3 @@
-"""Giriş noktası: `python -m leveltodo` ya da `leveltodo` komutu.
-
-Sıra: günlük kur → container'ı inşa et (veritabanı + migration + ayarlar) →
-Qt uygulamasını başlat.
-"""
 
 from __future__ import annotations
 
@@ -13,7 +8,9 @@ from leveltodo.shared.logging import setup_logging
 
 
 def main() -> int:
+    # Hataları görmek için burada log dosyasını oluşturuyoruz.
     setup_logging(log_file=paths.logs_dir() / "leveltodo.log")
+    # Servis konteynırı. İhtiyaç duyulan servisler buradan çağrılır.
     container = build_container()
     app = LevelTodoApp(container)
     return app.run()
