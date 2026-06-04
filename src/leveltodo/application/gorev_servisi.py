@@ -16,6 +16,7 @@ from datetime import date, datetime, timedelta
 
 from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.domain.events import TaskCompleted
+from leveltodo.domain.sans import Sans
 from leveltodo.domain.stats.statlar import (
     SeviyeDurumu,
     Stat,
@@ -24,6 +25,8 @@ from leveltodo.domain.stats.statlar import (
     unvan_hesapla,
 )
 from leveltodo.domain.tasks.kurallar import (
+    KRITIK_CARPAN,
+    KRITIK_OLASILIK,
     Odul,
     Tekrar,
     canli_sure,
@@ -84,6 +87,7 @@ class GorevServisi:
         olay_hatti: OlayHatti,
         gun_baslangic_getir,
         dondurma: DondurmaServisi,
+        sans: Sans,
         user_id: str = DEFAULT_USER_ID,
     ) -> None:
         self._gorev = gorev_repo
@@ -92,6 +96,7 @@ class GorevServisi:
         self._olay_hatti = olay_hatti
         self._gun_baslangic = gun_baslangic_getir
         self._dondurma = dondurma
+        self._sans = sans
         self._user_id = user_id
 
     def _bugun(self):
@@ -266,6 +271,9 @@ class GorevServisi:
         ozel = sablon.reward_override if sablon is not None else None
 
         odul = odul_hesapla(islenmis_saniye, ozel)
+        kritik = self._sans.kritik_mi(KRITIK_OLASILIK)
+        if kritik:
+            odul = Odul(xp=odul.xp * KRITIK_CARPAN, puan=odul.puan * KRITIK_CARPAN)
         ok = self._gorev.complete_instance(
             instance_id=kayit_id,
             committed_seconds=islenmis_saniye,
@@ -296,6 +304,7 @@ class GorevServisi:
                 instance_id=kayit_id,
                 xp=odul.xp,
                 points=odul.puan,
+                kritik=kritik,
             )
         )
         self._seviye_dondurma_kontrol()

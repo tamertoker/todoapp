@@ -14,7 +14,16 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest
 
+from leveltodo.infrastructure import sans as _sans_modulu
+
 
 @pytest.fixture
 def db_url(tmp_path) -> str:
     return f"sqlite:///{tmp_path / 'test.db'}"
+
+
+@pytest.fixture(autouse=True)
+def _kritik_kapali(monkeypatch):
+    """Testlerde kritik (rastgele) varsayılan KAPALI; ödüller belirli olsun.
+    Kritiği test eden dosyalar kendi Sans nesnelerini geçer."""
+    monkeypatch.setattr(_sans_modulu.GercekSans, "kritik_mi", lambda self, olasilik: False)

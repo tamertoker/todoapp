@@ -32,3 +32,4 @@ class TaskCompleted(DomainEvent):
     instance_id: str
     xp: int
     points: int
+    kritik: bool = False

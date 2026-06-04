@@ -20,6 +20,7 @@ from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
 from leveltodo.application.seri_servisi import SeriServisi
 from leveltodo.application.settings_service import SettingsService
+from leveltodo.domain.sans import Sans
 from leveltodo.domain.time.saat import Saat
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
@@ -32,6 +33,7 @@ from leveltodo.infrastructure.persistence.sqlite.settings_repository import SqlS
 from leveltodo.infrastructure.persistence.sqlite.streak_repository import SqlStreakRepository
 from leveltodo.infrastructure.persistence.sqlite.task_repository import SqlTaskRepository
 from leveltodo.infrastructure.saat import AyarlanabilirSaat
+from leveltodo.infrastructure.sans import GercekSans
 
 
 @dataclass
@@ -47,7 +49,9 @@ class Container:
     seri: SeriServisi
 
 
-def build_container(db_url: str | None = None, saat: Saat | None = None) -> Container:
+def build_container(
+    db_url: str | None = None, saat: Saat | None = None, sans: Sans | None = None
+) -> Container:
     url = db_url or paths.db_url()
 
     upgrade_to_head(url)
@@ -56,6 +60,7 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
 
     olay_hatti = OlayHatti()
     aktif_saat = saat or AyarlanabilirSaat()
+    aktif_sans = sans or GercekSans()
 
     settings_repo = SqlSettingsRepository(session_factory)
     settings = SettingsService(settings_repo, DEFAULT_USER_ID)
@@ -70,6 +75,7 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
         olay_hatti=olay_hatti,
         gun_baslangic_getir=lambda: settings.day_start_hour,
         dondurma=dondurma,
+        sans=aktif_sans,
     )
     kronometre = KronometreServisi(gorev_repo, aktif_saat)
 

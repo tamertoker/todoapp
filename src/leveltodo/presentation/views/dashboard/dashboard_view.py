@@ -418,5 +418,10 @@ class DashboardView(QWidget):
                 mesaj = "Yarım kalmış kronometre vardı, durdurdum — kayıtlı süre duruyor. " + mesaj
             self._status_label.setText(mesaj)
         elif isinstance(event, TaskCompleted):
-            self._status_label.setText(f"+{event.xp} XP kazandın. Sırada ne var?")
+            if event.kritik:
+                self._status_label.setText(
+                    f"⚡ KRİTİK! +{event.xp} XP, +{event.points} puan (2 katı)!"
+                )
+            else:
+                self._status_label.setText(f"+{event.xp} XP kazandın. Sırada ne var?")
             self._render()
