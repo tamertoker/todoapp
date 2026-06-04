@@ -12,7 +12,7 @@ today_rows, record...) — bunlar yerleşik altyapı terimleridir.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 
 from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.stats.statlar import (
@@ -29,6 +29,7 @@ from leveltodo.domain.tasks.kurallar import (
     gunde_olusur_mu,
     odul_hesapla,
     onceki_olusum,
+    sonraki_olusum,
 )
 from leveltodo.domain.time.gun import Gun
 from leveltodo.domain.time.saat import Saat
@@ -55,6 +56,17 @@ class GorevSatiri:
     segment_baslangici: datetime | None
     odul_xp: int | None
     odul_puan: int | None
+
+
+@dataclass(frozen=True, slots=True)
+class TekrarliGorevOzeti:
+    """'Tümü' görünümü için: tekrarlı görevin düzeni ve bir sonraki gelişi."""
+
+    baslik: str
+    tekrar: str
+    parametre: str
+    seri: int
+    sonraki: date | None
 
 
 class GorevServisi:
@@ -125,6 +137,26 @@ class GorevServisi:
             )
             for kayit, tekrar, seri in satirlar
         ]
+
+    def tum_tekrarli_gorevler(self) -> list[TekrarliGorevOzeti]:
+        """'Tümü' görünümü: bugün görünmeyenler dahil tüm tekrarlı görevler."""
+        bugun = self._bugun()
+        ozetler: list[TekrarliGorevOzeti] = []
+        for sablon in self._gorev.aktif_tekrarli_sablonlar(self._user_id):
+            olusturma = Gun.olustur(sablon.created_at, self._gun_baslangic()).tarih
+            sonraki = sonraki_olusum(
+                Tekrar(sablon.recurrence), sablon.recurrence_param or "", olusturma, bugun
+            )
+            ozetler.append(
+                TekrarliGorevOzeti(
+                    baslik=sablon.title,
+                    tekrar=sablon.recurrence,
+                    parametre=sablon.recurrence_param or "",
+                    seri=sablon.streak_count,
+                    sonraki=sonraki,
+                )
+            )
+        return ozetler
 
     def _gunluk_kayitlari_uret(self, gun) -> None:
         for sablon in self._gorev.aktif_tekrarli_sablonlar(self._user_id):

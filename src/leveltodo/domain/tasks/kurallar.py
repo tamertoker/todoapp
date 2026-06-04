@@ -79,6 +79,18 @@ def onceki_olusum(
     return None
 
 
+def sonraki_olusum(
+    tekrar: Tekrar, parametre: str, olusturma_gunu: date, gun: date
+) -> date | None:
+    """gun (dahil) ve sonrasındaki ilk 'oluşma günü'. Yoksa None."""
+    aday = max(gun, olusturma_gunu)
+    for _ in range(800):  # yıllık vb. için güvenli üst sınır
+        if gunde_olusur_mu(tekrar, parametre, olusturma_gunu, aday):
+            return aday
+        aday += timedelta(days=1)
+    return None
+
+
 def odul_hesapla(calisilan_saniye: int, ozel_deger: int | None) -> Odul:
     if ozel_deger is not None:
         taban = ozel_deger

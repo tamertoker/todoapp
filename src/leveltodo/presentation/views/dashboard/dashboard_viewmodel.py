@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from leveltodo.application.gorev_servisi import GorevSatiri, GorevServisi
+from leveltodo.application.gorev_servisi import GorevSatiri, GorevServisi, TekrarliGorevOzeti
 from leveltodo.application.kronometre_servisi import KronometreServisi
 from leveltodo.domain.stats.statlar import SeviyeDurumu, Stat, UnvanDurumu
 from leveltodo.domain.tasks.kurallar import Tekrar
@@ -25,6 +25,9 @@ class DashboardViewModel(QObject):
 
     def satirlar(self) -> list[GorevSatiri]:
         return self._gorevler.bugunku_gorevler()
+
+    def tum_tekrarli_gorevler(self) -> list[TekrarliGorevOzeti]:
+        return self._gorevler.tum_tekrarli_gorevler()
 
     def toplamlar(self) -> tuple[int, int]:
         return self._gorevler.toplamlar()

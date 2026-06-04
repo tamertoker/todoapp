@@ -1,6 +1,6 @@
 from datetime import date
 
-from leveltodo.domain.tasks.kurallar import Tekrar, gunde_olusur_mu
+from leveltodo.domain.tasks.kurallar import Tekrar, gunde_olusur_mu, sonraki_olusum
 
 OLUSTURMA = date(2026, 6, 1)
 
@@ -40,3 +40,13 @@ def test_aylik():
     assert gunde_olusur_mu(Tekrar.AYLIK, "15", OLUSTURMA, date(2026, 6, 15)) is True
     assert gunde_olusur_mu(Tekrar.AYLIK, "15", OLUSTURMA, date(2026, 7, 15)) is True
     assert gunde_olusur_mu(Tekrar.AYLIK, "15", OLUSTURMA, date(2026, 6, 16)) is False
+
+
+def test_sonraki_olusum_her_x_gun():
+    assert sonraki_olusum(Tekrar.HER_X_GUN, "3", OLUSTURMA, date(2026, 6, 1)) == date(2026, 6, 1)
+    assert sonraki_olusum(Tekrar.HER_X_GUN, "3", OLUSTURMA, date(2026, 6, 2)) == date(2026, 6, 4)
+
+
+def test_sonraki_olusum_aylik():
+    assert sonraki_olusum(Tekrar.AYLIK, "15", OLUSTURMA, date(2026, 6, 10)) == date(2026, 6, 15)
+    assert sonraki_olusum(Tekrar.AYLIK, "15", OLUSTURMA, date(2026, 6, 16)) == date(2026, 7, 15)

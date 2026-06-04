@@ -11,6 +11,7 @@ from pathlib import Path
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
+    QButtonGroup,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -41,6 +42,20 @@ from leveltodo.presentation.views.dashboard.bitir_dialog import BitirDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
 
 _STAT_SIRA = (Stat.ENTELEKTUELLIK, Stat.BEDEN, Stat.FARKINDALIK, Stat.DISIPLIN)
+_GUN_KISA = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+
+
+def _tekrar_aciklama(tekrar: str, parametre: str) -> str:
+    if tekrar == "daily":
+        return "Her gün"
+    if tekrar == "every_x":
+        return f"Her {parametre} günde"
+    if tekrar == "weekly":
+        gunler = [_GUN_KISA[int(g)] for g in parametre.split(",") if g != ""]
+        return "-".join(gunler) if gunler else "Haftalık"
+    if tekrar == "monthly":
+        return f"Ayın {parametre}'i"
+    return "Tek seferlik"
 
 
 def _format_sure(saniye: int) -> str:
@@ -63,6 +78,7 @@ class DashboardView(QWidget):
         self._mevcut_rank_indeks: int | None = None
         self._pixmap_cache: dict[str, QPixmap] = {}
         self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
+        self._mod = "bugun"  # "bugun" | "tumu"
 
         title = QLabel("LevelTodo")
         title.setObjectName("Title")
@@ -173,6 +189,23 @@ class DashboardView(QWidget):
         add_btn = QPushButton("+ Görev Ekle")
         add_btn.clicked.connect(self._on_add)
 
+        self._mod_bugun_btn = QPushButton("Bugün")
+        self._mod_bugun_btn.setObjectName("NavButton")
+        self._mod_bugun_btn.setCheckable(True)
+        self._mod_bugun_btn.setChecked(True)
+        self._mod_tumu_btn = QPushButton("Tümü")
+        self._mod_tumu_btn.setObjectName("NavButton")
+        self._mod_tumu_btn.setCheckable(True)
+        mod_grup = QButtonGroup(self)
+        mod_grup.addButton(self._mod_bugun_btn)
+        mod_grup.addButton(self._mod_tumu_btn)
+        self._mod_bugun_btn.clicked.connect(lambda: self._mod_degis("bugun"))
+        self._mod_tumu_btn.clicked.connect(lambda: self._mod_degis("tumu"))
+        mod_satiri = QHBoxLayout()
+        mod_satiri.addWidget(self._mod_bugun_btn)
+        mod_satiri.addWidget(self._mod_tumu_btn)
+        mod_satiri.addStretch(1)
+
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -188,6 +221,7 @@ class DashboardView(QWidget):
         sag.addWidget(self._day_label)
         sag.addWidget(self._status_label)
         sag.addWidget(add_btn)
+        sag.addLayout(mod_satiri)
         sag.addWidget(scroll, stretch=1)
         return sag
 
@@ -241,15 +275,60 @@ class DashboardView(QWidget):
                 widget.setParent(None)  # ekrandan hemen kaldır (hayalet satır olmasın)
                 widget.deleteLater()
 
-        satirlar = self._vm.satirlar()
-        if not satirlar:
-            empty = QLabel("Bugün için görev yok. Başlamak için bir görev ekle.")
-            empty.setObjectName("Subtitle")
-            self._tasks_layout.addWidget(empty)
+        if self._mod == "tumu":
+            ozetler = self._vm.tum_tekrarli_gorevler()
+            if not ozetler:
+                bos = QLabel("Henüz tekrarlı görev yok.")
+                bos.setObjectName("Subtitle")
+                self._tasks_layout.addWidget(bos)
+            else:
+                for ozet in ozetler:
+                    self._tasks_layout.addWidget(self._build_ozet_row(ozet))
         else:
-            for satir in satirlar:
-                self._tasks_layout.addWidget(self._build_row(satir))
+            satirlar = self._vm.satirlar()
+            if not satirlar:
+                bos = QLabel("Bugün için görev yok. Başlamak için bir görev ekle.")
+                bos.setObjectName("Subtitle")
+                self._tasks_layout.addWidget(bos)
+            else:
+                for satir in satirlar:
+                    self._tasks_layout.addWidget(self._build_row(satir))
         self._tasks_layout.addStretch(1)
+
+    def _mod_degis(self, mod: str) -> None:
+        self._mod = mod
+        self._render_gorevler()
+
+    def _build_ozet_row(self, ozet) -> QFrame:
+        frame = QFrame()
+        frame.setObjectName("TaskRow")
+        h = QHBoxLayout(frame)
+        h.setContentsMargins(12, 8, 12, 8)
+        h.setSpacing(8)
+
+        baslik = QLabel(ozet.baslik)
+        aciklama = QLabel(_tekrar_aciklama(ozet.tekrar, ozet.parametre))
+        aciklama.setObjectName("Tag")
+        seri = QLabel(f"🔥 {ozet.seri}")
+        seri.setStyleSheet(f"color: {seri_rengi(ozet.seri)}; font-weight: bold;")
+
+        bugun = Gun.olustur(
+            self._container.saat.simdi(), self._container.settings.day_start_hour
+        ).tarih
+        if ozet.sonraki is None:
+            sonraki_metin = "Sonraki: —"
+        elif ozet.sonraki == bugun:
+            sonraki_metin = "Sonraki: Bugün"
+        else:
+            sonraki_metin = f"Sonraki: {ozet.sonraki}"
+        sonraki = QLabel(sonraki_metin)
+        sonraki.setObjectName("Tag")
+
+        h.addWidget(baslik, stretch=1)
+        h.addWidget(aciklama)
+        h.addWidget(seri)
+        h.addWidget(sonraki)
+        return frame
 
     def _build_row(self, satir: GorevSatiri) -> QFrame:
         frame = QFrame()

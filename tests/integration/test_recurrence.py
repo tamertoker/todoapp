@@ -1,6 +1,6 @@
 """Esnek tekrar: görevler doğru günlerde listede belirir (FakeClock ile)."""
 
-from datetime import datetime
+from datetime import date, datetime
 
 from leveltodo.bootstrap import build_container
 from leveltodo.domain.tasks.kurallar import Tekrar
@@ -39,6 +39,19 @@ def test_haftalik_secili_gunlerde(db_url):
     assert not _var_mi(svc, "Haftalık iş")   # ertesi gün (farklı haftagünü)
     saat.ilerlet(days=6)
     assert _var_mi(svc, "Haftalık iş")       # +7 gün = aynı haftagünü
+
+
+def test_tum_tekrarli_gorevler_ve_sonraki_tarih(db_url):
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    svc = _svc(db_url, saat)
+    svc.gorev_olustur("Her 3 günde", Tekrar.HER_X_GUN, parametre="3")
+    svc.gorev_olustur("Ayın 15'i", Tekrar.AYLIK, parametre="15")
+    svc.gorev_olustur("Tek seferlik", Tekrar.YOK)  # tekrarlı değil
+
+    ozetler = svc.tum_tekrarli_gorevler()
+    assert {o.baslik for o in ozetler} == {"Her 3 günde", "Ayın 15'i"}  # YOK listede değil
+    aylik = next(o for o in ozetler if o.baslik == "Ayın 15'i")
+    assert aylik.sonraki == date(2026, 6, 15)
 
 
 def test_her_x_gun_gece_eklenince_bugun_gorunur(db_url):
