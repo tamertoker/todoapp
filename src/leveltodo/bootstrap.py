@@ -17,7 +17,9 @@ from sqlalchemy.orm import sessionmaker
 
 from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
+from leveltodo.application.seri_servisi import SeriServisi
 from leveltodo.application.settings_service import SettingsService
+from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.time.saat import Saat
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
@@ -27,6 +29,7 @@ from leveltodo.infrastructure.persistence.sqlite.ledger_repository import SqlLed
 from leveltodo.infrastructure.persistence.sqlite.migrations import upgrade_to_head
 from leveltodo.infrastructure.persistence.sqlite.models import DEFAULT_USER_ID
 from leveltodo.infrastructure.persistence.sqlite.settings_repository import SqlSettingsRepository
+from leveltodo.infrastructure.persistence.sqlite.streak_repository import SqlStreakRepository
 from leveltodo.infrastructure.persistence.sqlite.task_repository import SqlTaskRepository
 from leveltodo.infrastructure.saat import AyarlanabilirSaat
 
@@ -40,6 +43,7 @@ class Container:
     settings: SettingsService
     gorevler: GorevServisi
     kronometre: KronometreServisi
+    seri: SeriServisi
 
 
 def build_container(db_url: str | None = None, saat: Saat | None = None) -> Container:
@@ -66,6 +70,11 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
     )
     kronometre = KronometreServisi(gorev_repo, aktif_saat)
 
+    streak_repo = SqlStreakRepository(session_factory)
+    seri = SeriServisi(streak_repo, aktif_saat, lambda: settings.day_start_hour)
+    # Görev tamamlanınca görev serisi güncellensin (olay tabanlı).
+    olay_hatti.subscribe(TaskCompleted, seri.gorev_tamamlandi)
+
     return Container(
         saat=aktif_saat,
         olay_hatti=olay_hatti,
@@ -74,4 +83,5 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
         settings=settings,
         gorevler=gorevler,
         kronometre=kronometre,
+        seri=seri,
     )

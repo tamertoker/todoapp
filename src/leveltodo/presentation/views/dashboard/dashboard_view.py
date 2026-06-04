@@ -25,6 +25,7 @@ from leveltodo.application.gorev_servisi import GorevSatiri
 from leveltodo.bootstrap import Container
 from leveltodo.domain.events import AppStarted, DomainEvent, TaskCompleted
 from leveltodo.domain.stats.statlar import STAT_ETIKET, Stat, unvan_listesi
+from leveltodo.domain.streaks.seriler import SeriTipi, seri_rengi
 from leveltodo.domain.tasks.kurallar import canli_sure
 from leveltodo.domain.time.gun import Gun
 from leveltodo.infrastructure.assets.avatar import (
@@ -93,11 +94,20 @@ class DashboardView(QWidget):
         orta.addWidget(sol)
         orta.addLayout(sag, stretch=1)
 
+        self._giris_seri_label = QLabel()
+        self._gorev_seri_label = QLabel()
+        seri_satiri = QHBoxLayout()
+        seri_satiri.addWidget(self._giris_seri_label)
+        seri_satiri.addSpacing(20)
+        seri_satiri.addWidget(self._gorev_seri_label)
+        seri_satiri.addStretch(1)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
         layout.addLayout(ust)
         layout.addWidget(self._unvan_label)
+        layout.addLayout(seri_satiri)
         layout.addLayout(orta, stretch=1)
 
         self._vm.changed.connect(self._render)
@@ -206,7 +216,17 @@ class DashboardView(QWidget):
         self._points_label.setText(f"Puan  {puan}")
 
         self._render_profil_ve_statlar()
+        self._render_seriler()
         self._render_gorevler()
+
+    def _render_seriler(self) -> None:
+        durumlar = self._container.seri.durumlar()
+        giris, _ = durumlar[SeriTipi.GIRIS]
+        gorev, _ = durumlar[SeriTipi.GOREV]
+        self._giris_seri_label.setText(f"🔥 Giriş serisi: {giris} gün")
+        self._giris_seri_label.setStyleSheet(f"color: {seri_rengi(giris)}; font-weight: bold;")
+        self._gorev_seri_label.setText(f"✓ Görev serisi: {gorev} gün")
+        self._gorev_seri_label.setStyleSheet(f"color: {seri_rengi(gorev)}; font-weight: bold;")
 
     def _render_profil_ve_statlar(self) -> None:
         durumlar = self._vm.stat_durumlari()

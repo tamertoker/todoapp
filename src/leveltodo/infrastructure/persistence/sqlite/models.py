@@ -103,6 +103,22 @@ class XpEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
+class Streak(Base):
+    """Seri (streak) kaydı. type='login' giriş serisi, type='task' görev serisi.
+    Kullanıcı + tip başına tek satır."""
+
+    __tablename__ = "streaks"
+    __table_args__ = (UniqueConstraint("user_id", "type", name="uq_streak_user_type"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    type: Mapped[str] = mapped_column(String(10))
+    current_count: Mapped[int] = mapped_column(Integer, default=0)
+    best_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_day: Mapped[date | None] = mapped_column(Date, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class PointTransaction(Base):
     """Kazanılan/harcanan her puanın kaydı."""
 

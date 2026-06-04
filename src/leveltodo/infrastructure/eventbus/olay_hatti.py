@@ -36,7 +36,9 @@ class OlayHatti:
         self._any.connect(lambda sender, **_kw: handler(sender), weak=False)
 
     def publish(self, event: DomainEvent) -> None:
-        self._any.send(event)
+        # Önce türe özel (alan mantığı) handler'lar, sonra catch-all (UI köprüsü);
+        # böylece UI güncellenmeden önce domain tepkileri (ör. seri) işlenmiş olur.
         sig = self._signals.get(type(event))
         if sig is not None:
             sig.send(event)
+        self._any.send(event)

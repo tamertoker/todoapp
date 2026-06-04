@@ -25,6 +25,7 @@ from leveltodo.presentation.theme.qss import build_qss
 class LevelTodoApp:
     def __init__(self, container: Container) -> None:
         self.container = container
+        container.seri.giris_kaydet()  # bugünkü giriş serisini işaretle
         self.qapp = QApplication.instance() or QApplication(sys.argv)
         self._font_family = load_pixel_font()
 
