@@ -27,7 +27,6 @@ from leveltodo.bootstrap import Container
 from leveltodo.domain.events import AppStarted, DomainEvent, TaskCompleted
 from leveltodo.domain.stats.statlar import STAT_ETIKET, Stat, unvan_listesi
 from leveltodo.domain.streaks.seriler import SeriTipi, seri_rengi
-from leveltodo.domain.tasks.kurallar import canli_sure
 from leveltodo.domain.time.gun import Gun
 from leveltodo.infrastructure.assets.avatar import (
     AvatarOlusturucu,
@@ -40,6 +39,11 @@ from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
 from leveltodo.presentation.views.dashboard.bitir_dialog import BitirDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
+from leveltodo.presentation.views.dashboard.gorev_satir_widget import (
+    format_sure,
+    kronometreli_satir,
+    satir_canli_saniye,
+)
 
 _STAT_SIRA = (Stat.ENTELEKTUELLIK, Stat.BEDEN, Stat.FARKINDALIK, Stat.DISIPLIN)
 _GUN_KISA = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
@@ -56,15 +60,6 @@ def _tekrar_aciklama(tekrar: str, parametre: str) -> str:
     if tekrar == "monthly":
         return f"Ayın {parametre}'i"
     return "Tek seferlik"
-
-
-def _format_sure(saniye: int) -> str:
-    saniye = max(0, saniye)
-    saat, kalan = divmod(saniye, 3600)
-    dakika, sn = divmod(kalan, 60)
-    if saat:
-        return f"{saat:02d}:{dakika:02d}:{sn:02d}"
-    return f"{dakika:02d}:{sn:02d}"
 
 
 class DashboardView(QWidget):
@@ -339,66 +334,21 @@ class DashboardView(QWidget):
         return frame
 
     def _build_row(self, satir: GorevSatiri) -> QFrame:
-        frame = QFrame()
-        frame.setObjectName("TaskRowActive" if satir.calisiyor else "TaskRow")
-        h = QHBoxLayout(frame)
-        h.setContentsMargins(12, 8, 12, 8)
-        h.setSpacing(8)
-
-        title = QLabel(satir.baslik)
-        if satir.tekrar == "none":
-            tag = QLabel("Tek seferlik")
-            tag.setObjectName("Tag")
-        else:
-            tag = QLabel(f"🔥 {satir.seri}")
-            tag.setToolTip("Bu görevi üst üste kaç kez yaptın (seri)")
-            tag.setStyleSheet(f"color: {seri_rengi(satir.seri)}; font-weight: bold;")
-        h.addWidget(title, stretch=1)
-        h.addWidget(tag)
-
-        if satir.durum == "pending":
-            sure_etiketi = QLabel(_format_sure(self._canli_saniye(satir)))
-            sure_etiketi.setObjectName("Timer")
-            h.addWidget(sure_etiketi)
-            self._sure_etiketleri[satir.kayit_id] = (sure_etiketi, satir)
-
-            if satir.calisiyor:
-                toggle = QPushButton("Duraklat")
-                toggle.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.duraklat(i))
-            else:
-                toggle = QPushButton("Başlat")
-                toggle.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.baslat(i))
-            done_btn = QPushButton("Bitir")
-            done_btn.clicked.connect(lambda _c, s=satir: self._on_bitir(s))
-            del_btn = QPushButton("Sil")
-            del_btn.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.sil(i))
-            h.addWidget(toggle)
-            h.addWidget(done_btn)
-            h.addWidget(del_btn)
-        else:
-            sure_etiketi = QLabel(_format_sure(satir.calisilan_saniye))
-            sure_etiketi.setObjectName("Timer")
-            done = QLabel(f"✓ +{satir.odul_xp} XP")
-            done.setObjectName("Counter")
-            del_btn = QPushButton("Sil")
-            del_btn.clicked.connect(lambda _c, i=satir.kayit_id: self._vm.sil(i))
-            h.addWidget(sure_etiketi)
-            h.addWidget(done)
-            h.addWidget(del_btn)
-
-        return frame
-
-    def _canli_saniye(self, satir: GorevSatiri) -> int:
-        return canli_sure(
-            satir.calisilan_saniye,
-            satir.segment_baslangici if satir.calisiyor else None,
-            self._container.saat.simdi(),
+        return kronometreli_satir(
+            satir,
+            simdi=self._container.saat.simdi(),
+            sure_etiketleri=self._sure_etiketleri,
+            baslat=self._vm.baslat,
+            duraklat=self._vm.duraklat,
+            bitir=self._on_bitir,
+            sil=self._vm.sil,
         )
 
     def _tick(self) -> None:
+        simdi = self._container.saat.simdi()
         for _kayit_id, (etiket, satir) in self._sure_etiketleri.items():
             if satir.calisiyor:
-                etiket.setText(_format_sure(self._canli_saniye(satir)))
+                etiket.setText(format_sure(satir_canli_saniye(satir, simdi)))
 
     # — Avatar önizleme (ok'larla gelecek seviyeleri gözetleme) —
     def _kilit_yolu(self) -> Path:
@@ -456,7 +406,7 @@ class DashboardView(QWidget):
                 self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat, parametre)
 
     def _on_bitir(self, satir: GorevSatiri) -> None:
-        on_dakika = round(self._canli_saniye(satir) / 60)
+        on_dakika = round(satir_canli_saniye(satir, self._container.saat.simdi()) / 60)
         dialog = BitirDialog(on_dakika, self)
         if dialog.exec():
             self._vm.tamamla(satir.kayit_id, dialog.dakika())

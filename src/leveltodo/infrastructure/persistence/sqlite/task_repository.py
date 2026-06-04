@@ -123,39 +123,25 @@ class SqlTaskRepository:
             )
             return s.scalar(stmt) is not None
 
-    def telafi_kaydet(
-        self,
-        *,
-        instance_id: str,
-        task_id: str,
-        user_id: str,
-        day: date,
-        title: str,
-        reward_xp: int,
-        reward_points: int,
-        completed_at: datetime,
-    ) -> None:
-        """Geçmiş bir günü 'yapıldı' olarak işaretler (varsa o günün kaydını,
-        yoksa yeni bir kayıt oluşturarak)."""
+    def gecmis_bekleyen_satirlar(
+        self, user_id: str, bugun: date, pencere_basi: date
+    ) -> list[tuple[TaskInstance, str, int]]:
+        """Geçmiş günlere ait, henüz yapılmamış tekrarlı görev kayıtları (telafi)."""
         with self._sf() as s:
-            inst = s.scalar(
-                select(TaskInstance).where(
-                    TaskInstance.task_id == task_id, TaskInstance.day == day
+            stmt = (
+                select(TaskInstance, Task.recurrence, Task.streak_count)
+                .join(Task, Task.id == TaskInstance.task_id)
+                .where(
+                    TaskInstance.user_id == user_id,
+                    Task.is_active.is_(True),
+                    Task.recurrence != "none",
+                    TaskInstance.status == "pending",
+                    TaskInstance.day < bugun,
+                    TaskInstance.day >= pencere_basi,
                 )
+                .order_by(TaskInstance.day.desc(), TaskInstance.title)
             )
-            if inst is None:
-                inst = TaskInstance(
-                    id=instance_id, task_id=task_id, user_id=user_id, day=day, title=title
-                )
-                s.add(inst)
-            inst.status = "done"
-            inst.committed_seconds = 0
-            inst.reward_xp = reward_xp
-            inst.reward_points = reward_points
-            inst.completed_at = completed_at
-            inst.timer_running = False
-            inst.segment_started_at = None
-            s.commit()
+            return [(inst, rec, seri) for inst, rec, seri in s.execute(stmt).all()]
 
     def complete_instance(
         self,

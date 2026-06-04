@@ -48,6 +48,7 @@ class GorevSatiri:
     """Ekranın bir görev satırını çizmek için ihtiyaç duyduğu sade veri."""
 
     kayit_id: str
+    gun: date
     baslik: str
     durum: str
     tekrar: str
@@ -69,15 +70,6 @@ class TekrarliGorevOzeti:
     parametre: str
     seri: int
     sonraki: date | None
-
-
-@dataclass(frozen=True, slots=True)
-class TelafiSatiri:
-    """Kaçırılmış bir tekrarlı oluşum (geç de olsa yapılabilir)."""
-
-    task_id: str
-    baslik: str
-    gun: date
 
 
 _TELAFI_PENCERE_GUN = 21  # son 3 hafta içindeki kaçırılanlar telafi edilebilir
@@ -141,6 +133,7 @@ class GorevServisi:
         return [
             GorevSatiri(
                 kayit_id=kayit.id,
+                gun=kayit.day,
                 baslik=kayit.title,
                 durum=kayit.status,
                 tekrar=tekrar,
@@ -175,11 +168,11 @@ class GorevServisi:
             )
         return ozetler
 
-    def telafi_listesi(self) -> list[TelafiSatiri]:
-        """Son 3 hafta içinde kaçırılmış (yapılmamış) tekrarlı oluşumlar."""
+    def telafi_gorevleri(self) -> list[GorevSatiri]:
+        """Son 3 hafta içinde kaçırılan tekrarlı oluşumlar; kronometreyle
+        yapılabilsin diye bekleyen kayıt olarak hazırlanır (yoksa üretilir)."""
         bugun = self._bugun()
         pencere_basi = bugun - timedelta(days=_TELAFI_PENCERE_GUN)
-        sonuc: list[TelafiSatiri] = []
         for sablon in self._gorev.aktif_tekrarli_sablonlar(self._user_id):
             olusturma = Gun.olustur(sablon.created_at, self._gun_baslangic()).tarih
             gun = max(pencere_basi, olusturma)
@@ -187,38 +180,37 @@ class GorevServisi:
                 olusur = gunde_olusur_mu(
                     Tekrar(sablon.recurrence), sablon.recurrence_param or "", olusturma, gun
                 )
-                if olusur and not self._gorev.done_instance_var_mi(sablon.id, gun):
-                    sonuc.append(TelafiSatiri(task_id=sablon.id, baslik=sablon.title, gun=gun))
+                if (
+                    olusur
+                    and not self._gorev.done_instance_var_mi(sablon.id, gun)
+                    and not self._gorev.instance_exists(sablon.id, gun)
+                ):
+                    self._gorev.add_instance(
+                        id=new_id(),
+                        task_id=sablon.id,
+                        user_id=self._user_id,
+                        day=gun,
+                        title=sablon.title,
+                    )
                 gun += timedelta(days=1)
-        sonuc.sort(key=lambda t: t.gun, reverse=True)  # en yeni kaçırılan önce
-        return sonuc
 
-    def telafi_yap(self, task_id: str, gun: date) -> Odul | None:
-        sablon = self._gorev.get_template(task_id)
-        if sablon is None or not sablon.is_active:
-            return None
-        odul = odul_hesapla(0, sablon.reward_override)  # geç telafi: sabit/özel ödül
-        simdi = self._saat.simdi()
-        self._gorev.telafi_kaydet(
-            instance_id=new_id(),
-            task_id=task_id,
-            user_id=self._user_id,
-            day=gun,
-            title=sablon.title,
-            reward_xp=odul.xp,
-            reward_points=odul.puan,
-            completed_at=simdi,
-        )
-        self._defter.record(
-            user_id=self._user_id,
-            day=gun,
-            source="catchup",
-            ref_id=task_id,
-            xp=odul.xp,
-            points=odul.puan,
-            stat=sablon.stat,
-        )
-        return odul
+        satirlar = self._gorev.gecmis_bekleyen_satirlar(self._user_id, bugun, pencere_basi)
+        return [
+            GorevSatiri(
+                kayit_id=kayit.id,
+                gun=kayit.day,
+                baslik=kayit.title,
+                durum=kayit.status,
+                tekrar=tekrar,
+                seri=seri,
+                calisilan_saniye=kayit.committed_seconds,
+                calisiyor=kayit.timer_running,
+                segment_baslangici=kayit.segment_started_at,
+                odul_xp=kayit.reward_xp,
+                odul_puan=kayit.reward_points,
+            )
+            for kayit, tekrar, seri in satirlar
+        ]
 
     def _gunluk_kayitlari_uret(self, gun) -> None:
         for sablon in self._gorev.aktif_tekrarli_sablonlar(self._user_id):
@@ -284,7 +276,9 @@ class GorevServisi:
         if not ok:
             return None
 
-        if sablon is not None and sablon.recurrence != "none":
+        # Seri yalnızca BUGÜNKÜ oluşum tamamlanınca ilerler; telafi (geçmiş gün)
+        # ödül verir ama seriyi değiştirmez.
+        if sablon is not None and sablon.recurrence != "none" and kayit.day == self._bugun():
             self._gorev_serisi_isle(sablon, kayit.day)
 
         self._defter.record(
