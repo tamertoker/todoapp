@@ -12,9 +12,19 @@ from leveltodo.application.settings_service import SettingsService
 
 class DondurmaServisi:
     ANAHTAR = "dondurma_stok"
+    SEVIYE_ANAHTAR = "dondurma_son_seviye"
 
     def __init__(self, settings: SettingsService) -> None:
         self._settings = settings
+
+    def seviye_odulu(self, profil_seviye: int) -> None:
+        """Profil seviyesi her 3'ün katını geçtiğinde +1 jeton (3 levelde bir)."""
+        onceki = int(self._settings.get(self.SEVIYE_ANAHTAR))
+        if profil_seviye > onceki:
+            kazanim = (profil_seviye // 3) - (onceki // 3)
+            if kazanim > 0:
+                self.ekle(kazanim)
+            self._settings.set(self.SEVIYE_ANAHTAR, profil_seviye)
 
     def stok(self) -> int:
         return int(self._settings.get(self.ANAHTAR))

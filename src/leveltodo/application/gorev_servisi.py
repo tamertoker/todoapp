@@ -304,6 +304,7 @@ class GorevServisi:
                 points=odul.puan,
             )
         )
+        self._seviye_dondurma_kontrol()
         return odul
 
     def gorev_sil(self, kayit_id: str) -> None:
@@ -329,6 +330,11 @@ class GorevServisi:
         profil = sum(d.seviye for d in durumlar.values())
         return profil, unvan_hesapla(profil)
 
+    def _seviye_dondurma_kontrol(self) -> None:
+        """XP kazanımından sonra profil seviyesi 3'ün katını geçtiyse dondurma ver."""
+        profil, _ = self.profil_durumu()
+        self._dondurma.seviye_odulu(profil)
+
     def gelistirme_xp_ekle(self, stat: Stat, miktar: int) -> None:
         """Debug: bir stata doğrudan XP ekler (yalnızca geliştirme/test için)."""
         self._defter.record(
@@ -340,3 +346,4 @@ class GorevServisi:
             points=0,
             stat=stat.value,
         )
+        self._seviye_dondurma_kontrol()

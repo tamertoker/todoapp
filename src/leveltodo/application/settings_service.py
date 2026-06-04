@@ -21,6 +21,7 @@ DEFAULTS: dict[str, Any] = {
     "theme": "dark",
     "minimize_to_tray": True,
     "dondurma_stok": 0,
+    "dondurma_son_seviye": 0,
 }
 
 
