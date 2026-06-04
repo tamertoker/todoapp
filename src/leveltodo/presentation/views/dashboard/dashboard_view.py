@@ -36,6 +36,7 @@ from leveltodo.infrastructure.assets.avatar import (
 )
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
+from leveltodo.presentation.mesajlar import combo_mesaji, kritik_mesaji, tamamlama_mesaji
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
 from leveltodo.presentation.views.dashboard.bitir_dialog import BitirDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
@@ -430,11 +431,9 @@ class DashboardView(QWidget):
             self._status_label.setText(mesaj)
         elif isinstance(event, TaskCompleted):
             if event.combo_tetik:
-                self._status_label.setText("🔥 COMBO başladı! 1 saat boyunca ödüller ×1.5!")
+                self._status_label.setText(combo_mesaji())
             elif event.kritik:
-                self._status_label.setText(
-                    f"⚡ KRİTİK! +{event.xp} XP, +{event.points} puan (2 katı)!"
-                )
+                self._status_label.setText(kritik_mesaji(event.xp, event.points))
             else:
-                self._status_label.setText(f"+{event.xp} XP kazandın. Sırada ne var?")
+                self._status_label.setText(tamamlama_mesaji(event.xp))
             self._render()
