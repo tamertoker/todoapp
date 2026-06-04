@@ -24,6 +24,10 @@ DEFAULTS: dict[str, Any] = {
     "dondurma_son_seviye": 0,
     "combo_bitis": "",
     "combo_zamanlar": [],
+    "kazanilan_rozetler": [],
+    "toplam_tamamlama": 0,
+    "kritik_yasandi": False,
+    "combo_yasandi": False,
 }
 
 

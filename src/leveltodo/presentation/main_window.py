@@ -27,6 +27,7 @@ from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.views.admin.admin_view import AdminView
 from leveltodo.presentation.views.avatar.avatar_view import AvatarEditorView
 from leveltodo.presentation.views.dashboard.dashboard_view import DashboardView
+from leveltodo.presentation.views.rozetler.rozet_view import RozetView
 from leveltodo.presentation.views.settings.settings_view import SettingsView
 from leveltodo.presentation.views.settings.settings_viewmodel import SettingsViewModel
 from leveltodo.presentation.views.telafi.telafi_view import TelafiView
@@ -45,6 +46,7 @@ class MainWindow(QWidget):
         self._dashboard = DashboardView(container, bridge)
         self._telafi = TelafiView(container)
         self._avatar_editor = AvatarEditorView()
+        self._rozetler = RozetView(container)
         settings_vm = SettingsViewModel(container.settings)
         self._settings = SettingsView(settings_vm)
         self._admin = AdminView(container)
@@ -53,6 +55,7 @@ class MainWindow(QWidget):
         self._stack.addWidget(self._dashboard)
         self._stack.addWidget(self._telafi)
         self._stack.addWidget(self._avatar_editor)
+        self._stack.addWidget(self._rozetler)
         self._stack.addWidget(self._settings)
         self._stack.addWidget(self._admin)
 
@@ -79,7 +82,9 @@ class MainWindow(QWidget):
         nav.setSpacing(4)
 
         group = QButtonGroup(self)
-        for index, label in enumerate(("Anasayfa", "Telafi", "Avatar", "Ayarlar", "Debug")):
+        for index, label in enumerate(
+            ("Anasayfa", "Telafi", "Avatar", "Rozetler", "Ayarlar", "Debug")
+        ):
             btn = QPushButton(label)
             btn.setObjectName("NavButton")
             btn.setCheckable(True)

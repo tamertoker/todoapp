@@ -151,4 +151,12 @@ def build_qss(palette: Palette, font_family: str, up_arrow: str, down_arrow: str
     QProgressBar::chunk {{
         background-color: {p.accent};
     }}
+    QFrame#RozetKartAcik {{
+        background-color: {p.panel};
+        border: 2px solid {p.accent};
+    }}
+    QFrame#RozetKartKilitli {{
+        background-color: {p.bg};
+        border: 2px solid {p.border};
+    }}
     """

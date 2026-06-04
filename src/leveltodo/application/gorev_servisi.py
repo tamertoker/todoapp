@@ -16,6 +16,7 @@ from datetime import date, datetime, timedelta
 
 from leveltodo.application.combo_servisi import ComboServisi
 from leveltodo.application.dondurma_servisi import DondurmaServisi
+from leveltodo.application.rozet_servisi import RozetServisi
 from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.sans import Sans
 from leveltodo.domain.stats.statlar import (
@@ -90,6 +91,7 @@ class GorevServisi:
         dondurma: DondurmaServisi,
         sans: Sans,
         combo: ComboServisi,
+        rozet: RozetServisi,
         user_id: str = DEFAULT_USER_ID,
     ) -> None:
         self._gorev = gorev_repo
@@ -100,6 +102,7 @@ class GorevServisi:
         self._dondurma = dondurma
         self._sans = sans
         self._combo = combo
+        self._rozet = rozet
         self._user_id = user_id
 
     def _bugun(self):
@@ -303,6 +306,11 @@ class GorevServisi:
             stat=sablon.stat if sablon is not None else None,
         )
         combo_tetik = self._combo.tamamlama_bildir(islenmis_saniye, simdi)
+        self._rozet.tamamlama_arttir()
+        if kritik:
+            self._rozet.kritik_isaretle()
+        if combo_tetik:
+            self._rozet.combo_isaretle()
         self._olay_hatti.publish(
             TaskCompleted(
                 occurred_at=simdi,

@@ -19,6 +19,7 @@ from leveltodo.application.combo_servisi import ComboServisi
 from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
+from leveltodo.application.rozet_servisi import RozetServisi
 from leveltodo.application.seri_servisi import SeriServisi
 from leveltodo.application.settings_service import SettingsService
 from leveltodo.domain.sans import Sans
@@ -46,6 +47,7 @@ class Container:
     settings: SettingsService
     dondurma: DondurmaServisi
     combo: ComboServisi
+    rozet: RozetServisi
     gorevler: GorevServisi
     kronometre: KronometreServisi
     seri: SeriServisi
@@ -68,6 +70,7 @@ def build_container(
     settings = SettingsService(settings_repo, DEFAULT_USER_ID)
     dondurma = DondurmaServisi(settings)
     combo = ComboServisi(settings)
+    rozet = RozetServisi(settings)
 
     gorev_repo = SqlTaskRepository(session_factory)
     defter_repo = SqlLedgerRepository(session_factory)
@@ -80,6 +83,7 @@ def build_container(
         dondurma=dondurma,
         sans=aktif_sans,
         combo=combo,
+        rozet=rozet,
     )
     kronometre = KronometreServisi(gorev_repo, aktif_saat)
 
@@ -94,6 +98,7 @@ def build_container(
         settings=settings,
         dondurma=dondurma,
         combo=combo,
+        rozet=rozet,
         gorevler=gorevler,
         kronometre=kronometre,
         seri=seri,
