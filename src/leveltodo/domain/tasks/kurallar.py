@@ -15,7 +15,7 @@ XP ve Puan şimdilik aynı taban değeri alır; ileride ayrı ayrı ayarlanabili
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from enum import StrEnum
 
 SURESIZ_VARSAYILAN_ODUL = 5
@@ -63,6 +63,20 @@ def gunde_olusur_mu(
     if tekrar is Tekrar.AYLIK:
         return parametre != "" and hedef_gun.day == int(parametre)
     return False
+
+
+def onceki_olusum(
+    tekrar: Tekrar, parametre: str, olusturma_gunu: date, gun: date
+) -> date | None:
+    """gun'den önceki en yakın 'oluşma günü' (seri hesabı için). Yoksa None."""
+    aday = gun - timedelta(days=1)
+    for _ in range(400):  # aylık için en fazla ~31 gün geri; güvenli üst sınır
+        if aday < olusturma_gunu:
+            return None
+        if gunde_olusur_mu(tekrar, parametre, olusturma_gunu, aday):
+            return aday
+        aday -= timedelta(days=1)
+    return None
 
 
 def odul_hesapla(calisilan_saniye: int, ozel_deger: int | None) -> Odul:

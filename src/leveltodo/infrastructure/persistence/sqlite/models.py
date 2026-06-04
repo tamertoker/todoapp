@@ -63,6 +63,8 @@ class Task(Base):
     stat: Mapped[str | None] = mapped_column(String(20), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    streak_count: Mapped[int] = mapped_column(Integer, default=0)
+    streak_last_day: Mapped[date | None] = mapped_column(Date, nullable=True)
 
 
 class TaskInstance(Base):

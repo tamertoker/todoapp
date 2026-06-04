@@ -87,12 +87,11 @@ class SqlTaskRepository:
         with self._sf() as s:
             return s.get(TaskInstance, instance_id)
 
-    def today_rows(self, user_id: str, day: date) -> list[tuple[TaskInstance, str]]:
-        """Bugünün listesi: her-gün görevlerinin bugünkü kaydı + henüz
-        yapılmamış tek seferlik görevler. Her satır (kayıt, tekrar-tipi)."""
+    def today_rows(self, user_id: str, day: date) -> list[tuple[TaskInstance, str, int]]:
+        """Bugünün listesi. Her satır (kayıt, tekrar-tipi, göreve-özel-seri)."""
         with self._sf() as s:
             stmt = (
-                select(TaskInstance, Task.recurrence)
+                select(TaskInstance, Task.recurrence, Task.streak_count)
                 .join(Task, Task.id == TaskInstance.task_id)
                 .where(
                     TaskInstance.user_id == user_id,
@@ -104,7 +103,15 @@ class SqlTaskRepository:
                 )
                 .order_by(TaskInstance.status.desc(), TaskInstance.title)
             )
-            return [(inst, rec) for inst, rec in s.execute(stmt).all()]
+            return [(inst, rec, seri) for inst, rec, seri in s.execute(stmt).all()]
+
+    def gorev_serisi_guncelle(self, task_id: str, yeni_seri: int, son_gun: date) -> None:
+        with self._sf() as s:
+            task = s.get(Task, task_id)
+            if task is not None:
+                task.streak_count = yeni_seri
+                task.streak_last_day = son_gun
+                s.commit()
 
     def complete_instance(
         self,

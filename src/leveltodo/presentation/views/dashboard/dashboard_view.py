@@ -41,13 +41,6 @@ from leveltodo.presentation.views.dashboard.bitir_dialog import BitirDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
 
 _STAT_SIRA = (Stat.ENTELEKTUELLIK, Stat.BEDEN, Stat.FARKINDALIK, Stat.DISIPLIN)
-_TEKRAR_ETIKET = {
-    "none": "Tek seferlik",
-    "daily": "Her gün",
-    "every_x": "Her X günde",
-    "weekly": "Haftalık",
-    "monthly": "Aylık",
-}
 
 
 def _format_sure(saniye: int) -> str:
@@ -95,11 +88,8 @@ class DashboardView(QWidget):
         orta.addLayout(sag, stretch=1)
 
         self._giris_seri_label = QLabel()
-        self._gorev_seri_label = QLabel()
         seri_satiri = QHBoxLayout()
         seri_satiri.addWidget(self._giris_seri_label)
-        seri_satiri.addSpacing(20)
-        seri_satiri.addWidget(self._gorev_seri_label)
         seri_satiri.addStretch(1)
 
         layout = QVBoxLayout(self)
@@ -220,13 +210,9 @@ class DashboardView(QWidget):
         self._render_gorevler()
 
     def _render_seriler(self) -> None:
-        durumlar = self._container.seri.durumlar()
-        giris, _ = durumlar[SeriTipi.GIRIS]
-        gorev, _ = durumlar[SeriTipi.GOREV]
+        giris, _ = self._container.seri.durumlar()[SeriTipi.GIRIS]
         self._giris_seri_label.setText(f"🔥 Giriş serisi: {giris} gün")
         self._giris_seri_label.setStyleSheet(f"color: {seri_rengi(giris)}; font-weight: bold;")
-        self._gorev_seri_label.setText(f"✓ Görev serisi: {gorev} gün")
-        self._gorev_seri_label.setStyleSheet(f"color: {seri_rengi(gorev)}; font-weight: bold;")
 
     def _render_profil_ve_statlar(self) -> None:
         durumlar = self._vm.stat_durumlari()
@@ -252,6 +238,7 @@ class DashboardView(QWidget):
             item = self._tasks_layout.takeAt(0)
             widget = item.widget()
             if widget is not None:
+                widget.setParent(None)  # ekrandan hemen kaldır (hayalet satır olmasın)
                 widget.deleteLater()
 
         satirlar = self._vm.satirlar()
@@ -272,8 +259,13 @@ class DashboardView(QWidget):
         h.setSpacing(8)
 
         title = QLabel(satir.baslik)
-        tag = QLabel(_TEKRAR_ETIKET.get(satir.tekrar, satir.tekrar))
-        tag.setObjectName("Tag")
+        if satir.tekrar == "none":
+            tag = QLabel("Tek seferlik")
+            tag.setObjectName("Tag")
+        else:
+            tag = QLabel(f"🔥 {satir.seri}")
+            tag.setToolTip("Bu görevi üst üste kaç kez yaptın (seri)")
+            tag.setStyleSheet(f"color: {seri_rengi(satir.seri)}; font-weight: bold;")
         h.addWidget(title, stretch=1)
         h.addWidget(tag)
 

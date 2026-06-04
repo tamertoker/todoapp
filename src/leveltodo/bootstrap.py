@@ -19,7 +19,6 @@ from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
 from leveltodo.application.seri_servisi import SeriServisi
 from leveltodo.application.settings_service import SettingsService
-from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.time.saat import Saat
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
@@ -72,8 +71,6 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
 
     streak_repo = SqlStreakRepository(session_factory)
     seri = SeriServisi(streak_repo, aktif_saat, lambda: settings.day_start_hour)
-    # Görev tamamlanınca görev serisi güncellensin (olay tabanlı).
-    olay_hatti.subscribe(TaskCompleted, seri.gorev_tamamlandi)
 
     return Container(
         saat=aktif_saat,

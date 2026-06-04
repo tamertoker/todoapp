@@ -1,4 +1,4 @@
-"""Seri sistemi: giriş ve görev serileri ardışık günlerde artar, boşlukta sıfırlanır."""
+"""Seri sistemi: giriş serisi (global) + göreve özel görev serisi."""
 
 from datetime import datetime
 
@@ -27,14 +27,22 @@ def test_giris_serisi_ardisik_gun_ve_bosluk(db_url):
     assert c.seri.durumlar()[SeriTipi.GIRIS] == (1, 2)  # seri 1, rekor 2 korunur
 
 
-def test_gorev_serisi_tamamlamayla_artar(db_url):
+def test_gorev_serisi_her_goreve_ozel(db_url):
     saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
     c = build_container(db_url=db_url, saat=saat)
+    c.gorevler.gorev_olustur("Her gün koş", Tekrar.GUNLUK)
 
-    c.gorevler.gorev_olustur("Her gün", Tekrar.GUNLUK)
+    def seri():
+        return c.gorevler.bugunku_gorevler()[0].seri
+
     c.gorevler.tamamla(c.gorevler.bugunku_gorevler()[0].kayit_id)
-    assert c.seri.durumlar()[SeriTipi.GOREV][0] == 1
+    assert seri() == 1
 
     saat.ilerlet(days=1)
     c.gorevler.tamamla(c.gorevler.bugunku_gorevler()[0].kayit_id)
-    assert c.seri.durumlar()[SeriTipi.GOREV][0] == 2
+    assert seri() == 2
+
+    # Bir günü atla (tamamlama yok), sonraki gün tamamla → seri 1'e döner.
+    saat.ilerlet(days=2)
+    c.gorevler.tamamla(c.gorevler.bugunku_gorevler()[0].kayit_id)
+    assert seri() == 1

@@ -7,7 +7,6 @@ Hangi mantıksal güne sayılacağı, olay/saat zamanı + gün başlangıç saat
 
 from __future__ import annotations
 
-from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.streaks.seriler import SeriTipi, seri_ilerlet
 from leveltodo.domain.time.gun import Gun
 from leveltodo.domain.time.saat import Saat
@@ -30,10 +29,6 @@ class SeriServisi:
 
     def giris_kaydet(self) -> None:
         self._kaydet(SeriTipi.GIRIS, self._bugun())
-
-    def gorev_tamamlandi(self, olay: TaskCompleted) -> None:
-        gun = Gun.olustur(olay.occurred_at, self._gun_baslangic()).tarih
-        self._kaydet(SeriTipi.GOREV, gun)
 
     def durumlar(self) -> dict[SeriTipi, tuple[int, int]]:
         """{SeriTipi: (mevcut, en_iyi)}."""

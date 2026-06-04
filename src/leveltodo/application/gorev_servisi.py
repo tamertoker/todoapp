@@ -28,6 +28,7 @@ from leveltodo.domain.tasks.kurallar import (
     canli_sure,
     gunde_olusur_mu,
     odul_hesapla,
+    onceki_olusum,
 )
 from leveltodo.domain.time.gun import Gun
 from leveltodo.domain.time.saat import Saat
@@ -48,6 +49,7 @@ class GorevSatiri:
     baslik: str
     durum: str
     tekrar: str
+    seri: int
     calisilan_saniye: int
     calisiyor: bool
     segment_baslangici: datetime | None
@@ -114,13 +116,14 @@ class GorevServisi:
                 baslik=kayit.title,
                 durum=kayit.status,
                 tekrar=tekrar,
+                seri=seri,
                 calisilan_saniye=kayit.committed_seconds,
                 calisiyor=kayit.timer_running,
                 segment_baslangici=kayit.segment_started_at,
                 odul_xp=kayit.reward_xp,
                 odul_puan=kayit.reward_points,
             )
-            for kayit, tekrar in satirlar
+            for kayit, tekrar, seri in satirlar
         ]
 
     def _gunluk_kayitlari_uret(self, gun) -> None:
@@ -142,6 +145,18 @@ class GorevServisi:
                     day=gun,
                     title=sablon.title,
                 )
+
+    def _gorev_serisi_isle(self, sablon, gun) -> None:
+        """Göreve özel seri: önceki planlı oluşum tamamlandıysa +1, yoksa 1'e döner."""
+        olusturma = Gun.olustur(sablon.created_at, self._gun_baslangic()).tarih
+        onceki = onceki_olusum(
+            Tekrar(sablon.recurrence), sablon.recurrence_param or "", olusturma, gun
+        )
+        if onceki is not None and sablon.streak_last_day == onceki:
+            yeni_seri = sablon.streak_count + 1
+        else:
+            yeni_seri = 1
+        self._gorev.gorev_serisi_guncelle(sablon.id, yeni_seri, gun)
 
     def tamamla(self, kayit_id: str, elle_dakika: int | None = None) -> Odul | None:
         kayit = self._gorev.get_instance(kayit_id)
@@ -171,6 +186,9 @@ class GorevServisi:
         )
         if not ok:
             return None
+
+        if sablon is not None and sablon.recurrence != "none":
+            self._gorev_serisi_isle(sablon, kayit.day)
 
         self._defter.record(
             user_id=self._user_id,
