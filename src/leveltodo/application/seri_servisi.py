@@ -7,6 +7,7 @@ Hangi mantıksal güne sayılacağı, olay/saat zamanı + gün başlangıç saat
 
 from __future__ import annotations
 
+from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.domain.streaks.seriler import SeriTipi, seri_ilerlet
 from leveltodo.domain.time.gun import Gun
 from leveltodo.domain.time.saat import Saat
@@ -20,15 +21,21 @@ class SeriServisi:
         repo: SqlStreakRepository,
         saat: Saat,
         gun_baslangic_getir,
+        dondurma: DondurmaServisi,
         user_id: str = DEFAULT_USER_ID,
     ) -> None:
         self._repo = repo
         self._saat = saat
         self._gun_baslangic = gun_baslangic_getir
+        self._dondurma = dondurma
         self._user_id = user_id
 
     def giris_kaydet(self) -> None:
+        onceki = self.durumlar()[SeriTipi.GIRIS][0]
         self._kaydet(SeriTipi.GIRIS, self._bugun())
+        yeni = self.durumlar()[SeriTipi.GIRIS][0]
+        if yeni > onceki and yeni % 7 == 0:
+            self._dondurma.ekle(1)  # her 7 günlük giriş serisinde +1 dondurma
 
     def durumlar(self) -> dict[SeriTipi, tuple[int, int]]:
         """{SeriTipi: (mevcut, en_iyi)}."""

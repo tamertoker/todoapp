@@ -20,6 +20,7 @@ DEFAULTS: dict[str, Any] = {
     "day_start_hour": 4,
     "theme": "dark",
     "minimize_to_tray": True,
+    "dondurma_stok": 0,
 }
 
 

@@ -63,6 +63,9 @@ class AdminView(QWidget):
         xp_satiri.addWidget(xp_btn)
         xp_satiri.addStretch(1)
 
+        self._dondurma_btn = QPushButton("+1 Dondurma jetonu")
+        self._dondurma_btn.clicked.connect(self._dondurma_ekle)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
@@ -73,6 +76,8 @@ class AdminView(QWidget):
         layout.addLayout(tarih_satiri)
         layout.addWidget(QLabel("Stat XP ekle (seviye/avatar/unvan testi)"))
         layout.addLayout(xp_satiri)
+        layout.addWidget(QLabel("Seri dondurma"))
+        layout.addWidget(self._dondurma_btn)
         layout.addStretch(1)
 
         self._gun_guncelle()
@@ -99,4 +104,8 @@ class AdminView(QWidget):
     def _xp_ekle(self) -> None:
         stat = Stat(self._stat_combo.currentData())
         self._container.gorevler.gelistirme_xp_ekle(stat, self._xp_spin.value())
+        self.degisti.emit()
+
+    def _dondurma_ekle(self) -> None:
+        self._container.dondurma.ekle(1)
         self.degisti.emit()

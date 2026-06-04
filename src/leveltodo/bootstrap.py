@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
 
+from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
 from leveltodo.application.seri_servisi import SeriServisi
@@ -40,6 +41,7 @@ class Container:
     engine: Engine
     session_factory: sessionmaker
     settings: SettingsService
+    dondurma: DondurmaServisi
     gorevler: GorevServisi
     kronometre: KronometreServisi
     seri: SeriServisi
@@ -57,6 +59,7 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
 
     settings_repo = SqlSettingsRepository(session_factory)
     settings = SettingsService(settings_repo, DEFAULT_USER_ID)
+    dondurma = DondurmaServisi(settings)
 
     gorev_repo = SqlTaskRepository(session_factory)
     defter_repo = SqlLedgerRepository(session_factory)
@@ -66,11 +69,12 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
         saat=aktif_saat,
         olay_hatti=olay_hatti,
         gun_baslangic_getir=lambda: settings.day_start_hour,
+        dondurma=dondurma,
     )
     kronometre = KronometreServisi(gorev_repo, aktif_saat)
 
     streak_repo = SqlStreakRepository(session_factory)
-    seri = SeriServisi(streak_repo, aktif_saat, lambda: settings.day_start_hour)
+    seri = SeriServisi(streak_repo, aktif_saat, lambda: settings.day_start_hour, dondurma)
 
     return Container(
         saat=aktif_saat,
@@ -78,6 +82,7 @@ def build_container(db_url: str | None = None, saat: Saat | None = None) -> Cont
         engine=engine,
         session_factory=session_factory,
         settings=settings,
+        dondurma=dondurma,
         gorevler=gorevler,
         kronometre=kronometre,
         seri=seri,

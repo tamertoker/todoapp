@@ -14,6 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime
 
+from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.stats.statlar import (
     SeviyeDurumu,
@@ -78,6 +79,7 @@ class GorevServisi:
         saat: Saat,
         olay_hatti: OlayHatti,
         gun_baslangic_getir,
+        dondurma: DondurmaServisi,
         user_id: str = DEFAULT_USER_ID,
     ) -> None:
         self._gorev = gorev_repo
@@ -85,6 +87,7 @@ class GorevServisi:
         self._saat = saat
         self._olay_hatti = olay_hatti
         self._gun_baslangic = gun_baslangic_getir
+        self._dondurma = dondurma
         self._user_id = user_id
 
     def _bugun(self):
@@ -187,6 +190,9 @@ class GorevServisi:
             Tekrar(sablon.recurrence), sablon.recurrence_param or "", olusturma, gun
         )
         if onceki is not None and sablon.streak_last_day == onceki:
+            yeni_seri = sablon.streak_count + 1
+        elif sablon.streak_count > 0 and self._dondurma.kullan():
+            # Boşluk var ama bir dondurma harcanarak seri korunuyor.
             yeni_seri = sablon.streak_count + 1
         else:
             yeni_seri = 1

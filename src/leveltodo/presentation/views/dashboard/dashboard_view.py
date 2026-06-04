@@ -104,8 +104,11 @@ class DashboardView(QWidget):
         orta.addLayout(sag, stretch=1)
 
         self._giris_seri_label = QLabel()
+        self._dondurma_label = QLabel()
         seri_satiri = QHBoxLayout()
         seri_satiri.addWidget(self._giris_seri_label)
+        seri_satiri.addSpacing(20)
+        seri_satiri.addWidget(self._dondurma_label)
         seri_satiri.addStretch(1)
 
         layout = QVBoxLayout(self)
@@ -247,6 +250,7 @@ class DashboardView(QWidget):
         giris, _ = self._container.seri.durumlar()[SeriTipi.GIRIS]
         self._giris_seri_label.setText(f"🔥 Giriş serisi: {giris} gün")
         self._giris_seri_label.setStyleSheet(f"color: {seri_rengi(giris)}; font-weight: bold;")
+        self._dondurma_label.setText(f"❄ Dondurma: {self._container.dondurma.stok()}")
 
     def _render_profil_ve_statlar(self) -> None:
         durumlar = self._vm.stat_durumlari()
