@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
 
+from leveltodo.application.combo_servisi import ComboServisi
 from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
@@ -44,6 +45,7 @@ class Container:
     session_factory: sessionmaker
     settings: SettingsService
     dondurma: DondurmaServisi
+    combo: ComboServisi
     gorevler: GorevServisi
     kronometre: KronometreServisi
     seri: SeriServisi
@@ -65,6 +67,7 @@ def build_container(
     settings_repo = SqlSettingsRepository(session_factory)
     settings = SettingsService(settings_repo, DEFAULT_USER_ID)
     dondurma = DondurmaServisi(settings)
+    combo = ComboServisi(settings)
 
     gorev_repo = SqlTaskRepository(session_factory)
     defter_repo = SqlLedgerRepository(session_factory)
@@ -76,6 +79,7 @@ def build_container(
         gun_baslangic_getir=lambda: settings.day_start_hour,
         dondurma=dondurma,
         sans=aktif_sans,
+        combo=combo,
     )
     kronometre = KronometreServisi(gorev_repo, aktif_saat)
 
@@ -89,6 +93,7 @@ def build_container(
         session_factory=session_factory,
         settings=settings,
         dondurma=dondurma,
+        combo=combo,
         gorevler=gorevler,
         kronometre=kronometre,
         seri=seri,

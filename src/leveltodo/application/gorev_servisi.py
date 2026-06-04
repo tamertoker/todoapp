@@ -14,6 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
+from leveltodo.application.combo_servisi import ComboServisi
 from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.sans import Sans
@@ -88,6 +89,7 @@ class GorevServisi:
         gun_baslangic_getir,
         dondurma: DondurmaServisi,
         sans: Sans,
+        combo: ComboServisi,
         user_id: str = DEFAULT_USER_ID,
     ) -> None:
         self._gorev = gorev_repo
@@ -97,6 +99,7 @@ class GorevServisi:
         self._gun_baslangic = gun_baslangic_getir
         self._dondurma = dondurma
         self._sans = sans
+        self._combo = combo
         self._user_id = user_id
 
     def _bugun(self):
@@ -272,8 +275,9 @@ class GorevServisi:
 
         odul = odul_hesapla(islenmis_saniye, ozel)
         kritik = self._sans.kritik_mi(KRITIK_OLASILIK)
-        if kritik:
-            odul = Odul(xp=odul.xp * KRITIK_CARPAN, puan=odul.puan * KRITIK_CARPAN)
+        carpan = self._combo.carpan(simdi) * (KRITIK_CARPAN if kritik else 1)
+        if carpan != 1.0:
+            odul = Odul(xp=round(odul.xp * carpan), puan=round(odul.puan * carpan))
         ok = self._gorev.complete_instance(
             instance_id=kayit_id,
             committed_seconds=islenmis_saniye,
@@ -298,6 +302,7 @@ class GorevServisi:
             points=odul.puan,
             stat=sablon.stat if sablon is not None else None,
         )
+        combo_tetik = self._combo.tamamlama_bildir(islenmis_saniye, simdi)
         self._olay_hatti.publish(
             TaskCompleted(
                 occurred_at=simdi,
@@ -305,6 +310,7 @@ class GorevServisi:
                 xp=odul.xp,
                 points=odul.puan,
                 kritik=kritik,
+                combo_tetik=combo_tetik,
             )
         )
         self._seviye_dondurma_kontrol()

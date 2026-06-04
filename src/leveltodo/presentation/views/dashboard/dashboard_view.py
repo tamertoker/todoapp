@@ -100,10 +100,13 @@ class DashboardView(QWidget):
 
         self._giris_seri_label = QLabel()
         self._dondurma_label = QLabel()
+        self._combo_label = QLabel()
         seri_satiri = QHBoxLayout()
         seri_satiri.addWidget(self._giris_seri_label)
         seri_satiri.addSpacing(20)
         seri_satiri.addWidget(self._dondurma_label)
+        seri_satiri.addSpacing(20)
+        seri_satiri.addWidget(self._combo_label)
         seri_satiri.addStretch(1)
 
         layout = QVBoxLayout(self)
@@ -246,6 +249,14 @@ class DashboardView(QWidget):
         self._giris_seri_label.setText(f"🔥 Giriş serisi: {giris} gün")
         self._giris_seri_label.setStyleSheet(f"color: {seri_rengi(giris)}; font-weight: bold;")
         self._dondurma_label.setText(f"❄ Dondurma: {self._container.dondurma.stok()}")
+
+        simdi = self._container.saat.simdi()
+        if self._container.combo.aktif_mi(simdi):
+            kalan = self._container.combo.kalan_dakika(simdi)
+            self._combo_label.setText(f"🔥 Combo ×1.5 ({kalan} dk)")
+            self._combo_label.setStyleSheet("color: #ff7a4d; font-weight: bold;")
+        else:
+            self._combo_label.setText("")
 
     def _render_profil_ve_statlar(self) -> None:
         durumlar = self._vm.stat_durumlari()
@@ -418,7 +429,9 @@ class DashboardView(QWidget):
                 mesaj = "Yarım kalmış kronometre vardı, durdurdum — kayıtlı süre duruyor. " + mesaj
             self._status_label.setText(mesaj)
         elif isinstance(event, TaskCompleted):
-            if event.kritik:
+            if event.combo_tetik:
+                self._status_label.setText("🔥 COMBO başladı! 1 saat boyunca ödüller ×1.5!")
+            elif event.kritik:
                 self._status_label.setText(
                     f"⚡ KRİTİK! +{event.xp} XP, +{event.points} puan (2 katı)!"
                 )

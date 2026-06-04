@@ -33,3 +33,4 @@ class TaskCompleted(DomainEvent):
     xp: int
     points: int
     kritik: bool = False
+    combo_tetik: bool = False
