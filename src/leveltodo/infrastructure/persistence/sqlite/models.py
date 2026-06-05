@@ -146,3 +146,73 @@ class PointTransaction(Base):
     ref_id: Mapped[str | None] = mapped_column(String(26), nullable=True)
     amount: Mapped[int] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class RoutineField(Base):
+    """Rutin alan TANIMI — kullanıcının her gün takip ettiği bir ölçüt.
+    kind='number' (kaç bardak/sayfa) ya da 'bool' (yaptım mı ✓). Sayısal alanda
+    direction='min'/'max' ve target hedefi belirler; hedefi tutturunca seçilen
+    stata reward_xp kadar XP yazılır. Silme = is_active False (geçmiş bozulmaz)."""
+
+    __tablename__ = "routine_fields"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(200))
+    kind: Mapped[str] = mapped_column(String(10))  # number|bool
+    direction: Mapped[str | None] = mapped_column(String(3), nullable=True)  # min|max
+    target: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    reward_xp: Mapped[int] = mapped_column(Integer)
+    stat: Mapped[str] = mapped_column(String(20))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class RoutineEntry(Base):
+    """Bir rutin alanının belirli bir güne düşen değeri. Sayıda girilen sayı,
+    evet/hayır'da 0/1. rewarded: o gün hedef tutturulup XP verildi mi (gün başına
+    en çok bir kez; geri alınmaz). Alan + gün başına tek satır."""
+
+    __tablename__ = "routine_entries"
+    __table_args__ = (UniqueConstraint("field_id", "day", name="uq_routine_field_day"),)
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    field_id: Mapped[str] = mapped_column(ForeignKey("routine_fields.id", ondelete="CASCADE"))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    day: Mapped[date] = mapped_column(Date)
+    value: Mapped[int] = mapped_column(Integer)
+    rewarded: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class JournalEntry(Base):
+    """Gün sonu günlüğü — gün başına tek kayıt (user_id+day benzersiz). text dolu
+    kaydedilince Farkındalık'a reward_xp kadar XP verilir (gün başına bir kez);
+    reward_xp o günün ilk dolduruşunda sabitlenir, böylece boşaltıp tekrar
+    doldurmada tutarlı kalır. rewarded: şu an ödül duruyor mu (boşaltınca geri
+    alınır → False)."""
+
+    __tablename__ = "journal_entries"
+    __table_args__ = (UniqueConstraint("user_id", "day", name="uq_journal_user_day"),)
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    day: Mapped[date] = mapped_column(Date)
+    text: Mapped[str] = mapped_column(String, default="")
+    reward_xp: Mapped[int] = mapped_column(Integer, default=0)
+    rewarded: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class ReflectionQuestion(Base):
+    """Kullanıcının eklediği yansıtma sorusu. Hazır havuz koda gömülüdür; bu tablo
+    yalnızca kullanıcının kendi eklediklerini tutar. Silme = is_active False."""
+
+    __tablename__ = "reflection_questions"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    text: Mapped[str] = mapped_column(String(300))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

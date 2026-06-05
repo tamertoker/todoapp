@@ -15,9 +15,11 @@ from leveltodo.application.combo_servisi import ComboServisi
 from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.application.dusman_servisi import DusmanServisi
 from leveltodo.application.gorev_servisi import GorevServisi
+from leveltodo.application.gunluk_servisi import GunlukServisi
 from leveltodo.application.irade_servisi import IradeServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
 from leveltodo.application.rozet_servisi import RozetServisi
+from leveltodo.application.rutin_servisi import RutinServisi
 from leveltodo.application.seri_servisi import SeriServisi
 from leveltodo.application.settings_service import SettingsService
 from leveltodo.domain.events import TaskCompleted
@@ -27,10 +29,12 @@ from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
 from leveltodo.infrastructure.persistence.sqlite.bootstrap_data import ensure_default_user
 from leveltodo.infrastructure.persistence.sqlite.engine import create_engine_and_factory
+from leveltodo.infrastructure.persistence.sqlite.gunluk_repository import SqlGunlukRepository
 from leveltodo.infrastructure.persistence.sqlite.irade_repository import SqlIradeRepository
 from leveltodo.infrastructure.persistence.sqlite.ledger_repository import SqlLedgerRepository
 from leveltodo.infrastructure.persistence.sqlite.migrations import upgrade_to_head
 from leveltodo.infrastructure.persistence.sqlite.models import DEFAULT_USER_ID
+from leveltodo.infrastructure.persistence.sqlite.rutin_repository import SqlRutinRepository
 from leveltodo.infrastructure.persistence.sqlite.settings_repository import SqlSettingsRepository
 from leveltodo.infrastructure.persistence.sqlite.streak_repository import SqlStreakRepository
 from leveltodo.infrastructure.persistence.sqlite.task_repository import SqlTaskRepository
@@ -53,6 +57,8 @@ class Container:
     kronometre: KronometreServisi
     seri: SeriServisi
     irade: IradeServisi
+    rutin: RutinServisi
+    gunluk: GunlukServisi
 
 
 def build_container(
@@ -105,6 +111,26 @@ def build_container(
         lambda: gorevler.profil_durumu()[0],
     )
 
+    rutin_repo = SqlRutinRepository(session_factory)
+    rutin = RutinServisi(
+        rutin_repo,
+        defter_repo,
+        aktif_saat,
+        lambda: settings.day_start_hour,
+        dondurma,
+        lambda: gorevler.profil_durumu()[0],
+    )
+
+    gunluk_repo = SqlGunlukRepository(session_factory)
+    gunluk = GunlukServisi(
+        gunluk_repo,
+        defter_repo,
+        aktif_saat,
+        lambda: settings.day_start_hour,
+        dondurma,
+        lambda: gorevler.profil_durumu()[0],
+    )
+
     return Container(
         saat=aktif_saat,
         olay_hatti=olay_hatti,
@@ -119,4 +145,6 @@ def build_container(
         kronometre=kronometre,
         seri=seri,
         irade=irade,
+        rutin=rutin,
+        gunluk=gunluk,
     )
