@@ -31,6 +31,13 @@ DEFAULTS: dict[str, Any] = {
     "dusman_tier": 0,
     "dusman_hp": -1,
     "dusman_son_etkinlik": "",
+    "bildirim_hatirlatma": True,
+    "bildirim_kutlama": True,
+    "bildirim_uyari": True,
+    "bildirim_durtme": True,
+    "bildirim_sessiz_acik": True,
+    "bildirim_sessiz_baslangic": 23,
+    "bildirim_sessiz_bitis": 7,
 }
 
 

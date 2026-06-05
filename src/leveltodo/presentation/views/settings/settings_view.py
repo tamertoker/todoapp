@@ -26,8 +26,17 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from leveltodo.application.bildirim_servisi import BildirimServisi
+from leveltodo.domain.bildirim.bildirim import BildirimKategori
 from leveltodo.infrastructure.backup.yedekleme import Yedekleyici
 from leveltodo.presentation.views.settings.settings_viewmodel import SettingsViewModel
+
+_KATEGORI_ETIKET = {
+    BildirimKategori.HATIRLATMA: "Hatırlatmalar",
+    BildirimKategori.KUTLAMA: "Kutlamalar",
+    BildirimKategori.UYARI: "Uyarılar",
+    BildirimKategori.DURTME: "Dürtmeler",
+}
 
 _THEME_LABELS = {
     "dark": "Koyu (gece)",
@@ -42,11 +51,15 @@ _THEME_LABELS = {
 
 class SettingsView(QWidget):
     def __init__(
-        self, view_model: SettingsViewModel, yedekleyici: Yedekleyici | None = None
+        self,
+        view_model: SettingsViewModel,
+        yedekleyici: Yedekleyici | None = None,
+        bildirim: BildirimServisi | None = None,
     ) -> None:
         super().__init__()
         self.view_model = view_model
         self._yedekleyici = yedekleyici
+        self._bildirim = bildirim
 
         panel = QFrame()
         panel.setObjectName("Panel")
@@ -79,11 +92,56 @@ class SettingsView(QWidget):
         outer = QVBoxLayout(self)
         outer.setContentsMargins(16, 16, 16, 16)
         outer.addWidget(panel)
+        if self._bildirim is not None:
+            outer.addWidget(self._bildirim_panel())
         if self._yedekleyici is not None:
             outer.addWidget(self._veri_panel())
         outer.addStretch(1)
 
         self._load()
+
+    def _bildirim_panel(self) -> QFrame:
+        panel = QFrame()
+        panel.setObjectName("Panel")
+        form = QFormLayout(panel)
+        form.setContentsMargins(24, 20, 24, 20)
+        form.setSpacing(10)
+
+        baslik = QLabel("Bildirimler")
+        baslik.setObjectName("Title")
+        form.addRow(baslik)
+
+        for kategori, etiket in _KATEGORI_ETIKET.items():
+            kutu = QCheckBox(etiket)
+            kutu.setChecked(self._bildirim.kategori_acik(kategori))
+            kutu.toggled.connect(
+                lambda acik, k=kategori: self._bildirim.kategori_ayarla(k, acik)
+            )
+            form.addRow("", kutu)
+
+        self._sessiz = QCheckBox("Gece sessizliği")
+        self._sessiz.setChecked(self._bildirim.sessiz_acik)
+        self._sessiz.toggled.connect(self._sessiz_kaydet)
+        self._sessiz_bas = QSpinBox()
+        self._sessiz_bas.setRange(0, 23)
+        self._sessiz_bas.setSuffix(":00")
+        self._sessiz_bas.setValue(self._bildirim.sessiz_baslangic)
+        self._sessiz_bas.valueChanged.connect(self._sessiz_kaydet)
+        self._sessiz_bit = QSpinBox()
+        self._sessiz_bit.setRange(0, 23)
+        self._sessiz_bit.setSuffix(":00")
+        self._sessiz_bit.setValue(self._bildirim.sessiz_bitis)
+        self._sessiz_bit.valueChanged.connect(self._sessiz_kaydet)
+
+        form.addRow("", self._sessiz)
+        form.addRow("Sessizlik başlangıcı:", self._sessiz_bas)
+        form.addRow("Sessizlik bitişi:", self._sessiz_bit)
+        return panel
+
+    def _sessiz_kaydet(self) -> None:
+        self._bildirim.sessiz_ayarla(
+            self._sessiz.isChecked(), self._sessiz_bas.value(), self._sessiz_bit.value()
+        )
 
     def _veri_panel(self) -> QFrame:
         panel = QFrame()

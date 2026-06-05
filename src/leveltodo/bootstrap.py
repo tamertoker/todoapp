@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
 
+from leveltodo.application.bildirim_servisi import BildirimServisi
 from leveltodo.application.combo_servisi import ComboServisi
 from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.application.dusman_servisi import DusmanServisi
@@ -28,6 +29,7 @@ from leveltodo.domain.time.saat import Saat
 from leveltodo.infrastructure.backup.yedekleme import Yedekleyici, db_dosya_yolu
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
+from leveltodo.infrastructure.notifications.plyer_kanali import plyer_kanali
 from leveltodo.infrastructure.persistence.sqlite.bootstrap_data import ensure_default_user
 from leveltodo.infrastructure.persistence.sqlite.engine import create_engine_and_factory
 from leveltodo.infrastructure.persistence.sqlite.gunluk_repository import SqlGunlukRepository
@@ -61,6 +63,7 @@ class Container:
     rutin: RutinServisi
     gunluk: GunlukServisi
     yedekleyici: Yedekleyici
+    bildirim: BildirimServisi
 
 
 def build_container(
@@ -139,6 +142,9 @@ def build_container(
 
     yedekleyici = Yedekleyici(db_dosyasi)
 
+    bildirim = BildirimServisi(settings, aktif_saat)
+    bildirim.kanal_ekle(plyer_kanali)  # OS bildirimi (best-effort)
+
     return Container(
         saat=aktif_saat,
         olay_hatti=olay_hatti,
@@ -156,4 +162,5 @@ def build_container(
         rutin=rutin,
         gunluk=gunluk,
         yedekleyici=yedekleyici,
+        bildirim=bildirim,
     )

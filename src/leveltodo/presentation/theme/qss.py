@@ -162,4 +162,15 @@ def build_qss(palette: Palette, font_family: str, up_arrow: str, down_arrow: str
         background-color: {p.bg};
         border: 2px solid {p.border};
     }}
+    QFrame#Toast {{
+        background-color: {p.panel};
+        border: 2px solid {p.accent};
+    }}
+    QLabel#ToastBaslik {{
+        font-weight: bold;
+        color: {p.accent};
+    }}
+    QLabel#ToastGovde {{
+        color: {p.text};
+    }}
     """

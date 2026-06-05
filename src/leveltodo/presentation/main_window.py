@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import (
 
 from leveltodo.bootstrap import Container
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
+from leveltodo.presentation.common.toast import ToastYoneticisi
 from leveltodo.presentation.views.admin.admin_view import AdminView
 from leveltodo.presentation.views.avatar.avatar_view import AvatarEditorView
 from leveltodo.presentation.views.dashboard.dashboard_view import DashboardView
@@ -54,7 +55,7 @@ class MainWindow(QWidget):
         self._avatar_editor = AvatarEditorView()
         self._rozetler = RozetView(container)
         settings_vm = SettingsViewModel(container.settings)
-        self._settings = SettingsView(settings_vm, container.yedekleyici)
+        self._settings = SettingsView(settings_vm, container.yedekleyici, container.bildirim)
         self._admin = AdminView(container)
 
         self._stack = QStackedWidget()
@@ -87,6 +88,10 @@ class MainWindow(QWidget):
         self._gunluk.degisti.connect(self._dashboard.refresh_day)
 
         self._tray = self._build_tray()
+
+        # Uygulama-içi toast'ı garantili bildirim kanalı olarak kaydet.
+        self._toast = ToastYoneticisi(self)
+        container.bildirim.kanal_ekle(self._toast.goster)
 
     def _build_nav(self) -> QVBoxLayout:
         nav = QVBoxLayout()
