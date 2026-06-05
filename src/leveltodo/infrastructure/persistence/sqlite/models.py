@@ -181,7 +181,8 @@ class RoutineEntry(Base):
     field_id: Mapped[str] = mapped_column(ForeignKey("routine_fields.id", ondelete="CASCADE"))
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     day: Mapped[date] = mapped_column(Date)
-    value: Mapped[int] = mapped_column(Integer)
+    value: Mapped[int] = mapped_column(Integer, default=0)
+    value_text: Mapped[str | None] = mapped_column(String, nullable=True)  # METIN türü için
     rewarded: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 

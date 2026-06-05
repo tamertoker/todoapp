@@ -18,6 +18,7 @@ from leveltodo.domain.stats.statlar import (
 from leveltodo.domain.tasks.kurallar import (
     KRITIK_CARPAN,
     KRITIK_OLASILIK,
+    TELAFI_CARPAN,
     Odul,
     Tekrar,
     canli_sure,
@@ -265,9 +266,12 @@ class GorevServisi:
         sablon = self._gorev.get_template(kayit.task_id)
         ozel = sablon.reward_override if sablon is not None else None
 
+        telafi_mi = kayit.day < self._bugun()  # geçmiş günü telafi ediyoruz
         odul = odul_hesapla(islenmis_saniye, ozel)
         kritik = self._sans.kritik_mi(KRITIK_OLASILIK)
         carpan = self._combo.carpan(simdi) * (KRITIK_CARPAN if kritik else 1)
+        if telafi_mi:
+            carpan *= TELAFI_CARPAN
         if carpan != 1.0:
             odul = Odul(xp=round(odul.xp * carpan), puan=round(odul.puan * carpan))
         ok = self._gorev.complete_instance(

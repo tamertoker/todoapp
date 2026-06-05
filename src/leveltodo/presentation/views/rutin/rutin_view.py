@@ -78,6 +78,7 @@ class RutinView(QWidget):
         self._tur = QComboBox()
         self._tur.addItem("Sayı", RutinTuru.SAYI)
         self._tur.addItem("Evet / Hayır", RutinTuru.EVET_HAYIR)
+        self._tur.addItem("Metin", RutinTuru.METIN)
         self._tur.currentIndexChanged.connect(self._tur_degisti)
 
         self._yon = QComboBox()
@@ -115,9 +116,14 @@ class RutinView(QWidget):
         return frame
 
     def _tur_degisti(self) -> None:
-        sayi = self._tur.currentData() is RutinTuru.SAYI
+        tur = self._tur.currentData()
+        sayi = tur is RutinTuru.SAYI
+        metin = tur is RutinTuru.METIN
         self._yon.setEnabled(sayi)
         self._hedef.setEnabled(sayi)
+        # Metin alanının hedefi/ödülü yok → stat ve XP de kapanır.
+        self._stat.setEnabled(not metin)
+        self._odul.setEnabled(not metin)
 
     def _alan_ekle(self) -> None:
         ad = self._ad.text().strip()
@@ -133,8 +139,10 @@ class RutinView(QWidget):
                 yon=self._yon.currentData(),
                 hedef=self._hedef.value(),
             )
-        else:
+        elif tur is RutinTuru.EVET_HAYIR:
             self._container.rutin.alan_ekle(ad, tur, self._stat.currentData(), self._odul.value())
+        else:  # METIN — hedefsiz/ödülsüz
+            self._container.rutin.alan_ekle(ad, tur)
         self._ad.clear()
         self.yenile()
         self.degisti.emit()
@@ -179,6 +187,15 @@ class RutinView(QWidget):
                 lambda isaretli, fid=alan.field_id: self._deger_gir(fid, 1 if isaretli else 0)
             )
             h.addWidget(kutu)
+        elif alan.tur is RutinTuru.METIN:
+            satir_metin = QLineEdit(alan.bugun_metin or "")
+            satir_metin.setPlaceholderText("bugünkü not…")
+            kaydet = QPushButton("Kaydet")
+            kaydet.clicked.connect(
+                lambda _c, fid=alan.field_id, le=satir_metin: self._metin_gir(fid, le.text())
+            )
+            h.addWidget(satir_metin, stretch=2)
+            h.addWidget(kaydet)
         else:
             hedef_metni = f"{'en az' if alan.yon is Yon.EN_AZ else 'en fazla'} {alan.hedef}"
             ipucu = QLabel(hedef_metni)
@@ -194,13 +211,15 @@ class RutinView(QWidget):
             h.addWidget(spin)
             h.addWidget(kaydet)
 
-        odul = QLabel(f"+{alan.odul_xp} {STAT_ETIKET[Stat(alan.stat)]}")
-        odul.setObjectName("Counter")
-        h.addWidget(odul)
-        if alan.odul_verildi:
-            alindi = QLabel("✓ bugün alındı")
-            alindi.setObjectName("Tag")
-            h.addWidget(alindi)
+        # Ödül etiketi yalnızca ödüllü türlerde (metin türünün ödülü yok).
+        if alan.tur is not RutinTuru.METIN:
+            odul = QLabel(f"+{alan.odul_xp} {STAT_ETIKET[Stat(alan.stat)]}")
+            odul.setObjectName("Counter")
+            h.addWidget(odul)
+            if alan.odul_verildi:
+                alindi = QLabel("✓ bugün alındı")
+                alindi.setObjectName("Tag")
+                h.addWidget(alindi)
 
         sil = QPushButton("Sil")
         sil.clicked.connect(lambda _c, fid=alan.field_id: self._alan_sil(fid))
@@ -209,6 +228,11 @@ class RutinView(QWidget):
 
     def _deger_gir(self, field_id: str, deger: int) -> None:
         self._container.rutin.deger_gir(field_id, deger)
+        self.yenile()
+        self.degisti.emit()
+
+    def _metin_gir(self, field_id: str, metin: str) -> None:
+        self._container.rutin.metin_gir(field_id, metin)
         self.yenile()
         self.degisti.emit()
 

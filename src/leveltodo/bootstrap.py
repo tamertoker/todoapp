@@ -79,7 +79,7 @@ def build_container(
     dondurma = DondurmaServisi(settings)
     combo = ComboServisi(settings)
     rozet = RozetServisi(settings)
-    dusman = DusmanServisi(settings)
+    dusman = DusmanServisi(settings, aktif_saat, lambda: settings.day_start_hour)
     # Görev tamamlanınca kazanılan XP kadar düşmana hasar (olay tabanlı).
     olay_hatti.subscribe(TaskCompleted, lambda olay: dusman.hasar_ver(olay.xp))
 

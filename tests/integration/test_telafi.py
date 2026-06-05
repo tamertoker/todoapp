@@ -34,11 +34,25 @@ def test_telafi_tamamla_odul_listeden_cikar_seri_etkilenmez(db_url):
 
     hedef = satirlar[0]  # en yeni kaçırılan (2 Haziran)
     odul = svc.tamamla(hedef.kayit_id)
-    assert odul is not None and odul.xp == 10  # özel ödül
-    assert svc.toplamlar()[0] == 10
+    assert odul is not None and odul.xp == 20  # özel ödül 10 × telafi 2x
+    assert svc.toplamlar()[0] == 20
 
     kalan = {s.gun for s in svc.telafi_gorevleri()}
     assert hedef.gun not in kalan and len(kalan) == 1
 
     # Telafi geçmiş günü tamamladı; bugünkü seri etkilenmemeli.
     assert svc.bugunku_gorevler()[0].seri == 0
+
+
+def test_telafi_2x_bugun_1x(db_url):
+    """Geçmiş gün telafisi 2x ödül; aynı görevin bugünkü tamamlanması 1x."""
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    svc = _svc(db_url, saat)
+    svc.gorev_olustur("Her gün", Tekrar.GUNLUK, ozel_odul=10)
+
+    saat.ilerlet(days=1)  # bugün 2 Haziran; 1 Haziran kaçtı
+    telafi = svc.telafi_gorevleri()[0]  # 1 Haziran (geçmiş)
+    assert svc.tamamla(telafi.kayit_id).xp == 20  # 10 × 2
+
+    bugunku = svc.bugunku_gorevler()[0]  # 2 Haziran (bugün)
+    assert svc.tamamla(bugunku.kayit_id).xp == 10  # 1x

@@ -82,7 +82,15 @@ class SqlRutinRepository:
             return s.scalar(stmt)
 
     def deger_yaz(
-        self, *, id: str, field_id: str, user_id: str, day: date, value: int, rewarded: bool
+        self,
+        *,
+        id: str,
+        field_id: str,
+        user_id: str,
+        day: date,
+        value: int,
+        rewarded: bool,
+        value_text: str | None = None,
     ) -> None:
         """Alan+gün için değeri ekler ya da üzerine yazar (tek satır kalır)."""
         with self._sf() as s:
@@ -99,10 +107,12 @@ class SqlRutinRepository:
                         user_id=user_id,
                         day=day,
                         value=value,
+                        value_text=value_text,
                         rewarded=rewarded,
                     )
                 )
             else:
                 kayit.value = value
+                kayit.value_text = value_text
                 kayit.rewarded = rewarded
             s.commit()

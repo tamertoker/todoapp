@@ -21,6 +21,7 @@ from enum import StrEnum
 SURESIZ_VARSAYILAN_ODUL = 5
 KRITIK_OLASILIK = 0.10  # %10 kritik başarı şansı
 KRITIK_CARPAN = 2  # kritikte ödül kaç katı
+TELAFI_CARPAN = 2  # geçmiş günü telafi ederken ödül kaç katı
 
 
 class Tekrar(StrEnum):

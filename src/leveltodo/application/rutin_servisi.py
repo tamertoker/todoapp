@@ -35,6 +35,7 @@ class RutinSatiri:
     stat: str
     odul_xp: int
     bugun_deger: int | None
+    bugun_metin: str | None
     odul_verildi: bool
 
 
@@ -64,12 +65,13 @@ class RutinServisi:
         self,
         ad: str,
         tur: RutinTuru,
-        stat: Stat,
-        odul_xp: int,
+        stat: Stat | None = None,
+        odul_xp: int = 0,
         yon: Yon | None = None,
         hedef: int | None = None,
     ) -> None:
         sayi = tur is RutinTuru.SAYI
+        metin = tur is RutinTuru.METIN  # metin: hedefsiz/ödülsüz, sadece takip
         self._repo.alan_ekle(
             id=new_id(),
             user_id=self._user_id,
@@ -77,8 +79,8 @@ class RutinServisi:
             kind=tur.value,
             direction=(yon or Yon.EN_AZ).value if sayi else None,
             target=hedef if sayi else None,
-            reward_xp=odul_xp,
-            stat=stat.value,
+            reward_xp=0 if metin else odul_xp,
+            stat="" if metin else stat.value,
             sort_order=self._repo.sonraki_sira(self._user_id),
         )
 
@@ -101,10 +103,23 @@ class RutinServisi:
                     stat=alan.stat,
                     odul_xp=alan.reward_xp,
                     bugun_deger=kayit.value if kayit is not None else None,
+                    bugun_metin=kayit.value_text if kayit is not None else None,
                     odul_verildi=kayit.rewarded if kayit is not None else False,
                 )
             )
         return satirlar
+
+    def metin_gir(self, field_id: str, metin: str) -> None:
+        """METIN alanının bugünkü notunu kaydeder (üzerine yazar). Ödül yok."""
+        self._repo.deger_yaz(
+            id=new_id(),
+            field_id=field_id,
+            user_id=self._user_id,
+            day=self._bugun(),
+            value=0,
+            value_text=metin.strip(),
+            rewarded=False,
+        )
 
     def deger_gir(self, field_id: str, deger: int) -> bool:
         """Bugünün değerini kaydeder (üzerine yazar) ve ödülü hedef durumuyla

@@ -30,6 +30,7 @@ DEFAULTS: dict[str, Any] = {
     "combo_yasandi": False,
     "dusman_tier": 0,
     "dusman_hp": -1,
+    "dusman_son_etkinlik": "",
 }
 
 

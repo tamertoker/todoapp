@@ -1,8 +1,9 @@
 """Düşman (Şeytan) tanımları ve can formülü — saf, test edilebilir.
 
-Şeytan, tembelliğin görsel düşmanıdır. Kazandığın XP kadar hasar alır; canı
-biterse bir üst tier (daha çok canlı) düşman gelir. Tier başına maksimum can
-1.5 katına çıkar. Düşman isimleri tier'a göre döner.
+Şeytan, tembelliğin görsel düşmanıdır. Kazandığın XP kadar (hasar katsayısıyla
+ölçeklenmiş) hasar alır; canı biterse bir üst tier (daha çok canlı) düşman gelir.
+Tier başına maksimum can 1.5 katına çıkar. Hiç XP kazanmadığın her gün düşman
+biraz iyileşir (tembellik onu güçlendirir). Düşman isimleri tier'a göre döner.
 """
 
 from __future__ import annotations
@@ -10,6 +11,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 BASE_HP = 100
+# Kazanılan XP'nin hasara çevrilirken çarpıldığı katsayı (denge ayarı).
+HASAR_KATSAYISI = 1.0
+# XP kazanmadan geçen her gün düşman maksimum canının bu oranı kadar iyileşir.
+GUNLUK_IYILESME_ORANI = 0.03
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,3 +38,13 @@ def dusman_getir(tier: int) -> Dusman:
 
 def max_hp(tier: int) -> int:
     return round(BASE_HP * (1.5**tier))
+
+
+def hasar(xp: int) -> int:
+    """Kazanılan XP'yi katsayıyla düşman hasarına çevirir."""
+    return round(xp * HASAR_KATSAYISI)
+
+
+def gunluk_iyilesme(maks_hp: int) -> int:
+    """Bir XP'siz günde düşmanın iyileşeceği can miktarı."""
+    return round(maks_hp * GUNLUK_IYILESME_ORANI)

@@ -90,6 +90,22 @@ def test_evet_hayir_isaretleyince_odul(db_url):
     assert _beden_xp(c) == 0
 
 
+def test_metin_alani_not_saklar_odul_vermez(db_url):
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    c = build_container(db_url=db_url, saat=saat)
+    c.rutin.alan_ekle("ruh hali", RutinTuru.METIN)
+    alan = c.rutin.bugunku_alanlar()[0]
+    assert alan.tur is RutinTuru.METIN and alan.odul_xp == 0
+
+    c.rutin.metin_gir(alan.field_id, "bugün iyiyim")
+    g = c.rutin.bugunku_alanlar()[0]
+    assert g.bugun_metin == "bugün iyiyim"
+    assert c.gorevler.toplamlar()[0] == 0  # metin alanı XP vermez
+
+    c.rutin.metin_gir(alan.field_id, "düzeltme")  # üzerine yazılır
+    assert c.rutin.bugunku_alanlar()[0].bugun_metin == "düzeltme"
+
+
 def test_deger_dogru_mantiksal_gune_yazilir(db_url):
     # Gün başlangıcı varsayılan 04:00; 02:00 hâlâ önceki güne sayılır.
     saat = SahteSaat(datetime(2026, 6, 2, 2, 0))
