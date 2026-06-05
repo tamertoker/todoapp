@@ -42,6 +42,8 @@ DEFAULTS: dict[str, Any] = {
     "dusman_son_kiskirtma_gun": "",
     "amnesti_son_uyari_gun": "",
     "uyandirma_hedef": "07:00",
+    "ses_acik": True,
+    "ses_duzeyi": 70,
 }
 
 

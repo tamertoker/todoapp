@@ -55,11 +55,13 @@ class SettingsView(QWidget):
         view_model: SettingsViewModel,
         yedekleyici: Yedekleyici | None = None,
         bildirim: BildirimServisi | None = None,
+        ses=None,
     ) -> None:
         super().__init__()
         self.view_model = view_model
         self._yedekleyici = yedekleyici
         self._bildirim = bildirim
+        self._ses = ses
 
         panel = QFrame()
         panel.setObjectName("Panel")
@@ -92,6 +94,8 @@ class SettingsView(QWidget):
         outer = QVBoxLayout(self)
         outer.setContentsMargins(16, 16, 16, 16)
         outer.addWidget(panel)
+        if self._ses is not None:
+            outer.addWidget(self._ses_panel())
         if self._bildirim is not None:
             outer.addWidget(self._bildirim_panel())
         if self._yedekleyici is not None:
@@ -99,6 +103,28 @@ class SettingsView(QWidget):
         outer.addStretch(1)
 
         self._load()
+
+    def _ses_panel(self) -> QFrame:
+        panel = QFrame()
+        panel.setObjectName("Panel")
+        form = QFormLayout(panel)
+        form.setContentsMargins(24, 20, 24, 20)
+        form.setSpacing(10)
+        baslik = QLabel("Ses")
+        baslik.setObjectName("Title")
+        form.addRow(baslik)
+
+        self._ses_acik = QCheckBox("Ses efektleri açık")
+        self._ses_acik.setChecked(self._ses.acik)
+        self._ses_acik.toggled.connect(self._ses.acik_ayarla)
+        self._ses_duzey = QSpinBox()
+        self._ses_duzey.setRange(0, 100)
+        self._ses_duzey.setSuffix("%")
+        self._ses_duzey.setValue(self._ses.duzey)
+        self._ses_duzey.valueChanged.connect(self._ses.duzey_ayarla)
+        form.addRow("", self._ses_acik)
+        form.addRow("Ses düzeyi:", self._ses_duzey)
+        return panel
 
     def _bildirim_panel(self) -> QFrame:
         panel = QFrame()
@@ -194,6 +220,8 @@ class SettingsView(QWidget):
         try:
             self._yedekleyici.geri_yukle_isaretle(yol)
         except ValueError as hata:
+            if self._ses is not None:
+                self._ses.cal("hata")
             QMessageBox.warning(self, "Geri yükleme", str(hata))
             return
         QMessageBox.information(

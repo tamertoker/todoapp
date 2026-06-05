@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — commit `73a1f4f`, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **131 test yeşil**, ruff temiz.
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **134 test yeşil**, ruff temiz.
 - Stack: Python 3.12.8 · PyQt6 · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid.
 
 ## Bitti ✅
@@ -54,11 +54,18 @@
   Disiplin'e XP, gün başına tek, **ceza yok**). İrade ekranında uyandırma kartı
   (QTimeEdit hedef + "Kalktım" + sonuç). `tests/integration/test_uyandirma.py`.
 
-## Sırada ⏸️ — Faz 6 (ses + font, ASSET gerektirir)
-Onaylı plan: `~/.claude/plans/t-m-plan-uydu-a-k-lexical-steele.md`. Sıra:
-- **6.5** Ses motoru (QSoundEffect) — kod kurulur ama **kullanıcıdan CC0 .wav ses
-  dosyaları istenecek** (asset-shortfall). Dosya yoksa sessiz çalışır.
-- **6.6** Pixel-art font (kullanıcıdan .ttf istenecek; yoksa fallback monospace).
+- **Faz 6.5 — Ses**: `infrastructure/sound/ses_motoru.py` (`SesMotoru` QSoundEffect,
+  assets/sounds/<anahtar>.wav yükler, dosya yoksa sessiz), `secim.py` (`tamamlama_sesi`).
+  Olaylar: `SeviyeAtlandi`/`DusmanDevrildi` (events.py) — dondurma seviye atlayınca,
+  dusman devrilince yayınlar. main_window `_ses_isle` köprüden: tamamla/kritik/combo/
+  seviye/dusman_devrildi. rozet→RozetView, hata→geç kalkış (İrade) + geçersiz yedek
+  (Settings). Ayarlar'da "Ses" paneli (aç/kapa + düzey). 7 ses WAV (3 mp3 ffmpeg ile
+  çevrildi) `assets/sounds/`. `tests/integration/test_ses.py`.
+
+## Sırada ⏸️ — Faz 6 son adım (ASSET gerektirir)
+- **6.6** Pixel-art font: `fonts.py` zaten assets/fonts/*.ttf yüklüyor (yoksa fallback
+  monospace). **Kullanıcıdan CC0/OFL bir pixel .ttf istenecek**, assets/fonts/'a konunca
+  otomatik devreye girer.
 - Sonra Faz 7 → 8 → 9. **Push edilmedi** (kullanıcı "hadi" deyince).
 
 ## Çalışma kuralları (özet — tam hâli CLAUDE.md'de)

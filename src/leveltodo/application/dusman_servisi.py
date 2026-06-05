@@ -18,6 +18,7 @@ from leveltodo.domain.dusman.dusman import (
     hasar,
     max_hp,
 )
+from leveltodo.domain.events import DusmanDevrildi
 from leveltodo.domain.time.gun import Gun
 from leveltodo.domain.time.saat import Saat
 
@@ -27,10 +28,13 @@ class DusmanServisi:
     HP = "dusman_hp"
     SON_ETKINLIK = "dusman_son_etkinlik"  # son hasar/iyileşme günü (ISO tarih)
 
-    def __init__(self, settings: SettingsService, saat: Saat, gun_baslangic_getir) -> None:
+    def __init__(
+        self, settings: SettingsService, saat: Saat, gun_baslangic_getir, olay_hatti=None
+    ) -> None:
         self._settings = settings
         self._saat = saat
         self._gun_baslangic = gun_baslangic_getir
+        self._olay_hatti = olay_hatti
 
     def _bugun(self) -> date:
         return Gun.olustur(self._saat.simdi(), self._gun_baslangic()).tarih
@@ -74,8 +78,13 @@ class DusmanServisi:
         hp = self._hp() - hasar(xp)
         tier = self._tier()
         if hp <= 0:  # düşman devrildi → bir üst tier, tam can
+            devrilen_tier = tier
             tier += 1
             self._settings.set(self.TIER, tier)
             hp = max_hp(tier)
+            if self._olay_hatti is not None:
+                self._olay_hatti.publish(
+                    DusmanDevrildi(occurred_at=self._saat.simdi(), tier=devrilen_tier)
+                )
         self._settings.set(self.HP, hp)
         self._settings.set(self.SON_ETKINLIK, self._bugun().isoformat())

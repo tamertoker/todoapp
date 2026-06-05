@@ -28,9 +28,10 @@ from leveltodo.bootstrap import Container
 class IradeView(QWidget):
     degisti = pyqtSignal()
 
-    def __init__(self, container: Container) -> None:
+    def __init__(self, container: Container, ses=None) -> None:
         super().__init__()
         self._container = container
+        self._ses = ses
 
         title = QLabel("İrade")
         title.setObjectName("Title")
@@ -104,7 +105,9 @@ class IradeView(QWidget):
         self._container.uyandirma.hedef_ayarla(t.toString("HH:mm"))
 
     def _kalktim(self) -> None:
-        self._container.uyandirma.kalktim()
+        basarili = self._container.uyandirma.kalktim()
+        if not basarili and self._ses is not None:
+            self._ses.cal("hata")  # geç kalkış: başarısızlık anı
         self._uyanma_yenile()
         self.degisti.emit()
 

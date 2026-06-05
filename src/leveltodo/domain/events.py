@@ -24,3 +24,17 @@ class TaskCompleted(DomainEvent):
     points: int
     kritik: bool = False
     combo_tetik: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class SeviyeAtlandi(DomainEvent):
+    """Profil seviyesi yükseldiğinde yayınlanır."""
+
+    yeni_seviye: int
+
+
+@dataclass(frozen=True, slots=True)
+class DusmanDevrildi(DomainEvent):
+    """Bir düşman devrildiğinde (canı bitince) yayınlanır; devrilen tier'ı taşır."""
+
+    tier: int

@@ -92,10 +92,12 @@ def build_container(
 
     settings_repo = SqlSettingsRepository(session_factory)
     settings = SettingsService(settings_repo, DEFAULT_USER_ID)
-    dondurma = DondurmaServisi(settings)
+    dondurma = DondurmaServisi(settings, olay_hatti, aktif_saat)
     combo = ComboServisi(settings)
     rozet = RozetServisi(settings)
-    dusman = DusmanServisi(settings, aktif_saat, lambda: settings.day_start_hour)
+    dusman = DusmanServisi(
+        settings, aktif_saat, lambda: settings.day_start_hour, olay_hatti
+    )
     # Görev tamamlanınca kazanılan XP kadar düşmana hasar (olay tabanlı).
     olay_hatti.subscribe(TaskCompleted, lambda olay: dusman.hasar_ver(olay.xp))
 

@@ -24,9 +24,10 @@ _SUTUN = 3
 
 
 class RozetView(QWidget):
-    def __init__(self, container: Container) -> None:
+    def __init__(self, container: Container, ses=None) -> None:
         super().__init__()
         self._container = container
+        self._ses = ses
 
         title = QLabel("Rozetler")
         title.setObjectName("Title")
@@ -65,7 +66,9 @@ class RozetView(QWidget):
             kritik_yasandi=self._container.rozet.kritik_yasandi_mi(),
             combo_yasandi=self._container.rozet.combo_yasandi_mi(),
         )
-        self._container.rozet.degerlendir(durum)
+        yeni = self._container.rozet.degerlendir(durum)
+        if yeni and self._ses is not None:
+            self._ses.cal("rozet")
 
         while self._grid.count():
             item = self._grid.takeAt(0)

@@ -23,7 +23,11 @@ from PyQt6.QtWidgets import (
 )
 
 from leveltodo.bootstrap import Container
+from leveltodo.domain.events import DusmanDevrildi, SeviyeAtlandi, TaskCompleted
+from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
+from leveltodo.infrastructure.sound.secim import tamamlama_sesi
+from leveltodo.infrastructure.sound.ses_motoru import SesMotoru
 from leveltodo.presentation.common.toast import ToastYoneticisi
 from leveltodo.presentation.views.admin.admin_view import AdminView
 from leveltodo.presentation.views.avatar.avatar_view import AvatarEditorView
@@ -46,16 +50,21 @@ class MainWindow(QWidget):
         self.setWindowTitle("LevelTodo")
         self.resize(1180, 760)
 
+        # Ses motoru (efektler) — görünümlerden önce kurulur ki onlara verilebilsin.
+        self._ses = SesMotoru(paths.assets_dir() / "sounds", container.settings)
+
         # — Sayfalar —
         self._dashboard = DashboardView(container, bridge)
-        self._irade = IradeView(container)
+        self._irade = IradeView(container, self._ses)
         self._rutin = RutinView(container)
         self._gunluk = GunlukView(container)
         self._telafi = TelafiView(container)
         self._avatar_editor = AvatarEditorView()
-        self._rozetler = RozetView(container)
+        self._rozetler = RozetView(container, self._ses)
         settings_vm = SettingsViewModel(container.settings)
-        self._settings = SettingsView(settings_vm, container.yedekleyici, container.bildirim)
+        self._settings = SettingsView(
+            settings_vm, container.yedekleyici, container.bildirim, self._ses
+        )
         self._admin = AdminView(container)
 
         self._stack = QStackedWidget()
@@ -92,6 +101,17 @@ class MainWindow(QWidget):
         # Uygulama-içi toast'ı garantili bildirim kanalı olarak kaydet.
         self._toast = ToastYoneticisi(self)
         container.bildirim.kanal_ekle(self._toast.goster)
+
+        # Olaylara göre ses çal (UI thread'inde, köprü üzerinden güvenli).
+        bridge.domain_event.connect(self._ses_isle)
+
+    def _ses_isle(self, event: object) -> None:
+        if isinstance(event, TaskCompleted):
+            self._ses.cal(tamamlama_sesi(event.kritik, event.combo_tetik))
+        elif isinstance(event, SeviyeAtlandi):
+            self._ses.cal("seviye")
+        elif isinstance(event, DusmanDevrildi):
+            self._ses.cal("dusman_devrildi")
 
     def _build_nav(self) -> QVBoxLayout:
         nav = QVBoxLayout()
