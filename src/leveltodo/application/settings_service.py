@@ -38,6 +38,9 @@ DEFAULTS: dict[str, Any] = {
     "bildirim_sessiz_acik": True,
     "bildirim_sessiz_baslangic": 23,
     "bildirim_sessiz_bitis": 7,
+    "mentor_son_durtme_gun": "",
+    "dusman_son_kiskirtma_gun": "",
+    "amnesti_son_uyari_gun": "",
 }
 
 

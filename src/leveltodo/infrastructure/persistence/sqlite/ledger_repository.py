@@ -54,6 +54,21 @@ class SqlLedgerRepository:
             )
             return {stat: int(toplam) for stat, toplam in s.execute(stmt).all()}
 
+    def son_stat_gunleri(self, user_id: str) -> dict[str, date]:
+        """Her stat için son pozitif XP kazanım günü {stat: gun}. Hiç dokunulmamış
+        statlar (kaydı olmayanlar) sonuçta yer almaz."""
+        with self._sf() as s:
+            stmt = (
+                select(XpEvent.stat, func.max(XpEvent.day))
+                .where(
+                    XpEvent.user_id == user_id,
+                    XpEvent.stat.is_not(None),
+                    XpEvent.amount > 0,
+                )
+                .group_by(XpEvent.stat)
+            )
+            return {stat: gun for stat, gun in s.execute(stmt).all()}
+
     def totals(self, user_id: str) -> tuple[int, int]:
         with self._sf() as s:
             xp = s.scalar(

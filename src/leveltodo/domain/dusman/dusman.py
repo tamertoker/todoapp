@@ -32,8 +32,25 @@ DUSMANLAR: list[Dusman] = [
 ]
 
 
+# Düşmanın ara sıra fısıldadığı kışkırtmalar — seni tembelliğe çağıran ses.
+KISKIRTMALAR: tuple[str, ...] = (
+    "Amaan, bugün de olmadı; yarın nasılsa yaparsın...",
+    "Otur otur, görevler kaçmıyor ya.",
+    "Bir mola daha? Sonuçta hak ettin.",
+    "Yarın bol bol vaktin olacak, merak etme.",
+    "Bugünlük bu kadar yeter, kendine bu kadar yüklenme.",
+    "Şu an pek havanda değilsin, zorlama.",
+    "Küçük bir es ver; zaten dünya kurtarmıyorsun.",
+)
+
+
 def dusman_getir(tier: int) -> Dusman:
     return DUSMANLAR[tier % len(DUSMANLAR)]
+
+
+def kiskirtma_sec(tohum: int) -> str:
+    """Verilen tohuma (ör. günün sıra numarası) göre bir kışkırtma seçer."""
+    return KISKIRTMALAR[tohum % len(KISKIRTMALAR)]
 
 
 def max_hp(tier: int) -> int:

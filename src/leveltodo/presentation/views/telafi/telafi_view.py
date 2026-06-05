@@ -9,9 +9,19 @@ from __future__ import annotations
 
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtGui import QShowEvent
-from PyQt6.QtWidgets import QFrame, QLabel, QScrollArea, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 from leveltodo.application.gorev_servisi import GorevSatiri
+from leveltodo.application.mentor_servisi import AMNESTI_ESIK
 from leveltodo.bootstrap import Container
 from leveltodo.presentation.views.dashboard.bitir_dialog import BitirDialog
 from leveltodo.presentation.views.dashboard.gorev_satir_widget import (
@@ -75,6 +85,8 @@ class TelafiView(QWidget):
             bos.setObjectName("Subtitle")
             self._liste_layout.addWidget(bos)
         else:
+            if len(satirlar) >= AMNESTI_ESIK:
+                self._liste_layout.addWidget(self._amnesti_afis(len(satirlar)))
             for satir in satirlar:
                 frame = kronometreli_satir(
                     satir,
@@ -88,6 +100,34 @@ class TelafiView(QWidget):
                 )
                 self._liste_layout.addWidget(frame)
         self._liste_layout.addStretch(1)
+
+    def _amnesti_afis(self, adet: int) -> QFrame:
+        frame = QFrame()
+        frame.setObjectName("TaskRow")
+        h = QHBoxLayout(frame)
+        h.setContentsMargins(12, 10, 12, 10)
+        h.setSpacing(8)
+        metin = QLabel(
+            f"{adet} kaçan görev birikti. İstersen hepsini tek seferde affet — "
+            "yük sıfırlansın, taze başla."
+        )
+        metin.setWordWrap(True)
+        affet = QPushButton("Yükü affet")
+        affet.clicked.connect(self._amnesti)
+        h.addWidget(metin, stretch=1)
+        h.addWidget(affet)
+        return frame
+
+    def _amnesti(self) -> None:
+        onay = QMessageBox.question(
+            self,
+            "Yükü affet",
+            "Tüm kaçan görevler ödülsüz kapatılacak ve liste temizlenecek. Emin misin?",
+        )
+        if onay == QMessageBox.StandardButton.Yes:
+            self._container.gorevler.telafi_amnesti_uygula()
+            self.yenile()
+            self.degisti.emit()
 
     def _tick(self) -> None:
         simdi = self._container.saat.simdi()

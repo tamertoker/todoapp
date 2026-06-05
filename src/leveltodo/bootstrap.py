@@ -19,6 +19,7 @@ from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.gunluk_servisi import GunlukServisi
 from leveltodo.application.irade_servisi import IradeServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
+from leveltodo.application.mentor_servisi import MentorServisi
 from leveltodo.application.rozet_servisi import RozetServisi
 from leveltodo.application.rutin_servisi import RutinServisi
 from leveltodo.application.seri_servisi import SeriServisi
@@ -64,6 +65,7 @@ class Container:
     gunluk: GunlukServisi
     yedekleyici: Yedekleyici
     bildirim: BildirimServisi
+    mentor: MentorServisi
 
 
 def build_container(
@@ -145,6 +147,17 @@ def build_container(
     bildirim = BildirimServisi(settings, aktif_saat)
     bildirim.kanal_ekle(plyer_kanali)  # OS bildirimi (best-effort)
 
+    mentor = MentorServisi(
+        defter_repo,
+        dusman,
+        gorevler,
+        bildirim,
+        settings,
+        aktif_saat,
+        lambda: settings.day_start_hour,
+        aktif_sans,
+    )
+
     return Container(
         saat=aktif_saat,
         olay_hatti=olay_hatti,
@@ -163,4 +176,5 @@ def build_container(
         gunluk=gunluk,
         yedekleyici=yedekleyici,
         bildirim=bildirim,
+        mentor=mentor,
     )

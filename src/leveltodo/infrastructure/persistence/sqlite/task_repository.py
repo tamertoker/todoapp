@@ -143,6 +143,35 @@ class SqlTaskRepository:
             )
             return [(inst, rec, seri) for inst, rec, seri in s.execute(stmt).all()]
 
+    def gecmis_bekleyenleri_amnesti(
+        self, user_id: str, bugun: date, pencere_basi: date, simdi: datetime
+    ) -> int:
+        """Telafi penceresindeki tüm bekleyen geçmiş kayıtları ödülsüz 'yapıldı'
+        işaretler (yük affı). Böylece listeden çıkar ve yeniden üretilmez."""
+        with self._sf() as s:
+            stmt = (
+                select(TaskInstance)
+                .join(Task, Task.id == TaskInstance.task_id)
+                .where(
+                    TaskInstance.user_id == user_id,
+                    Task.is_active.is_(True),
+                    Task.recurrence != "none",
+                    TaskInstance.status == "pending",
+                    TaskInstance.day < bugun,
+                    TaskInstance.day >= pencere_basi,
+                )
+            )
+            kayitlar = list(s.scalars(stmt))
+            for inst in kayitlar:
+                inst.status = "done"
+                inst.reward_xp = 0
+                inst.reward_points = 0
+                inst.completed_at = simdi
+                inst.timer_running = False
+                inst.segment_started_at = None
+            s.commit()
+            return len(kayitlar)
+
     def complete_instance(
         self,
         *,

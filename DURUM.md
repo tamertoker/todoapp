@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — commit `73a1f4f`, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **124 test yeşil**, ruff temiz.
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **127 test yeşil**, ruff temiz.
 - Stack: Python 3.12.8 · PyQt6 · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid.
 
 ## Bitti ✅
@@ -40,12 +40,18 @@
   #Toast). Ayarlar'da "Bildirimler" paneli. bootstrap: plyer kanalı + main_window toast
   kanalı. `tests/integration/test_bildirim.py`. plyer bağımlılık eklendi.
 
+- **Faz 6.3 — Mesajlar**: `domain/mentor/mesajlar.py` (Mentor dürtme havuzu),
+  `domain/dusman` KISKIRTMALAR + `kiskirtma_sec`, `application/mentor_servisi.py`
+  (`MentorServisi.periyodik_kontrol`: ihmal eşiği 3 gün dürtme + %15 düşman kışkırtma +
+  amnesti eşiği 10 uyarı; her biri gün başına tek). ledger `son_stat_gunleri`,
+  gorev_servisi `telafi_sayisi`/`telafi_amnesti_uygula` + repo `gecmis_bekleyenleri_amnesti`.
+  app.py'de 30dk periyodik QTimer + açılışta bir kez. Telafi ekranında "Yükü affet"
+  afişi (≥10). `tests/integration/test_mentor.py`.
+
 ## Sırada ⏸️ — Faz 6 (kod-yalnız önce, ses en sona)
 Onaylı plan: `~/.claude/plans/t-m-plan-uydu-a-k-lexical-steele.md`. Sıra:
-- **6.3** Düşman kışkırtma mesajları + **Mentor dürtmeleri** (6.2'den taşındı) + telafi
-  amnesti uyarısı. (Hepsi 6.2 bildirim altyapısını kullanır.)
-- **6.4** Uyandırma disiplini. **6.5** Ses motoru (burada kullanıcıdan CC0 ses dosyası
-  istenecek). **6.6** Pixel font.
+- **6.4** Uyandırma disiplini (akşam hedef saat → sabah gerçek saat → ödül/ceza).
+- **6.5** Ses motoru (burada kullanıcıdan CC0 ses dosyası istenecek). **6.6** Pixel font.
 - Sonra Faz 7 → 8 → 9. **Push edilmedi** (kullanıcı "hadi" deyince).
 
 ## Çalışma kuralları (özet — tam hâli CLAUDE.md'de)

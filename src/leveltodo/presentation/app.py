@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import sys
 
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QApplication
 
 from leveltodo.bootstrap import Container
@@ -38,6 +39,12 @@ class LevelTodoApp:
         # Temiz çıkışta çalışan kronometreyi kaydet (kısa süreler bile kaybolmasın).
         self.qapp.aboutToQuit.connect(container.kronometre.checkpoint)
 
+        # Mentor/düşman/amnesti mesajlarını periyodik değerlendir (gün içinde).
+        self._mentor_timer = QTimer(self.qapp)
+        self._mentor_timer.setInterval(30 * 60 * 1000)  # 30 dakika
+        self._mentor_timer.timeout.connect(container.mentor.periyodik_kontrol)
+        self._mentor_timer.start()
+
     def _apply_theme(self, theme: str) -> None:
         palette = get_palette(theme)
         up_arrow, down_arrow = ok_yollari(palette.text)
@@ -49,4 +56,5 @@ class LevelTodoApp:
     def run(self) -> int:
         self.window.show()
         self.container.olay_hatti.publish(AppStarted(occurred_at=self.container.saat.simdi()))
+        self.container.mentor.periyodik_kontrol()  # açılışta bir kez
         return self.qapp.exec()

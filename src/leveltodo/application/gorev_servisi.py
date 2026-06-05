@@ -213,6 +213,19 @@ class GorevServisi:
             for kayit, tekrar, seri in satirlar
         ]
 
+    def telafi_sayisi(self) -> int:
+        return len(self.telafi_gorevleri())
+
+    def telafi_amnesti_uygula(self) -> int:
+        """Kaçan görev yığınını affeder: penceredeki bekleyen geçmiş kayıtları
+        ödülsüz kapatır. Kaç kaydın affedildiğini döner."""
+        self.telafi_gorevleri()  # eksik geçmiş kayıtları önce üret
+        bugun = self._bugun()
+        pencere_basi = bugun - timedelta(days=_TELAFI_PENCERE_GUN)
+        return self._gorev.gecmis_bekleyenleri_amnesti(
+            self._user_id, bugun, pencere_basi, self._saat.simdi()
+        )
+
     def _gunluk_kayitlari_uret(self, gun) -> None:
         for sablon in self._gorev.aktif_tekrarli_sablonlar(self._user_id):
             # Çapa, takvim tarihi değil mantıksal oluşturma günü olmalı; böylece
