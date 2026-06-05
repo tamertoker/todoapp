@@ -54,7 +54,7 @@ class MainWindow(QWidget):
         self._avatar_editor = AvatarEditorView()
         self._rozetler = RozetView(container)
         settings_vm = SettingsViewModel(container.settings)
-        self._settings = SettingsView(settings_vm)
+        self._settings = SettingsView(settings_vm, container.yedekleyici)
         self._admin = AdminView(container)
 
         self._stack = QStackedWidget()

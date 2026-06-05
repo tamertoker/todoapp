@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — commit `73a1f4f`, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **117 test yeşil**, ruff temiz.
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **120 test yeşil**, ruff temiz.
 - Stack: Python 3.12.8 · PyQt6 · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid.
 
 ## Bitti ✅
@@ -26,11 +26,19 @@
   (`RutinTuru.METIN`, migration 0010 `value_text`, `metin_gir`, view metin satırı);
   **telafi 2× ödül** (`TELAFI_CARPAN`, `gorev_servisi.tamamla` geçmiş-gün dalı).
 
-## Sırada ⏸️
-- **Faz 6** (plana göre sıradaki): Bildirim + Ses + Yedek + Uyandırma + düşman kışkırtma
-  mesajları + telafi amnesti uyarısı + pixel font. Plan dosyası: `~/.claude/plans/
-  t-m-plan-uydu-a-k-lexical-steele.md`. Sonra 7 → 8 → 9.
-- **Push edilmedi** (kullanıcı "hadi" deyince). Onaylı plan dosyasında tüm yol haritası var.
+- **Faz 6.1 — Veri yedekleme/geri yükleme**: `infrastructure/backup/yedekleme.py`
+  (`Yedekleyici`: sqlite_yedek_al, json_disa_aktar, geri_yukle_isaretle +
+  bekleyen_geri_yukleme_uygula). Geri yükleme `<db>.restore` işaretiyle açılışta
+  (motor öncesi, bootstrap) uygulanır — kilit sorunu yok. Ayarlar'da "Veri" paneli
+  (yedek al / JSON / geri yükle). `tests/integration/test_backup.py`.
+
+## Sırada ⏸️ — Faz 6 (kod-yalnız önce, ses en sona)
+Onaylı plan: `~/.claude/plans/t-m-plan-uydu-a-k-lexical-steele.md`. Sıra:
+- **6.2** Bildirim altyapısı (plyer + uygulama-içi toast) + kategoriler + gece sessizliği.
+- **6.3** Düşman kışkırtma mesajları + Mentor dürtmeleri + telafi amnesti uyarısı.
+- **6.4** Uyandırma disiplini. **6.5** Ses motoru (burada kullanıcıdan CC0 ses dosyası
+  istenecek). **6.6** Pixel font.
+- Sonra Faz 7 → 8 → 9. **Push edilmedi** (kullanıcı "hadi" deyince).
 
 ## Çalışma kuralları (özet — tam hâli CLAUDE.md'de)
 - Kullanıcı teknik değil → her değişiklikten sonra sade Türkçe anlat; soruları sonuç-odaklı sor; arayüz tamamen Türkçe.

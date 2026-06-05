@@ -25,6 +25,7 @@ from leveltodo.application.settings_service import SettingsService
 from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.sans import Sans
 from leveltodo.domain.time.saat import Saat
+from leveltodo.infrastructure.backup.yedekleme import Yedekleyici, db_dosya_yolu
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
 from leveltodo.infrastructure.persistence.sqlite.bootstrap_data import ensure_default_user
@@ -59,12 +60,17 @@ class Container:
     irade: IradeServisi
     rutin: RutinServisi
     gunluk: GunlukServisi
+    yedekleyici: Yedekleyici
 
 
 def build_container(
     db_url: str | None = None, saat: Saat | None = None, sans: Sans | None = None
 ) -> Container:
     url = db_url or paths.db_url()
+
+    # Motoru açmadan ÖNCE: bekleyen bir geri yükleme varsa veritabanını değiştir.
+    db_dosyasi = db_dosya_yolu(url)
+    Yedekleyici.bekleyen_geri_yukleme_uygula(db_dosyasi)
 
     upgrade_to_head(url)
     engine, session_factory = create_engine_and_factory(url)
@@ -131,6 +137,8 @@ def build_container(
         lambda: gorevler.profil_durumu()[0],
     )
 
+    yedekleyici = Yedekleyici(db_dosyasi)
+
     return Container(
         saat=aktif_saat,
         olay_hatti=olay_hatti,
@@ -147,4 +155,5 @@ def build_container(
         irade=irade,
         rutin=rutin,
         gunluk=gunluk,
+        yedekleyici=yedekleyici,
     )
