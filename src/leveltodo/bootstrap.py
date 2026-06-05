@@ -24,6 +24,7 @@ from leveltodo.application.rozet_servisi import RozetServisi
 from leveltodo.application.rutin_servisi import RutinServisi
 from leveltodo.application.seri_servisi import SeriServisi
 from leveltodo.application.settings_service import SettingsService
+from leveltodo.application.uyandirma_servisi import UyandirmaServisi
 from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.sans import Sans
 from leveltodo.domain.time.saat import Saat
@@ -42,6 +43,9 @@ from leveltodo.infrastructure.persistence.sqlite.rutin_repository import SqlRuti
 from leveltodo.infrastructure.persistence.sqlite.settings_repository import SqlSettingsRepository
 from leveltodo.infrastructure.persistence.sqlite.streak_repository import SqlStreakRepository
 from leveltodo.infrastructure.persistence.sqlite.task_repository import SqlTaskRepository
+from leveltodo.infrastructure.persistence.sqlite.uyandirma_repository import (
+    SqlUyandirmaRepository,
+)
 from leveltodo.infrastructure.saat import AyarlanabilirSaat
 from leveltodo.infrastructure.sans import GercekSans
 
@@ -66,6 +70,7 @@ class Container:
     yedekleyici: Yedekleyici
     bildirim: BildirimServisi
     mentor: MentorServisi
+    uyandirma: UyandirmaServisi
 
 
 def build_container(
@@ -147,6 +152,17 @@ def build_container(
     bildirim = BildirimServisi(settings, aktif_saat)
     bildirim.kanal_ekle(plyer_kanali)  # OS bildirimi (best-effort)
 
+    uyandirma_repo = SqlUyandirmaRepository(session_factory)
+    uyandirma = UyandirmaServisi(
+        uyandirma_repo,
+        defter_repo,
+        settings,
+        aktif_saat,
+        lambda: settings.day_start_hour,
+        dondurma,
+        lambda: gorevler.profil_durumu()[0],
+    )
+
     mentor = MentorServisi(
         defter_repo,
         dusman,
@@ -177,4 +193,5 @@ def build_container(
         yedekleyici=yedekleyici,
         bildirim=bildirim,
         mentor=mentor,
+        uyandirma=uyandirma,
     )

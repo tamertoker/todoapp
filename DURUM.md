@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — commit `73a1f4f`, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **127 test yeşil**, ruff temiz.
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **131 test yeşil**, ruff temiz.
 - Stack: Python 3.12.8 · PyQt6 · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid.
 
 ## Bitti ✅
@@ -48,10 +48,17 @@
   app.py'de 30dk periyodik QTimer + açılışta bir kez. Telafi ekranında "Yükü affet"
   afişi (≥10). `tests/integration/test_mentor.py`.
 
-## Sırada ⏸️ — Faz 6 (kod-yalnız önce, ses en sona)
+- **Faz 6.4 — Uyandırma disiplini**: `domain/uyandirma` (`dakikaya`, `uyanma_basarili_mi`,
+  ODUL 50, TOLERANS 15dk), `WakeLog` (migration 0011, user+day unique),
+  `SqlUyandirmaRepository`, `UyandirmaServisi` (hedef get/set, `kalktim` → zamanındaysa
+  Disiplin'e XP, gün başına tek, **ceza yok**). İrade ekranında uyandırma kartı
+  (QTimeEdit hedef + "Kalktım" + sonuç). `tests/integration/test_uyandirma.py`.
+
+## Sırada ⏸️ — Faz 6 (ses + font, ASSET gerektirir)
 Onaylı plan: `~/.claude/plans/t-m-plan-uydu-a-k-lexical-steele.md`. Sıra:
-- **6.4** Uyandırma disiplini (akşam hedef saat → sabah gerçek saat → ödül/ceza).
-- **6.5** Ses motoru (burada kullanıcıdan CC0 ses dosyası istenecek). **6.6** Pixel font.
+- **6.5** Ses motoru (QSoundEffect) — kod kurulur ama **kullanıcıdan CC0 .wav ses
+  dosyaları istenecek** (asset-shortfall). Dosya yoksa sessiz çalışır.
+- **6.6** Pixel-art font (kullanıcıdan .ttf istenecek; yoksa fallback monospace).
 - Sonra Faz 7 → 8 → 9. **Push edilmedi** (kullanıcı "hadi" deyince).
 
 ## Çalışma kuralları (özet — tam hâli CLAUDE.md'de)

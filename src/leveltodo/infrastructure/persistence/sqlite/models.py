@@ -206,6 +206,22 @@ class JournalEntry(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
+class WakeLog(Base):
+    """Uyandırma kaydı — gün başına tek. Hedef ve gerçek kalkış saati (HH:MM) ile
+    o günün başarılı olup olmadığı. Başarılı günler Disiplin'e XP yazar."""
+
+    __tablename__ = "wake_logs"
+    __table_args__ = (UniqueConstraint("user_id", "day", name="uq_wake_user_day"),)
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    day: Mapped[date] = mapped_column(Date)
+    hedef: Mapped[str] = mapped_column(String(5))
+    gercek: Mapped[str] = mapped_column(String(5))
+    basarili: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class ReflectionQuestion(Base):
     """Kullanıcının eklediği yansıtma sorusu. Hazır havuz koda gömülüdür; bu tablo
     yalnızca kullanıcının kendi eklediklerini tutar. Silme = is_active False."""
