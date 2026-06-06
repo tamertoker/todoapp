@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import sessionmaker
 
 from leveltodo.infrastructure.persistence.sqlite.models import Task, TaskInstance
@@ -195,6 +195,71 @@ class SqlTaskRepository:
             inst.segment_started_at = None
             s.commit()
             return True
+
+    # — İstatistik toplama —
+    def gunluk_calisma(self, user_id: str, bas: date, bit: date) -> dict[date, int]:
+        """Aralıktaki her gün için toplam çalışma saniyesi {gun: saniye}."""
+        with self._sf() as s:
+            stmt = (
+                select(
+                    TaskInstance.day,
+                    func.coalesce(func.sum(TaskInstance.committed_seconds), 0),
+                )
+                .where(
+                    TaskInstance.user_id == user_id,
+                    TaskInstance.day >= bas,
+                    TaskInstance.day <= bit,
+                )
+                .group_by(TaskInstance.day)
+            )
+            return {gun: int(sn) for gun, sn in s.execute(stmt).all()}
+
+    def gunluk_tamamlama(self, user_id: str, bas: date, bit: date) -> dict[date, int]:
+        """Aralıktaki her gün tamamlanan görev sayısı {gun: adet}."""
+        with self._sf() as s:
+            stmt = (
+                select(TaskInstance.day, func.count())
+                .where(
+                    TaskInstance.user_id == user_id,
+                    TaskInstance.status == "done",
+                    TaskInstance.day >= bas,
+                    TaskInstance.day <= bit,
+                )
+                .group_by(TaskInstance.day)
+            )
+            return {gun: int(adet) for gun, adet in s.execute(stmt).all()}
+
+    def en_uzun_kronometre(self, user_id: str) -> int:
+        with self._sf() as s:
+            return int(
+                s.scalar(
+                    select(func.coalesce(func.max(TaskInstance.committed_seconds), 0)).where(
+                        TaskInstance.user_id == user_id
+                    )
+                )
+            )
+
+    def en_uzun_gorev_serisi(self, user_id: str) -> int:
+        with self._sf() as s:
+            return int(
+                s.scalar(
+                    select(func.coalesce(func.max(Task.streak_count), 0)).where(
+                        Task.user_id == user_id
+                    )
+                )
+            )
+
+    def en_cok_gorev_gun(self, user_id: str) -> tuple[date | None, int]:
+        with self._sf() as s:
+            stmt = (
+                select(TaskInstance.day, func.count().label("c"))
+                .where(TaskInstance.user_id == user_id, TaskInstance.status == "done")
+                .group_by(TaskInstance.day)
+                .order_by(func.count().desc())
+                .limit(1)
+            )
+            satir = s.execute(stmt).first()
+            return (satir[0], int(satir[1])) if satir else (None, 0)
 
     # — Kronometre —
     def calisan_kayitlar(self, user_id: str) -> list[TaskInstance]:

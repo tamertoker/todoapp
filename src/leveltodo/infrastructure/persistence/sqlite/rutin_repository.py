@@ -74,6 +74,20 @@ class SqlRutinRepository:
             return (enbuyuk or 0) + 1
 
     # — Günlük değerler —
+    def gunluk_degerler(self, field_id: str, bas: date, bit: date) -> dict[date, int]:
+        """Bir rutin alanının aralıktaki günlük sayısal değerleri {gun: deger}."""
+        with self._sf() as s:
+            stmt = (
+                select(RoutineEntry.day, RoutineEntry.value)
+                .where(
+                    RoutineEntry.field_id == field_id,
+                    RoutineEntry.day >= bas,
+                    RoutineEntry.day <= bit,
+                )
+                .order_by(RoutineEntry.day)
+            )
+            return {gun: int(deger) for gun, deger in s.execute(stmt).all()}
+
     def gun_kaydi(self, field_id: str, day: date) -> RoutineEntry | None:
         with self._sf() as s:
             stmt = select(RoutineEntry).where(

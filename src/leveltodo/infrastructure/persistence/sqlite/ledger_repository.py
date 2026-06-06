@@ -69,6 +69,29 @@ class SqlLedgerRepository:
             )
             return {stat: gun for stat, gun in s.execute(stmt).all()}
 
+    def gunluk_xp(self, user_id: str, bas: date, bit: date) -> dict[date, int]:
+        """Aralıktaki her gün için net XP toplamı {gun: xp}."""
+        with self._sf() as s:
+            stmt = (
+                select(XpEvent.day, func.coalesce(func.sum(XpEvent.amount), 0))
+                .where(XpEvent.user_id == user_id, XpEvent.day >= bas, XpEvent.day <= bit)
+                .group_by(XpEvent.day)
+            )
+            return {gun: int(xp) for gun, xp in s.execute(stmt).all()}
+
+    def en_uretken_gun(self, user_id: str) -> tuple[date | None, int]:
+        """Tek günde kazanılan en yüksek XP (gun, xp). Kayıt yoksa (None, 0)."""
+        with self._sf() as s:
+            stmt = (
+                select(XpEvent.day, func.coalesce(func.sum(XpEvent.amount), 0).label("t"))
+                .where(XpEvent.user_id == user_id)
+                .group_by(XpEvent.day)
+                .order_by(func.sum(XpEvent.amount).desc())
+                .limit(1)
+            )
+            satir = s.execute(stmt).first()
+            return (satir[0], int(satir[1])) if satir else (None, 0)
+
     def totals(self, user_id: str) -> tuple[int, int]:
         with self._sf() as s:
             xp = s.scalar(

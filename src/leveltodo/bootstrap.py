@@ -18,6 +18,7 @@ from leveltodo.application.dusman_servisi import DusmanServisi
 from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.gunluk_servisi import GunlukServisi
 from leveltodo.application.irade_servisi import IradeServisi
+from leveltodo.application.istatistik_servisi import IstatistikServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
 from leveltodo.application.mentor_servisi import MentorServisi
 from leveltodo.application.rozet_servisi import RozetServisi
@@ -71,6 +72,7 @@ class Container:
     bildirim: BildirimServisi
     mentor: MentorServisi
     uyandirma: UyandirmaServisi
+    istatistik: IstatistikServisi
 
 
 def build_container(
@@ -165,6 +167,15 @@ def build_container(
         lambda: gorevler.profil_durumu()[0],
     )
 
+    istatistik = IstatistikServisi(
+        defter_repo,
+        gorev_repo,
+        rutin_repo,
+        streak_repo,
+        aktif_saat,
+        lambda: settings.day_start_hour,
+    )
+
     mentor = MentorServisi(
         defter_repo,
         dusman,
@@ -196,4 +207,5 @@ def build_container(
         bildirim=bildirim,
         mentor=mentor,
         uyandirma=uyandirma,
+        istatistik=istatistik,
     )
