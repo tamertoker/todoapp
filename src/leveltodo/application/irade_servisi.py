@@ -66,3 +66,10 @@ class IradeServisi:
 
     def son_eylemler(self) -> list[WillAct]:
         return self._irade.son_eylemler(self._user_id)
+
+    def baslik_onerileri(self) -> list[str]:
+        return self._irade.baslik_onerileri(self._user_id)
+
+    def eylem_oneri(self, baslik: str) -> WillAct | None:
+        """Verilen başlıklı son irade eylemi (autofill: XP için). Yoksa None."""
+        return self._irade.son_eylem_baslikli(self._user_id, baslik)

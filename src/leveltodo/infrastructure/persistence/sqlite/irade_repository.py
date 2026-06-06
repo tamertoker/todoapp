@@ -34,3 +34,26 @@ class SqlIradeRepository:
                 .limit(limit)
             )
             return list(s.scalars(stmt))
+
+    def baslik_onerileri(self, user_id: str) -> list[str]:
+        with self._sf() as s:
+            stmt = (
+                select(WillAct.title)
+                .where(WillAct.user_id == user_id)
+                .order_by(WillAct.created_at.desc())
+            )
+            gorulen: list[str] = []
+            for (baslik,) in s.execute(stmt).all():
+                if baslik not in gorulen:
+                    gorulen.append(baslik)
+            return gorulen
+
+    def son_eylem_baslikli(self, user_id: str, baslik: str) -> WillAct | None:
+        with self._sf() as s:
+            stmt = (
+                select(WillAct)
+                .where(WillAct.user_id == user_id, WillAct.title == baslik)
+                .order_by(WillAct.created_at.desc())
+                .limit(1)
+            )
+            return s.scalar(stmt)

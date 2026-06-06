@@ -196,6 +196,31 @@ class SqlTaskRepository:
             s.commit()
             return True
 
+    # — Autofill (öneri) —
+    def baslik_onerileri(self, user_id: str) -> list[str]:
+        """Geçmiş görev başlıkları, en yeniden eskiye, tekrarsız."""
+        with self._sf() as s:
+            stmt = (
+                select(Task.title)
+                .where(Task.user_id == user_id)
+                .order_by(Task.created_at.desc())
+            )
+            gorulen: list[str] = []
+            for (baslik,) in s.execute(stmt).all():
+                if baslik not in gorulen:
+                    gorulen.append(baslik)
+            return gorulen
+
+    def son_sablon_baslikli(self, user_id: str, baslik: str) -> Task | None:
+        with self._sf() as s:
+            stmt = (
+                select(Task)
+                .where(Task.user_id == user_id, Task.title == baslik)
+                .order_by(Task.created_at.desc())
+                .limit(1)
+            )
+            return s.scalar(stmt)
+
     # — İstatistik toplama —
     def gunluk_calisma(self, user_id: str, bas: date, bit: date) -> dict[date, int]:
         """Aralıktaki her gün için toplam çalışma saniyesi {gun: saniye}."""

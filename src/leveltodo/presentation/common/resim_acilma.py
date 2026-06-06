@@ -16,7 +16,7 @@ class ResimAcilma(QWidget):
         super().__init__()
         self._pixmap: QPixmap | None = None
         self._oran = 0.0
-        self.setMinimumHeight(120)
+        self.setMinimumHeight(160)
 
     def setVeri(self, pixmap: QPixmap | None, oran: float) -> None:
         self._pixmap = pixmap
@@ -28,16 +28,18 @@ class ResimAcilma(QWidget):
         w, h = self.width(), self.height()
         acilan = int(w * self._oran)
         if self._pixmap is not None and not self._pixmap.isNull():
+            # Resmin TAMAMI görünsün: kırpmadan, oranını koruyarak sığdır (ortalı).
+            p.fillRect(0, 0, w, h, QColor("#1a1a1a"))
             olcekli = self._pixmap.scaled(
                 w,
                 h,
-                Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+                Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
-            kx = max(0, (olcekli.width() - w) // 2)
-            ky = max(0, (olcekli.height() - h) // 2)
-            p.drawPixmap(0, 0, w, h, olcekli, kx, ky, w, h)
-            if acilan < w:  # açılmamış kısmı karart
+            ox = (w - olcekli.width()) // 2
+            oy = (h - olcekli.height()) // 2
+            p.drawPixmap(ox, oy, olcekli)
+            if acilan < w:  # açılmamış kısmı karart (soldan sağa açılma efekti)
                 p.fillRect(acilan, 0, w - acilan, h, QColor(0, 0, 0, 175))
         else:
             p.fillRect(0, 0, acilan, h, QColor("#39d353"))

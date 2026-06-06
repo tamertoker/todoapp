@@ -22,6 +22,7 @@ from PyQt6.QtWidgets import (
 
 from leveltodo.domain.stats.statlar import GOREV_STATLARI, STAT_ETIKET, Stat
 from leveltodo.domain.tasks.kurallar import Tekrar
+from leveltodo.presentation.common.autofill import AutoFill
 
 _TEKRAR_SECENEKLERI = [
     ("Tek seferlik", Tekrar.YOK),
@@ -34,13 +35,21 @@ _GUN_KISA = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
 
 
 class AddTaskDialog(QDialog):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        parent: QWidget | None = None,
+        oneri_getir=None,
+        sablon_getir=None,
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Yeni Görev")
         self.setMinimumWidth(420)
+        self._sablon_getir = sablon_getir
 
         self._title = QLineEdit()
         self._title.setPlaceholderText("Görev başlığı")
+        if oneri_getir is not None:
+            self._autofill = AutoFill(self._title, oneri_getir, self._baslik_secildi)
 
         self._tekrar = QComboBox()
         for etiket, tekrar in _TEKRAR_SECENEKLERI:
@@ -131,6 +140,35 @@ class AddTaskDialog(QDialog):
         self._x_widget.setVisible(tekrar is Tekrar.HER_X_GUN)
         self._hafta_widget.setVisible(tekrar is Tekrar.HAFTALIK)
         self._ay_widget.setVisible(tekrar is Tekrar.AYLIK)
+
+    def _baslik_secildi(self, baslik: str) -> None:
+        """Öneri seçilince o başlıklı son görevin ayarlarını forma doldur."""
+        sablon = self._sablon_getir(baslik) if self._sablon_getir else None
+        if sablon is None:
+            return
+        tekrar = Tekrar(sablon.recurrence)
+        idx = self._tekrar.findData(tekrar)
+        if idx >= 0:
+            self._tekrar.setCurrentIndex(idx)
+        param = sablon.recurrence_param or ""
+        if tekrar is Tekrar.HER_X_GUN and param:
+            self._x_spin.setValue(int(param))
+        elif tekrar is Tekrar.HAFTALIK:
+            gunler = {int(g) for g in param.split(",") if g != ""}
+            for i, kutu in enumerate(self._gun_kutulari):
+                kutu.setChecked(i in gunler)
+        elif tekrar is Tekrar.AYLIK and param:
+            self._ay_spin.setValue(int(param))
+        if sablon.stat:
+            sidx = self._stat.findData(sablon.stat)
+            if sidx >= 0:
+                self._stat.setCurrentIndex(sidx)
+        if sablon.reward_override is not None:
+            self._override_check.setChecked(True)
+            self._override.setValue(sablon.reward_override)
+        else:
+            self._override_check.setChecked(False)
+        self._param_goster()
 
     def accept(self) -> None:
         if not self._title.text().strip():

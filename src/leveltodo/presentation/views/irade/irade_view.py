@@ -23,6 +23,7 @@ from PyQt6.QtWidgets import (
 )
 
 from leveltodo.bootstrap import Container
+from leveltodo.presentation.common.autofill import AutoFill
 
 
 class IradeView(QWidget):
@@ -41,6 +42,9 @@ class IradeView(QWidget):
         self._baslik = QLineEdit()
         self._baslik.setPlaceholderText("Ne yaptın? (ör. erken kalktım, ertelediğimi bitirdim)")
         self._baslik.returnPressed.connect(self._ekle)
+        self._baslik_af = AutoFill(
+            self._baslik, self._container.irade.baslik_onerileri, self._baslik_secildi
+        )
         self._xp = QSpinBox()
         self._xp.setRange(1, 1000)
         self._xp.setValue(60)
@@ -130,8 +134,14 @@ class IradeView(QWidget):
         super().showEvent(event)
         self.yenile()
 
+    def _baslik_secildi(self, metin: str) -> None:
+        eylem = self._container.irade.eylem_oneri(metin)
+        if eylem is not None:
+            self._xp.setValue(eylem.xp)
+
     def yenile(self) -> None:
         self._uyanma_yenile()
+        self._baslik_af.yenile()
         while self._liste_layout.count():
             item = self._liste_layout.takeAt(0)
             widget = item.widget()

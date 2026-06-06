@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — Faz 0-8 burada, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **148 test yeşil**, ruff temiz (kendi kod: `ruff check src/ tests/`; repo kökünde kullanıcının analiz scriptleri ruff'a takılır, bizim değil).
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **152 test yeşil**, ruff temiz (kendi kod: `ruff check src/ tests/`; repo kökünde kullanıcının analiz scriptleri ruff'a takılır, bizim değil).
 - Stack: Python 3.12.8 · PyQt6 (+QtMultimedia) · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid · plyer · pyqtgraph + numpy.
 
 ## Bitti ✅
@@ -101,6 +101,17 @@ karışmaz; Mağaza=Puan→dakika.
   `MagazaServisi` (tohumlama, ekle/sil/maliyet_ayarla, satin_al puan harcar+geçmiş).
 - "Mağaza" sekmesi: bakiye + ödül ekle + kart başına dk-maliyet düzeni + süre kutusu+çubuk
   + anlık fiyat + Satın al + geçmiş. `tests/integration/test_magaza.py`.
+
+## Autofill + wishlist resmi ✅ (kullanıcı isteği)
+- **Autofill** (`presentation/common/autofill.py` `AutoFill` — QCompleter, yazdıkça öneri;
+  seçince ilgili alanları doldur). Uygulandığı yerler: **Görev ekle** (başlık→tekrar/param/
+  stat/özel ödül; add_task_dialog oneri_getir+sablon_getir), **Cüzdan** (açıklama→tutar+tür;
+  wishlist adı→fiyat), **İrade** (başlık→xp), **Mağaza** (ödül adı→dk-maliyet). Repo+servis:
+  `baslik_onerileri`/`sablon_oneri`, `aciklama_onerileri`/`islem_oneri`, wishlist öneri,
+  irade `baslik_onerileri`/`eylem_oneri`, magaza `ad_onerileri`/`maliyet_oneri`.
+  `tests/integration/test_autofill.py`.
+- **Wishlist resmi tam görünür**: `resim_acilma.py` artık KeepAspectRatio (kırpmıyor,
+  ortalı sığdırır), yükseklik 160.
 
 ## Sırada ⏸️ — Faz 9 (son faz)
 - **Faz 9**: lore (düşman lore fragmanları) + onboarding "Mentor" NPC (ilk açılış

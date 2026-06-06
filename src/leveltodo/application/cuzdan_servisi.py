@@ -78,6 +78,13 @@ class CuzdanServisi:
     def son_islemler(self) -> list[WalletTransaction]:
         return self._repo.son_islemler(self._user_id)
 
+    def aciklama_onerileri(self) -> list[str]:
+        return self._repo.aciklama_onerileri(self._user_id)
+
+    def islem_oneri(self, aciklama: str):
+        """Verilen açıklamalı son işlem (autofill: tutar+tür için). Yoksa None."""
+        return self._repo.son_islem_aciklamali(self._user_id, aciklama)
+
     def aylik_ozet(self) -> AylikOzet:
         bugun = self._bugun()
         gelir, gider = self._repo.ay_toplamlari(self._user_id, bugun.year, bugun.month)
@@ -109,6 +116,13 @@ class CuzdanServisi:
 
     def wishlist_sil(self, oge_id: str) -> None:
         self._repo.wishlist_pasife_al(oge_id)
+
+    def wishlist_ad_onerileri(self) -> list[str]:
+        return self._repo.wishlist_ad_onerileri(self._user_id)
+
+    def wishlist_oneri(self, ad: str):
+        """Verilen adlı son wishlist öğesi (autofill: fiyat için). Yoksa None."""
+        return self._repo.son_wishlist_adli(self._user_id, ad)
 
     def wishlist(self) -> list[WishlistSatiri]:
         bakiye = self.bakiye()

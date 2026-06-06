@@ -74,6 +74,32 @@ class SqlCuzdanRepository:
             )
             return list(s.scalars(stmt))
 
+    def aciklama_onerileri(self, user_id: str) -> list[str]:
+        with self._sf() as s:
+            stmt = (
+                select(WalletTransaction.aciklama)
+                .where(WalletTransaction.user_id == user_id, WalletTransaction.aciklama != "")
+                .order_by(WalletTransaction.created_at.desc())
+            )
+            gorulen: list[str] = []
+            for (aciklama,) in s.execute(stmt).all():
+                if aciklama not in gorulen:
+                    gorulen.append(aciklama)
+            return gorulen
+
+    def son_islem_aciklamali(self, user_id: str, aciklama: str) -> WalletTransaction | None:
+        with self._sf() as s:
+            stmt = (
+                select(WalletTransaction)
+                .where(
+                    WalletTransaction.user_id == user_id,
+                    WalletTransaction.aciklama == aciklama,
+                )
+                .order_by(WalletTransaction.created_at.desc())
+                .limit(1)
+            )
+            return s.scalar(stmt)
+
     # — Wishlist —
     def wishlist_ekle(
         self,
@@ -113,6 +139,29 @@ class SqlCuzdanRepository:
             if oge is not None:
                 oge.is_active = False
                 s.commit()
+
+    def wishlist_ad_onerileri(self, user_id: str) -> list[str]:
+        with self._sf() as s:
+            stmt = (
+                select(WishlistItem.name)
+                .where(WishlistItem.user_id == user_id)
+                .order_by(WishlistItem.created_at.desc())
+            )
+            gorulen: list[str] = []
+            for (ad,) in s.execute(stmt).all():
+                if ad not in gorulen:
+                    gorulen.append(ad)
+            return gorulen
+
+    def son_wishlist_adli(self, user_id: str, ad: str) -> WishlistItem | None:
+        with self._sf() as s:
+            stmt = (
+                select(WishlistItem)
+                .where(WishlistItem.user_id == user_id, WishlistItem.name == ad)
+                .order_by(WishlistItem.created_at.desc())
+                .limit(1)
+            )
+            return s.scalar(stmt)
 
     def wishlist_sonraki_sira(self, user_id: str) -> int:
         with self._sf() as s:

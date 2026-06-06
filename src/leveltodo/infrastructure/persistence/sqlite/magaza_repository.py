@@ -57,6 +57,29 @@ class SqlMagazaRepository:
                 odul.cost_per_min = cost_per_min
                 s.commit()
 
+    def ad_onerileri(self, user_id: str) -> list[str]:
+        with self._sf() as s:
+            stmt = (
+                select(StoreReward.name)
+                .where(StoreReward.user_id == user_id)
+                .order_by(StoreReward.created_at.desc())
+            )
+            gorulen: list[str] = []
+            for (ad,) in s.execute(stmt).all():
+                if ad not in gorulen:
+                    gorulen.append(ad)
+            return gorulen
+
+    def son_odul_adli(self, user_id: str, ad: str) -> StoreReward | None:
+        with self._sf() as s:
+            stmt = (
+                select(StoreReward)
+                .where(StoreReward.user_id == user_id, StoreReward.name == ad)
+                .order_by(StoreReward.created_at.desc())
+                .limit(1)
+            )
+            return s.scalar(stmt)
+
     def sonraki_sira(self, user_id: str) -> int:
         with self._sf() as s:
             enbuyuk = s.scalar(

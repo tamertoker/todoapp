@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
 
 from leveltodo.bootstrap import Container
 from leveltodo.domain.cuzdan.cuzdan import kurus_tl
+from leveltodo.presentation.common.autofill import AutoFill
 from leveltodo.presentation.common.resim_acilma import ResimAcilma
 
 
@@ -122,6 +123,9 @@ class CuzdanView(QWidget):
         self._tur.addItem("Gider", "gider")
         self._aciklama = QLineEdit()
         self._aciklama.setPlaceholderText("Açıklama (ör. maaş, market)")
+        self._aciklama_af = AutoFill(
+            self._aciklama, self._container.cuzdan.aciklama_onerileri, self._aciklama_secildi
+        )
         ekle = QPushButton("Ekle")
         ekle.clicked.connect(self._islem_ekle)
         h.addWidget(self._miktar)
@@ -138,6 +142,9 @@ class CuzdanView(QWidget):
         h.setSpacing(8)
         self._wl_ad = QLineEdit()
         self._wl_ad.setPlaceholderText("İstediğin şey (ör. Kulaklık)")
+        self._wl_af = AutoFill(
+            self._wl_ad, self._container.cuzdan.wishlist_ad_onerileri, self._wl_secildi
+        )
         self._wl_fiyat = _para_kutusu()
         self._resim_btn = QPushButton("Resim seç")
         self._resim_btn.clicked.connect(self._resim_sec)
@@ -159,9 +166,24 @@ class CuzdanView(QWidget):
 
     def yenile(self) -> None:
         self._bakiye_label.setText(f"Bakiye: {kurus_tl(self._container.cuzdan.bakiye())}")
+        self._aciklama_af.yenile()
+        self._wl_af.yenile()
         self._hedef_yenile()
         self._islemleri_ciz()
         self._wishlisti_ciz()
+
+    def _aciklama_secildi(self, metin: str) -> None:
+        islem = self._container.cuzdan.islem_oneri(metin)
+        if islem is not None:
+            self._miktar.setValue(islem.amount / 100)
+            idx = self._tur.findData(islem.tur)
+            if idx >= 0:
+                self._tur.setCurrentIndex(idx)
+
+    def _wl_secildi(self, metin: str) -> None:
+        oge = self._container.cuzdan.wishlist_oneri(metin)
+        if oge is not None:
+            self._wl_fiyat.setValue(oge.price / 100)
 
     def _hedef_yenile(self) -> None:
         ozet = self._container.cuzdan.aylik_ozet()

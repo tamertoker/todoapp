@@ -105,3 +105,11 @@ class MagazaServisi:
 
     def gecmis(self) -> list[StorePurchase]:
         return self._repo.son_satin_almalar(self._user_id)
+
+    def ad_onerileri(self) -> list[str]:
+        return self._repo.ad_onerileri(self._user_id)
+
+    def maliyet_oneri(self, ad: str) -> int | None:
+        """Verilen adlı son ödülün dk-maliyeti (autofill). Yoksa None."""
+        odul = self._repo.son_odul_adli(self._user_id, ad)
+        return odul.cost_per_min if odul is not None else None

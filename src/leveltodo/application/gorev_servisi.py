@@ -213,6 +213,13 @@ class GorevServisi:
             for kayit, tekrar, seri in satirlar
         ]
 
+    def baslik_onerileri(self) -> list[str]:
+        return self._gorev.baslik_onerileri(self._user_id)
+
+    def sablon_oneri(self, baslik: str):
+        """Verilen başlıklı son görev şablonu (autofill için). Yoksa None."""
+        return self._gorev.son_sablon_baslikli(self._user_id, baslik)
+
     def telafi_sayisi(self) -> int:
         return len(self.telafi_gorevleri())
 

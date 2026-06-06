@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
 
 from leveltodo.bootstrap import Container
 from leveltodo.domain.magaza.magaza import MIN_DK_MALIYET
+from leveltodo.presentation.common.autofill import AutoFill
 
 _SURE_MAKS = 300  # kaydırma çubuğu üst sınırı (dk)
 
@@ -80,6 +81,9 @@ class MagazaView(QWidget):
         h.setSpacing(8)
         self._yeni_ad = QLineEdit()
         self._yeni_ad.setPlaceholderText("Yeni ödül (ör. Kahve molası)")
+        self._ad_af = AutoFill(
+            self._yeni_ad, self._container.magaza.ad_onerileri, self._ad_secildi
+        )
         self._yeni_maliyet = QSpinBox()
         self._yeni_maliyet.setRange(MIN_DK_MALIYET, 1000)
         self._yeni_maliyet.setValue(3)
@@ -96,9 +100,15 @@ class MagazaView(QWidget):
         super().showEvent(event)
         self.yenile()
 
+    def _ad_secildi(self, metin: str) -> None:
+        maliyet = self._container.magaza.maliyet_oneri(metin)
+        if maliyet is not None:
+            self._yeni_maliyet.setValue(maliyet)
+
     def yenile(self) -> None:
         bakiye = self._container.magaza.bakiye_puan()
         self._bakiye_label.setText(f"Puan: {bakiye}")
+        self._ad_af.yenile()
         self._odulleri_ciz(bakiye)
         self._gecmisi_ciz()
 

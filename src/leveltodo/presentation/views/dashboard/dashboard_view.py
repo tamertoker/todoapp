@@ -440,7 +440,11 @@ class DashboardView(QWidget):
         self._ileri_btn.setEnabled(indeks < len(liste) - 1)
 
     def _on_add(self) -> None:
-        dialog = AddTaskDialog(self)
+        dialog = AddTaskDialog(
+            self,
+            oneri_getir=self._container.gorevler.baslik_onerileri,
+            sablon_getir=self._container.gorevler.sablon_oneri,
+        )
         if dialog.exec():
             baslik, tekrar, parametre, ozel_odul, stat = dialog.result_values()
             if baslik:
