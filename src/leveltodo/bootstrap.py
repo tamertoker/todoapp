@@ -13,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 
 from leveltodo.application.bildirim_servisi import BildirimServisi
 from leveltodo.application.combo_servisi import ComboServisi
+from leveltodo.application.cuzdan_servisi import CuzdanServisi
 from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.application.dusman_servisi import DusmanServisi
 from leveltodo.application.gorev_servisi import GorevServisi
@@ -34,6 +35,7 @@ from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.olay_hatti import OlayHatti
 from leveltodo.infrastructure.notifications.plyer_kanali import plyer_kanali
 from leveltodo.infrastructure.persistence.sqlite.bootstrap_data import ensure_default_user
+from leveltodo.infrastructure.persistence.sqlite.cuzdan_repository import SqlCuzdanRepository
 from leveltodo.infrastructure.persistence.sqlite.engine import create_engine_and_factory
 from leveltodo.infrastructure.persistence.sqlite.gunluk_repository import SqlGunlukRepository
 from leveltodo.infrastructure.persistence.sqlite.irade_repository import SqlIradeRepository
@@ -73,6 +75,7 @@ class Container:
     mentor: MentorServisi
     uyandirma: UyandirmaServisi
     istatistik: IstatistikServisi
+    cuzdan: CuzdanServisi
 
 
 def build_container(
@@ -167,6 +170,9 @@ def build_container(
         lambda: gorevler.profil_durumu()[0],
     )
 
+    cuzdan_repo = SqlCuzdanRepository(session_factory)
+    cuzdan = CuzdanServisi(cuzdan_repo, settings, aktif_saat, lambda: settings.day_start_hour)
+
     istatistik = IstatistikServisi(
         defter_repo,
         gorev_repo,
@@ -208,4 +214,5 @@ def build_container(
         mentor=mentor,
         uyandirma=uyandirma,
         istatistik=istatistik,
+        cuzdan=cuzdan,
     )

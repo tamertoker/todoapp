@@ -45,6 +45,8 @@ DEFAULTS: dict[str, Any] = {
     "ses_acik": True,
     "ses_duzeyi": 70,
     "font": "Pixelify Sans",
+    "tasarruf_hedefi": 0,  # kuruş, aylık
+    "harcama_butcesi": 0,  # kuruş, aylık
 }
 
 

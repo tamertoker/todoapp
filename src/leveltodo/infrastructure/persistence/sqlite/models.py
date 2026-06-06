@@ -206,6 +206,38 @@ class JournalEntry(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
+class WalletTransaction(Base):
+    """Cüzdan işlemi — gerçek para (uygulama-içi Puan'dan ayrı). amount KURUŞ olarak
+    saklanır (kayan nokta hatasından kaçınmak için tam sayı). tur='gelir'|'gider'."""
+
+    __tablename__ = "wallet_transactions"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    day: Mapped[date] = mapped_column(Date)
+    amount: Mapped[int] = mapped_column(Integer)  # kuruş, pozitif
+    tur: Mapped[str] = mapped_column(String(6))  # gelir|gider
+    aciklama: Mapped[str] = mapped_column(String(200), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class WishlistItem(Base):
+    """İstek listesi öğesi — almak istediğin gerçek bir şey. price KURUŞ. İlerleme,
+    cüzdan bakiyesi / fiyat oranıyla hesaplanır (ayrı kumbara yok). image_path varsa
+    görsel soldan sağa açılır. Silme = is_active False."""
+
+    __tablename__ = "wishlist_items"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(200))
+    price: Mapped[int] = mapped_column(Integer)  # kuruş
+    image_path: Mapped[str | None] = mapped_column(String, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class WakeLog(Base):
     """Uyandırma kaydı — gün başına tek. Hedef ve gerçek kalkış saati (HH:MM) ile
     o günün başarılı olup olmadığı. Başarılı günler Disiplin'e XP yazar."""
