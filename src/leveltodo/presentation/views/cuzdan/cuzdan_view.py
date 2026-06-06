@@ -1,19 +1,17 @@
 """Cüzdan ekranı.
 
 Gerçek paranı (uygulama-içi Puan'dan ayrı) takip edersin: gelir/gider ekle,
-bakiyeni gör, bu ayın tasarruf hedefi ve harcama bütçesi çubuklarını izle. Altta
-istek listen (wishlist): her öğe, biriken paran fiyatına yaklaştıkça görseli
-soldan sağa açılır.
+bakiyeni gör, bu ayın tasarruf hedefi ve harcama bütçesi çubuklarını izle.
+(İstek listesi artık ayrı "İstek Listesi" sekmesindedir.)
 """
 
 from __future__ import annotations
 
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QPixmap, QShowEvent
+from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (
     QComboBox,
     QDoubleSpinBox,
-    QFileDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -28,7 +26,6 @@ from PyQt6.QtWidgets import (
 from leveltodo.bootstrap import Container
 from leveltodo.domain.cuzdan.cuzdan import kurus_tl
 from leveltodo.presentation.common.autofill import AutoFill
-from leveltodo.presentation.common.resim_acilma import ResimAcilma
 
 
 def _para_kutusu() -> QDoubleSpinBox:
@@ -46,7 +43,6 @@ class CuzdanView(QWidget):
     def __init__(self, container: Container) -> None:
         super().__init__()
         self._container = container
-        self._secili_resim: str | None = None
 
         title = QLabel("Cüzdan")
         title.setObjectName("Title")
@@ -63,11 +59,6 @@ class CuzdanView(QWidget):
         self._islem_liste = QVBoxLayout()
         self._islem_liste.setSpacing(6)
         self._kok.addLayout(self._islem_liste)
-        self._kok.addWidget(self._wishlist_formu())
-        self._kok.addWidget(QLabel("İstek listesi"))
-        self._wishlist_liste = QVBoxLayout()
-        self._wishlist_liste.setSpacing(10)
-        self._kok.addLayout(self._wishlist_liste)
         self._kok.addStretch(1)
 
         scroll = QScrollArea()
@@ -134,31 +125,6 @@ class CuzdanView(QWidget):
         h.addWidget(ekle)
         return frame
 
-    def _wishlist_formu(self) -> QFrame:
-        frame = QFrame()
-        frame.setObjectName("TaskRow")
-        h = QHBoxLayout(frame)
-        h.setContentsMargins(12, 8, 12, 8)
-        h.setSpacing(8)
-        self._wl_ad = QLineEdit()
-        self._wl_ad.setPlaceholderText("İstediğin şey (ör. Kulaklık)")
-        self._wl_af = AutoFill(
-            self._wl_ad, self._container.cuzdan.wishlist_ad_onerileri, self._wl_secildi
-        )
-        self._wl_fiyat = _para_kutusu()
-        self._resim_btn = QPushButton("Resim seç")
-        self._resim_btn.clicked.connect(self._resim_sec)
-        self._resim_label = QLabel("(resim yok)")
-        self._resim_label.setObjectName("Tag")
-        ekle = QPushButton("Listeye ekle")
-        ekle.clicked.connect(self._wishlist_ekle)
-        h.addWidget(self._wl_ad, stretch=1)
-        h.addWidget(self._wl_fiyat)
-        h.addWidget(self._resim_btn)
-        h.addWidget(self._resim_label)
-        h.addWidget(ekle)
-        return frame
-
     # — Tazeleme —
     def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
@@ -167,10 +133,8 @@ class CuzdanView(QWidget):
     def yenile(self) -> None:
         self._bakiye_label.setText(f"Bakiye: {kurus_tl(self._container.cuzdan.bakiye())}")
         self._aciklama_af.yenile()
-        self._wl_af.yenile()
         self._hedef_yenile()
         self._islemleri_ciz()
-        self._wishlisti_ciz()
 
     def _aciklama_secildi(self, metin: str) -> None:
         islem = self._container.cuzdan.islem_oneri(metin)
@@ -179,11 +143,6 @@ class CuzdanView(QWidget):
             idx = self._tur.findData(islem.tur)
             if idx >= 0:
                 self._tur.setCurrentIndex(idx)
-
-    def _wl_secildi(self, metin: str) -> None:
-        oge = self._container.cuzdan.wishlist_oneri(metin)
-        if oge is not None:
-            self._wl_fiyat.setValue(oge.price / 100)
 
     def _hedef_yenile(self) -> None:
         ozet = self._container.cuzdan.aylik_ozet()
@@ -252,44 +211,6 @@ class CuzdanView(QWidget):
         h.addWidget(sil)
         return frame
 
-    def _wishlisti_ciz(self) -> None:
-        self._temizle(self._wishlist_liste)
-        ogeler = self._container.cuzdan.wishlist()
-        if not ogeler:
-            bos = QLabel("İstek listen boş. Yukarıdan bir şey ekle.")
-            bos.setObjectName("Subtitle")
-            self._wishlist_liste.addWidget(bos)
-            return
-        for oge in ogeler:
-            self._wishlist_liste.addWidget(self._wishlist_karti(oge))
-
-    def _wishlist_karti(self, oge) -> QFrame:
-        frame = QFrame()
-        frame.setObjectName("TaskRow")
-        v = QVBoxLayout(frame)
-        v.setContentsMargins(12, 8, 12, 8)
-        v.setSpacing(6)
-
-        reveal = ResimAcilma()
-        pixmap = QPixmap(oge.resim_yolu) if oge.resim_yolu else None
-        reveal.setVeri(pixmap, oge.oran)
-        v.addWidget(reveal)
-
-        h = QHBoxLayout()
-        ad = QLabel(oge.ad)
-        fiyat = QLabel(kurus_tl(oge.fiyat))
-        fiyat.setObjectName("Counter")
-        yuzde = QLabel(f"%{int(oge.oran * 100)}")
-        yuzde.setObjectName("Tag")
-        sil = QPushButton("Sil")
-        sil.clicked.connect(lambda _c, oid=oge.id: self._wishlist_sil(oid))
-        h.addWidget(ad, stretch=1)
-        h.addWidget(yuzde)
-        h.addWidget(fiyat)
-        h.addWidget(sil)
-        v.addLayout(h)
-        return frame
-
     # — Eylemler —
     def _islem_ekle(self) -> None:
         kurus = round(self._miktar.value() * 100)
@@ -311,28 +232,4 @@ class CuzdanView(QWidget):
             round(self._tasarruf_giris.value() * 100),
             round(self._butce_giris.value() * 100),
         )
-        self.yenile()
-
-    def _resim_sec(self) -> None:
-        yol, _ = QFileDialog.getOpenFileName(
-            self, "Resim seç", "", "Resimler (*.png *.jpg *.jpeg *.bmp *.webp)"
-        )
-        if yol:
-            self._secili_resim = yol
-            self._resim_label.setText("✓ resim seçildi")
-
-    def _wishlist_ekle(self) -> None:
-        ad = self._wl_ad.text().strip()
-        kurus = round(self._wl_fiyat.value() * 100)
-        if not ad or kurus <= 0:
-            return
-        self._container.cuzdan.wishlist_ekle(ad, kurus, self._secili_resim)
-        self._wl_ad.clear()
-        self._wl_fiyat.setValue(0)
-        self._secili_resim = None
-        self._resim_label.setText("(resim yok)")
-        self.yenile()
-
-    def _wishlist_sil(self, oge_id: str) -> None:
-        self._container.cuzdan.wishlist_sil(oge_id)
         self.yenile()

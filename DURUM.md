@@ -110,8 +110,10 @@ karışmaz; Mağaza=Puan→dakika.
   `baslik_onerileri`/`sablon_oneri`, `aciklama_onerileri`/`islem_oneri`, wishlist öneri,
   irade `baslik_onerileri`/`eylem_oneri`, magaza `ad_onerileri`/`maliyet_oneri`.
   `tests/integration/test_autofill.py`.
-- **Wishlist resmi tam görünür**: `resim_acilma.py` artık KeepAspectRatio (kırpmıyor,
-  ortalı sığdırır), yükseklik 160.
+- **Wishlist → ayrı "İstek Listesi" sekmesi** (`presentation/views/wishlist/wishlist_view.py`;
+  CuzdanView'dan çıkarıldı). Resim artık kendi en-boy oranında **büyük** (resim_acilma.py
+  widget'ı resmin boyutuna sabitler, maks 720×460, ortalı; siyah bar yok). Kullanıcı geri
+  bildirimi: dar şeride sığdırma kötüydü.
 
 ## Sırada ⏸️ — Faz 9 (son faz)
 - **Faz 9**: lore (düşman lore fragmanları) + onboarding "Mentor" NPC (ilk açılış

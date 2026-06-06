@@ -42,6 +42,7 @@ from leveltodo.presentation.views.rutin.rutin_view import RutinView
 from leveltodo.presentation.views.settings.settings_view import SettingsView
 from leveltodo.presentation.views.settings.settings_viewmodel import SettingsViewModel
 from leveltodo.presentation.views.telafi.telafi_view import TelafiView
+from leveltodo.presentation.views.wishlist.wishlist_view import WishlistView
 
 
 class MainWindow(QWidget):
@@ -67,6 +68,7 @@ class MainWindow(QWidget):
         self._rozetler = RozetView(container, self._ses)
         self._istatistik = IstatistikView(container)
         self._cuzdan = CuzdanView(container)
+        self._wishlist = WishlistView(container)
         self._magaza = MagazaView(container)
         settings_vm = SettingsViewModel(container.settings)
         self._settings = SettingsView(
@@ -84,6 +86,7 @@ class MainWindow(QWidget):
         self._stack.addWidget(self._rozetler)
         self._stack.addWidget(self._istatistik)
         self._stack.addWidget(self._cuzdan)
+        self._stack.addWidget(self._wishlist)
         self._stack.addWidget(self._magaza)
         self._stack.addWidget(self._settings)
         self._stack.addWidget(self._admin)
@@ -142,6 +145,7 @@ class MainWindow(QWidget):
                 "Rozetler",
                 "İstatistik",
                 "Cüzdan",
+                "İstek Listesi",
                 "Mağaza",
                 "Ayarlar",
                 "Debug",
