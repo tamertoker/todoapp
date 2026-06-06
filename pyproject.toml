@@ -16,6 +16,8 @@ dependencies = [
     "platformdirs>=4.2",
     "python-ulid>=2.2",
     "plyer>=2.1",
+    "pyqtgraph>=0.13",
+    "numpy>=1.26",
 ]
 
 [project.optional-dependencies]

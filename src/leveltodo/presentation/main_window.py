@@ -34,6 +34,7 @@ from leveltodo.presentation.views.avatar.avatar_view import AvatarEditorView
 from leveltodo.presentation.views.dashboard.dashboard_view import DashboardView
 from leveltodo.presentation.views.gunluk.gunluk_view import GunlukView
 from leveltodo.presentation.views.irade.irade_view import IradeView
+from leveltodo.presentation.views.istatistik.istatistik_view import IstatistikView
 from leveltodo.presentation.views.rozetler.rozet_view import RozetView
 from leveltodo.presentation.views.rutin.rutin_view import RutinView
 from leveltodo.presentation.views.settings.settings_view import SettingsView
@@ -62,6 +63,7 @@ class MainWindow(QWidget):
         self._telafi = TelafiView(container)
         self._avatar_editor = AvatarEditorView()
         self._rozetler = RozetView(container, self._ses)
+        self._istatistik = IstatistikView(container)
         settings_vm = SettingsViewModel(container.settings)
         self._settings = SettingsView(
             settings_vm, container.yedekleyici, container.bildirim, self._ses
@@ -76,6 +78,7 @@ class MainWindow(QWidget):
         self._stack.addWidget(self._telafi)
         self._stack.addWidget(self._avatar_editor)
         self._stack.addWidget(self._rozetler)
+        self._stack.addWidget(self._istatistik)
         self._stack.addWidget(self._settings)
         self._stack.addWidget(self._admin)
 
@@ -130,6 +133,7 @@ class MainWindow(QWidget):
                 "Telafi",
                 "Avatar",
                 "Rozetler",
+                "İstatistik",
                 "Ayarlar",
                 "Debug",
             )

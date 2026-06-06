@@ -74,17 +74,18 @@
   tetikleniyor. **ÖNEMLİ teşhis: gece sessizliği (23-07) varsayılan açık → o saatlerde
   TÜM bildirimler (toast dahil) bastırılır** — kullanıcının "gelmedi" sorununun olası sebebi.
 
-## Faz 7 — İstatistik (devam ediyor)
-- **7.1 ✅ Veri katmanı**: `IstatistikServisi` (metrik_secenekleri: xp/calisma/tamamlama +
-  her sayı/evet-hayır rutin alanı; gunluk_seri(metrik,bas,bit); stat_dagilimi; gun_araligi
-  hafta/ay/yil; rekorlar). Repo toplamaları: ledger gunluk_xp/en_uretken_gun, task
-  gunluk_calisma/gunluk_tamamlama/en_uzun_kronometre/en_uzun_gorev_serisi/en_cok_gorev_gun,
-  rutin gunluk_degerler. `tests/integration/test_istatistik.py`.
-- **7.2 ⏳ Ekran**: İstatistik sekmesi — metrik+aralık seçici, ısı haritası (QPainter,
-  hover detay) ↔ çizgi grafiği (pyqtgraph) anahtarı, rekorlar paneli.
+## Faz 7 — İstatistik ✅ (bitti)
+- **7.1 Veri katmanı**: `IstatistikServisi` (metrik_secenekleri: xp/calisma/tamamlama +
+  her sayı/evet-hayır rutin alanı; gunluk_seri; stat_dagilimi; gun_araligi hafta/ay/yil;
+  rekorlar). Repo toplamaları (ledger/task/rutin). `tests/integration/test_istatistik.py`.
+- **7.2 Ekran**: "İstatistik" sekmesi (nav). Metrik+aralık+görünüm seçici;
+  `presentation/common/heatmap.py` (IsiHaritasi QPainter, GitHub-tarzı, hover tooltip)
+  ↔ pyqtgraph çizgi grafiği; stat XP dağılımı (QProgressBar'lar) + kişisel rekorlar paneli.
+  pyqtgraph+numpy bağımlılık eklendi.
 
-## Sırada ⏸️
-- Faz 7.2 (ekran), sonra 8 (finans/wishlist), 9 (lore/onboarding). **Push edilmedi** ("hadi" bekle).
+## Sırada ⏸️ — Faz 8
+- **Faz 8**: finans (gelir/gider, aylık hedef) + cüzdan + wishlist. Sonra 9 (lore/
+  onboarding/açılış sözü/atmosfer). **Push edilmedi** ("hadi" bekle).
 
 ## Çalışma kuralları (özet — tam hâli CLAUDE.md'de)
 - Kullanıcı teknik değil → her değişiklikten sonra sade Türkçe anlat; soruları sonuç-odaklı sor; arayüz tamamen Türkçe.
