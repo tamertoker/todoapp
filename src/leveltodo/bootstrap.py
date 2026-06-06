@@ -21,6 +21,7 @@ from leveltodo.application.gunluk_servisi import GunlukServisi
 from leveltodo.application.irade_servisi import IradeServisi
 from leveltodo.application.istatistik_servisi import IstatistikServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
+from leveltodo.application.magaza_servisi import MagazaServisi
 from leveltodo.application.mentor_servisi import MentorServisi
 from leveltodo.application.rozet_servisi import RozetServisi
 from leveltodo.application.rutin_servisi import RutinServisi
@@ -40,6 +41,7 @@ from leveltodo.infrastructure.persistence.sqlite.engine import create_engine_and
 from leveltodo.infrastructure.persistence.sqlite.gunluk_repository import SqlGunlukRepository
 from leveltodo.infrastructure.persistence.sqlite.irade_repository import SqlIradeRepository
 from leveltodo.infrastructure.persistence.sqlite.ledger_repository import SqlLedgerRepository
+from leveltodo.infrastructure.persistence.sqlite.magaza_repository import SqlMagazaRepository
 from leveltodo.infrastructure.persistence.sqlite.migrations import upgrade_to_head
 from leveltodo.infrastructure.persistence.sqlite.models import DEFAULT_USER_ID
 from leveltodo.infrastructure.persistence.sqlite.rutin_repository import SqlRutinRepository
@@ -76,6 +78,7 @@ class Container:
     uyandirma: UyandirmaServisi
     istatistik: IstatistikServisi
     cuzdan: CuzdanServisi
+    magaza: MagazaServisi
 
 
 def build_container(
@@ -173,6 +176,9 @@ def build_container(
     cuzdan_repo = SqlCuzdanRepository(session_factory)
     cuzdan = CuzdanServisi(cuzdan_repo, settings, aktif_saat, lambda: settings.day_start_hour)
 
+    magaza_repo = SqlMagazaRepository(session_factory)
+    magaza = MagazaServisi(magaza_repo, defter_repo, aktif_saat, lambda: settings.day_start_hour)
+
     istatistik = IstatistikServisi(
         defter_repo,
         gorev_repo,
@@ -215,4 +221,5 @@ def build_container(
         uyandirma=uyandirma,
         istatistik=istatistik,
         cuzdan=cuzdan,
+        magaza=magaza,
     )

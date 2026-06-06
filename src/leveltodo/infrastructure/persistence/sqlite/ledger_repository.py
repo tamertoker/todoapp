@@ -92,6 +92,28 @@ class SqlLedgerRepository:
             satir = s.execute(stmt).first()
             return (satir[0], int(satir[1])) if satir else (None, 0)
 
+    def puan_bakiye(self, user_id: str) -> int:
+        with self._sf() as s:
+            return int(
+                s.scalar(
+                    select(func.coalesce(func.sum(PointTransaction.amount), 0)).where(
+                        PointTransaction.user_id == user_id
+                    )
+                )
+            )
+
+    def puan_islem(
+        self, *, user_id: str, day: date, source: str, ref_id: str | None, miktar: int
+    ) -> None:
+        """Yalnızca puan hareketi yazar (negatif olabilir — harcama). XP'ye dokunmaz."""
+        with self._sf() as s:
+            s.add(
+                PointTransaction(
+                    user_id=user_id, day=day, source=source, ref_id=ref_id, amount=miktar
+                )
+            )
+            s.commit()
+
     def totals(self, user_id: str) -> tuple[int, int]:
         with self._sf() as s:
             xp = s.scalar(

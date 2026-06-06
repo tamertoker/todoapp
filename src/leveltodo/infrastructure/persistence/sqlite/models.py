@@ -238,6 +238,36 @@ class WishlistItem(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
+class StoreReward(Base):
+    """Mağaza ödülü — Puan ile dakika satın alınan gerçek-hayat ödülü. cost_per_min
+    dk başına puan maliyeti (kullanıcı belirler, tabandan düşemez). Silme=is_active False."""
+
+    __tablename__ = "store_rewards"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(200))
+    cost_per_min: Mapped[int] = mapped_column(Integer)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class StorePurchase(Base):
+    """Mağaza satın alma kaydı (geçmiş). Harcanan puan ayrıca point_transactions'a
+    negatif olarak yazılır; bu tablo 'ne, kaç dk, kaç puan' detayını tutar."""
+
+    __tablename__ = "store_purchases"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    reward_name: Mapped[str] = mapped_column(String(200))
+    minutes: Mapped[int] = mapped_column(Integer)
+    cost: Mapped[int] = mapped_column(Integer)  # puan
+    day: Mapped[date] = mapped_column(Date)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class WakeLog(Base):
     """Uyandırma kaydı — gün başına tek. Hedef ve gerçek kalkış saati (HH:MM) ile
     o günün başarılı olup olmadığı. Başarılı günler Disiplin'e XP yazar."""
