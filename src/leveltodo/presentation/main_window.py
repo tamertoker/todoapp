@@ -43,6 +43,7 @@ from leveltodo.presentation.views.telafi.telafi_view import TelafiView
 
 class MainWindow(QWidget):
     theme_changed = pyqtSignal(str)
+    font_changed = pyqtSignal(str)
 
     def __init__(self, container: Container, bridge: QtEventBridge) -> None:
         super().__init__()
@@ -89,6 +90,7 @@ class MainWindow(QWidget):
 
         # — Ayar sinyallerini bağla —
         settings_vm.themeChanged.connect(self.theme_changed)
+        settings_vm.fontChanged.connect(self.font_changed)
         settings_vm.dayStartHourChanged.connect(lambda _h: self._dashboard.refresh_day())
         self._admin.degisti.connect(self._dashboard.refresh_day)
         self._telafi.degisti.connect(self._dashboard.refresh_day)

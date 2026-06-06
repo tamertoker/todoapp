@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import (
 )
 
 from leveltodo.bootstrap import Container
+from leveltodo.domain.bildirim.bildirim import BildirimKategori
 from leveltodo.domain.stats.statlar import STAT_ETIKET, Stat
 from leveltodo.domain.time.gun import Gun
 
@@ -66,6 +67,17 @@ class AdminView(QWidget):
         self._dondurma_btn = QPushButton("+1 Dondurma jetonu")
         self._dondurma_btn.clicked.connect(self._dondurma_ekle)
 
+        test_bildirim_btn = QPushButton("Test bildirimi gönder")
+        test_bildirim_btn.clicked.connect(self._test_bildirim)
+        mentor_btn = QPushButton("Mentor/kışkırtma kontrolünü çalıştır")
+        mentor_btn.clicked.connect(self._mentor_calistir)
+        self._bildirim_sonuc = QLabel()
+        self._bildirim_sonuc.setObjectName("Subtitle")
+        bildirim_satiri = QHBoxLayout()
+        bildirim_satiri.addWidget(test_bildirim_btn)
+        bildirim_satiri.addWidget(mentor_btn)
+        bildirim_satiri.addStretch(1)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
@@ -78,6 +90,9 @@ class AdminView(QWidget):
         layout.addLayout(xp_satiri)
         layout.addWidget(QLabel("Seri dondurma"))
         layout.addWidget(self._dondurma_btn)
+        layout.addWidget(QLabel("Bildirim testi"))
+        layout.addLayout(bildirim_satiri)
+        layout.addWidget(self._bildirim_sonuc)
         layout.addStretch(1)
 
         self._gun_guncelle()
@@ -92,8 +107,39 @@ class AdminView(QWidget):
     def _gun_kaydir(self, n: int) -> None:
         if hasattr(self._container.saat, "gun_kaydir"):
             self._container.saat.gun_kaydir(n)
+        self._container.mentor.periyodik_kontrol()  # gün değişince dürtmeleri hemen değerlendir
         self._gun_guncelle()
         self.degisti.emit()
+
+    def _test_bildirim(self) -> None:
+        # 1) Kuralları atlayarak doğrudan göster (mekanizma çalışıyor mu?).
+        self._container.bildirim.kanallara_gonder(
+            BildirimKategori.KUTLAMA,
+            "Test bildirimi (zorla)",
+            "Bunu gördüysen bildirim mekanizması çalışıyor.",
+        )
+        # 2) Normal yoldan dene (kurallar bastırıyor mu?).
+        kurala_gore = self._container.bildirim.bildir(
+            BildirimKategori.KUTLAMA, "Test (kurallı)", "Normal yoldan."
+        )
+        if kurala_gore:
+            self._bildirim_sonuc.setText(
+                "Gönderildi (hem zorla hem kurallı). Sağ üstte kart(lar) çıktıysa "
+                "uygulama-içi bildirim çalışıyor. Windows bildirimi için log dosyasına bak."
+            )
+        else:
+            self._bildirim_sonuc.setText(
+                "Zorla gönderildi (kart çıkmalı). Ama kurallı gönderim BASTIRILDI: "
+                "'Kutlamalar' kapalı ya da gece sessizliğindesin (Ayarlar > Bildirimler). "
+                "Muhtemelen sorunun buydu."
+            )
+
+    def _mentor_calistir(self) -> None:
+        self._container.mentor.periyodik_kontrol()
+        self._bildirim_sonuc.setText(
+            "Mentor/kışkırtma/amnesti kontrolü çalıştı. Koşul varsa bildirim çıkar "
+            "(her biri gün başına bir kez)."
+        )
 
     def _gun_sifirla(self) -> None:
         if hasattr(self._container.saat, "sifirla"):

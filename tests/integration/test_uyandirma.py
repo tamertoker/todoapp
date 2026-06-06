@@ -42,6 +42,15 @@ def test_gec_kalkis_odul_yok_ceza_yok(db_url):
     assert c.uyandirma.bugun_kaydi().basarili is False
 
 
+def test_elle_girilen_kalkis_saati(db_url):
+    # Kullanıcı kalktıktan saatler sonra açsa bile elle saat girebilir.
+    saat = SahteSaat(datetime(2026, 6, 1, 14, 0))  # öğleden sonra açıldı
+    c = build_container(db_url=db_url, saat=saat)
+    assert c.uyandirma.kalktim("06:45") is True  # sabah 06:45'te kalkmış (hedef 07:00)
+    assert _disiplin_xp(c) == 50
+    assert c.uyandirma.bugun_kaydi().gercek == "06:45"
+
+
 def test_hedef_degistirilince_kalici(db_url):
     saat = SahteSaat(datetime(2026, 6, 1, 8, 0))
     c = build_container(db_url=db_url, saat=saat)

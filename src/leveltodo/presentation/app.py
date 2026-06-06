@@ -18,7 +18,7 @@ from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.common.icon import make_app_icon
 from leveltodo.presentation.main_window import MainWindow
 from leveltodo.presentation.theme.arrows import ok_yollari
-from leveltodo.presentation.theme.fonts import load_pixel_font
+from leveltodo.presentation.theme.fonts import gecerli_font, load_all_fonts
 from leveltodo.presentation.theme.palette import get_palette
 from leveltodo.presentation.theme.qss import build_qss
 
@@ -28,13 +28,15 @@ class LevelTodoApp:
         self.container = container
         container.seri.giris_kaydet()  # bugünkü giriş serisini işaretle
         self.qapp = QApplication.instance() or QApplication(sys.argv)
-        self._font_family = load_pixel_font()
+        load_all_fonts()  # tüm .ttf'leri Qt'ye yükle
+        self._font_family = gecerli_font(str(container.settings.get("font")))
 
         self.bridge = QtEventBridge(container.olay_hatti)
         self.window = MainWindow(container, self.bridge)
 
         self._apply_theme(container.settings.theme)
         self.window.theme_changed.connect(self._apply_theme)
+        self.window.font_changed.connect(self._apply_font)
 
         # Temiz çıkışta çalışan kronometreyi kaydet (kısa süreler bile kaybolmasın).
         self.qapp.aboutToQuit.connect(container.kronometre.checkpoint)
@@ -52,6 +54,10 @@ class LevelTodoApp:
         icon = make_app_icon(palette)
         self.qapp.setWindowIcon(icon)
         self.window.set_icon(icon)
+
+    def _apply_font(self, font: str) -> None:
+        self._font_family = gecerli_font(font)
+        self._apply_theme(self.container.settings.theme)
 
     def run(self) -> int:
         self.window.show()

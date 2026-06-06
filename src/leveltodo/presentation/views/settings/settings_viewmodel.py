@@ -15,6 +15,7 @@ from leveltodo.application.settings_service import SettingsService
 
 class SettingsViewModel(QObject):
     themeChanged = pyqtSignal(str)
+    fontChanged = pyqtSignal(str)
     dayStartHourChanged = pyqtSignal(int)
     saved = pyqtSignal()
 
@@ -27,6 +28,10 @@ class SettingsViewModel(QObject):
         return self._settings.theme
 
     @property
+    def font(self) -> str:
+        return str(self._settings.get("font"))
+
+    @property
     def day_start_hour(self) -> int:
         return self._settings.day_start_hour
 
@@ -34,16 +39,22 @@ class SettingsViewModel(QObject):
     def minimize_to_tray(self) -> bool:
         return self._settings.minimize_to_tray
 
-    def save(self, theme: str, day_start_hour: int, minimize_to_tray: bool) -> None:
+    def save(
+        self, theme: str, day_start_hour: int, minimize_to_tray: bool, font: str
+    ) -> None:
         theme_changed = theme != self._settings.theme
         hour_changed = day_start_hour != self._settings.day_start_hour
+        font_changed = font != str(self._settings.get("font"))
 
         self._settings.set("theme", theme)
         self._settings.set("day_start_hour", day_start_hour)
         self._settings.set("minimize_to_tray", minimize_to_tray)
+        self._settings.set("font", font)
 
         if theme_changed:
             self.themeChanged.emit(theme)
+        if font_changed:
+            self.fontChanged.emit(font)
         if hour_changed:
             self.dayStartHourChanged.emit(day_start_hour)
         self.saved.emit()

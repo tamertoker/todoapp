@@ -86,6 +86,11 @@ class IradeView(QWidget):
         self._hedef_edit.setTime(self._saat_parse(self._container.uyandirma.hedef))
         self._hedef_edit.timeChanged.connect(self._hedef_kaydet)
         h.addWidget(self._hedef_edit)
+        h.addWidget(QLabel("Kalkış:"))
+        self._kalkis_edit = QTimeEdit()
+        self._kalkis_edit.setDisplayFormat("HH:mm")
+        self._kalkis_edit.setTime(QTime.currentTime())
+        h.addWidget(self._kalkis_edit)
         kalktim_btn = QPushButton("Kalktım")
         kalktim_btn.clicked.connect(self._kalktim)
         h.addWidget(kalktim_btn)
@@ -105,7 +110,8 @@ class IradeView(QWidget):
         self._container.uyandirma.hedef_ayarla(t.toString("HH:mm"))
 
     def _kalktim(self) -> None:
-        basarili = self._container.uyandirma.kalktim()
+        gercek = self._kalkis_edit.time().toString("HH:mm")
+        basarili = self._container.uyandirma.kalktim(gercek)
         if not basarili and self._ses is not None:
             self._ses.cal("hata")  # geç kalkış: başarısızlık anı
         self._uyanma_yenile()

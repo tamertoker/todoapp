@@ -59,16 +59,18 @@ class UyandirmaServisi:
     def bugun_kaydi(self) -> WakeLog | None:
         return self._repo.gun_kaydi(self._user_id, self._bugun())
 
-    def kalktim(self) -> bool:
-        """Şimdiki saati o günün kalkışı olarak kaydeder; zamanındaysa ödül verir.
+    def kalktim(self, gercek: str | None = None) -> bool:
+        """Kalkış saatini o günün kaydı olarak işler; zamanındaysa ödül verir.
+        `gercek` "HH:MM" verilmezse o anki saat kullanılır (kullanıcı genelde
+        kalktıktan saatler sonra uygulamayı açtığı için elle de girebilir).
         Gün başına bir kez geçerlidir (mevcut kayıt varsa tekrar ödül vermez)."""
         gun = self._bugun()
         mevcut = self._repo.gun_kaydi(self._user_id, gun)
         if mevcut is not None:
             return mevcut.basarili  # bugün zaten kalkıldı
 
-        simdi = self._saat.simdi()
-        gercek = simdi.strftime("%H:%M")
+        if gercek is None:
+            gercek = self._saat.simdi().strftime("%H:%M")
         hedef = self.hedef
         basarili = uyanma_basarili_mi(dakikaya(hedef), dakikaya(gercek))
         self._repo.kaydet(

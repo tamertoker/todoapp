@@ -44,6 +44,7 @@ DEFAULTS: dict[str, Any] = {
     "uyandirma_hedef": "07:00",
     "ses_acik": True,
     "ses_duzeyi": 70,
+    "font": "Pixelify Sans",
 }
 
 

@@ -29,6 +29,7 @@ from PyQt6.QtWidgets import (
 from leveltodo.application.bildirim_servisi import BildirimServisi
 from leveltodo.domain.bildirim.bildirim import BildirimKategori
 from leveltodo.infrastructure.backup.yedekleme import Yedekleyici
+from leveltodo.presentation.theme.fonts import mevcut_fontlar
 from leveltodo.presentation.views.settings.settings_viewmodel import SettingsViewModel
 
 _KATEGORI_ETIKET = {
@@ -77,6 +78,10 @@ class SettingsView(QWidget):
         for key, label in _THEME_LABELS.items():
             self._theme.addItem(label, key)
 
+        self._font = QComboBox()
+        for aile in mevcut_fontlar():
+            self._font.addItem(aile, aile)
+
         self._day_start = QSpinBox()
         self._day_start.setRange(0, 23)
         self._day_start.setSuffix(":00")
@@ -84,6 +89,7 @@ class SettingsView(QWidget):
         self._minimize = QCheckBox("Pencereyi kapatınca tepsiye insin")
 
         form.addRow("Tema:", self._theme)
+        form.addRow("Yazı tipi:", self._font)
         form.addRow("Gün başlangıcı:", self._day_start)
         form.addRow("", self._minimize)
 
@@ -233,6 +239,8 @@ class SettingsView(QWidget):
     def _load(self) -> None:
         idx = self._theme.findData(self.view_model.theme)
         self._theme.setCurrentIndex(max(idx, 0))
+        font_idx = self._font.findData(self.view_model.font)
+        self._font.setCurrentIndex(max(font_idx, 0))
         self._day_start.setValue(self.view_model.day_start_hour)
         self._minimize.setChecked(self.view_model.minimize_to_tray)
 
@@ -241,4 +249,5 @@ class SettingsView(QWidget):
             theme=self._theme.currentData(),
             day_start_hour=self._day_start.value(),
             minimize_to_tray=self._minimize.isChecked(),
+            font=self._font.currentData(),
         )

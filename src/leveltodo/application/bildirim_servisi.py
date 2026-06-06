@@ -7,6 +7,7 @@ iletir. Kanallar dışarıdan eklenir (PyQt/OS bağımlılığı bu katmana sız
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 
 from leveltodo.application.settings_service import SettingsService
@@ -19,6 +20,8 @@ from leveltodo.domain.bildirim.bildirim import (
 from leveltodo.domain.time.saat import Saat
 
 Kanal = Callable[[Bildirim], None]
+
+logger = logging.getLogger(__name__)
 
 
 class BildirimServisi:
@@ -58,13 +61,36 @@ class BildirimServisi:
             self._saat.simdi().hour, self.sessiz_baslangic, self.sessiz_bitis
         )
 
+    def kanallara_gonder(self, kategori: BildirimKategori, baslik: str, govde: str) -> None:
+        """Kuralları (kategori/gece sessizliği) ATLAYARAK doğrudan kanallara iletir.
+        Yalnızca teşhis/test için — bildirim mekanizmasının çalışıp çalışmadığını
+        kuralların bastırmasından ayırt etmeye yarar."""
+        bildirim = Bildirim(kategori=kategori, baslik=baslik, govde=govde)
+        logger.info("Bildirim ZORLA gonderiliyor: '%s' (%d kanal)", baslik, len(self._kanallar))
+        for kanal in self._kanallar:
+            kanal(bildirim)
+
     def bildir(self, kategori: BildirimKategori, baslik: str, govde: str) -> bool:
         """Kurallar elveriyorsa bildirimi tüm kanallara iletir. Gösterildiyse True."""
         if not gosterilsin_mi(
             self.kategori_acik(kategori), self.sessiz_acik, self._su_an_sessiz_mi()
         ):
+            logger.info(
+                "Bildirim bastirildi [%s] '%s' (kategori_acik=%s, sessiz_acik=%s, su_an_sessiz=%s)",
+                kategori.value,
+                baslik,
+                self.kategori_acik(kategori),
+                self.sessiz_acik,
+                self._su_an_sessiz_mi(),
+            )
             return False
         bildirim = Bildirim(kategori=kategori, baslik=baslik, govde=govde)
+        logger.info(
+            "Bildirim gosteriliyor [%s] '%s' (%d kanal)",
+            kategori.value,
+            baslik,
+            len(self._kanallar),
+        )
         for kanal in self._kanallar:
             kanal(bildirim)
         return True

@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — commit `73a1f4f`, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **134 test yeşil**, ruff temiz.
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **135 test yeşil**, ruff temiz (kendi kod: `ruff check src/ tests/`; repo kökünde kullanıcının analiz scriptleri ruff'a takılır, bizim değil).
 - Stack: Python 3.12.8 · PyQt6 · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid.
 
 ## Bitti ✅
@@ -62,11 +62,21 @@
   (Settings). Ayarlar'da "Ses" paneli (aç/kapa + düzey). 7 ses WAV (3 mp3 ffmpeg ile
   çevrildi) `assets/sounds/`. `tests/integration/test_ses.py`.
 
-## Sırada ⏸️ — Faz 6 son adım (ASSET gerektirir)
-- **6.6** Pixel-art font: `fonts.py` zaten assets/fonts/*.ttf yüklüyor (yoksa fallback
-  monospace). **Kullanıcıdan CC0/OFL bir pixel .ttf istenecek**, assets/fonts/'a konunca
-  otomatik devreye girer.
-- Sonra Faz 7 → 8 → 9. **Push edilmedi** (kullanıcı "hadi" deyince).
+- **Faz 6.6 — Fontlar (Faz 6 BİTTİ)**: `fonts.py` tüm assets/fonts/*.ttf yükler
+  (`load_all_fonts`/`mevcut_fontlar`/`varsayilan_font`/`gecerli_font`); 5 aile (Pixelify
+  Sans default, Geo, Press Start 2P, Silkscreen, VT323). Ayarlar'da "Yazı tipi" seçici;
+  `SettingsViewModel.fontChanged` → `app._apply_font` canlı uygular. ayar "font".
+- **Uyanma güncellemesi**: `UyandirmaServisi.kalktim(gercek=None)` artık elle "HH:MM"
+  alır (kullanıcı saatler sonra açabilir); İrade kartında Kalkış QTimeEdit + "Kalktım".
+- **Bildirim debug**: plyer_kanali + bildirim_servisi log ekledi; `BildirimServisi.
+  kanallara_gonder` (kuralları atlayan teşhis yolu); Debug ekranında "Test bildirimi"
+  (zorla+kurallı) ve "Mentor kontrolünü çalıştır"; gün-atlamada mentor.periyodik_kontrol
+  tetikleniyor. **ÖNEMLİ teşhis: gece sessizliği (23-07) varsayılan açık → o saatlerde
+  TÜM bildirimler (toast dahil) bastırılır** — kullanıcının "gelmedi" sorununun olası sebebi.
+
+## Sırada ⏸️ — Faz 7
+- **Faz 7**: pyqtgraph grafikleri + GitHub-tarzı yıllık ısı haritası + kişisel rekorlar.
+  Sonra 8 (finans/wishlist), 9 (lore/onboarding/atmosfer). **Push edilmedi** ("hadi" bekle).
 
 ## Çalışma kuralları (özet — tam hâli CLAUDE.md'de)
 - Kullanıcı teknik değil → her değişiklikten sonra sade Türkçe anlat; soruları sonuç-odaklı sor; arayüz tamamen Türkçe.
