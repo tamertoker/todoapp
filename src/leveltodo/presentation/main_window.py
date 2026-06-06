@@ -31,6 +31,7 @@ from leveltodo.infrastructure.sound.ses_motoru import SesMotoru
 from leveltodo.presentation.common.toast import ToastYoneticisi
 from leveltodo.presentation.views.admin.admin_view import AdminView
 from leveltodo.presentation.views.avatar.avatar_view import AvatarEditorView
+from leveltodo.presentation.views.cuzdan.cuzdan_view import CuzdanView
 from leveltodo.presentation.views.dashboard.dashboard_view import DashboardView
 from leveltodo.presentation.views.gunluk.gunluk_view import GunlukView
 from leveltodo.presentation.views.irade.irade_view import IradeView
@@ -64,6 +65,7 @@ class MainWindow(QWidget):
         self._avatar_editor = AvatarEditorView()
         self._rozetler = RozetView(container, self._ses)
         self._istatistik = IstatistikView(container)
+        self._cuzdan = CuzdanView(container)
         settings_vm = SettingsViewModel(container.settings)
         self._settings = SettingsView(
             settings_vm, container.yedekleyici, container.bildirim, self._ses
@@ -79,6 +81,7 @@ class MainWindow(QWidget):
         self._stack.addWidget(self._avatar_editor)
         self._stack.addWidget(self._rozetler)
         self._stack.addWidget(self._istatistik)
+        self._stack.addWidget(self._cuzdan)
         self._stack.addWidget(self._settings)
         self._stack.addWidget(self._admin)
 
@@ -134,6 +137,7 @@ class MainWindow(QWidget):
                 "Avatar",
                 "Rozetler",
                 "İstatistik",
+                "Cüzdan",
                 "Ayarlar",
                 "Debug",
             )

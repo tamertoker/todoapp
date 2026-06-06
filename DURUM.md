@@ -4,10 +4,10 @@
 > Yeni bir sohbet bu dosyayı + `CLAUDE.md`'yi + git geçmişini okuyarak kaldığı yerden devam edebilir.
 
 ## Kısa özet
-- Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — commit `73a1f4f`, **push edilmedi**.
+- Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — Faz 0-8 burada, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **135 test yeşil**, ruff temiz (kendi kod: `ruff check src/ tests/`; repo kökünde kullanıcının analiz scriptleri ruff'a takılır, bizim değil).
-- Stack: Python 3.12.8 · PyQt6 · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid.
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **143 test yeşil**, ruff temiz (kendi kod: `ruff check src/ tests/`; repo kökünde kullanıcının analiz scriptleri ruff'a takılır, bizim değil).
+- Stack: Python 3.12.8 · PyQt6 (+QtMultimedia) · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid · plyer · pyqtgraph + numpy.
 
 ## Bitti ✅
 - **Faz 0** İskelet: katmanlı mimari, `bootstrap.py` Container + elle DI, `OlayHatti`(blinker)+Qt köprüsü, `Saat`(IClock)/`Gun`(DayId, gün-başlangıç vars. 04:00), enjekte `Sans`, Alembic migrations.
@@ -83,9 +83,18 @@
   ↔ pyqtgraph çizgi grafiği; stat XP dağılımı (QProgressBar'lar) + kişisel rekorlar paneli.
   pyqtgraph+numpy bağımlılık eklendi.
 
-## Sırada ⏸️ — Faz 8
-- **Faz 8**: finans (gelir/gider, aylık hedef) + cüzdan + wishlist. Sonra 9 (lore/
-  onboarding/açılış sözü/atmosfer). **Push edilmedi** ("hadi" bekle).
+## Faz 8 — Cüzdan ✅ (bitti)
+- **8.1 Veri+servis**: `CuzdanServisi` (gelir/gider KURUŞ, bakiye, aylık özet=tasarruf
+  + harcama bütçesi iki hedef, wishlist ilerleme=bakiye/fiyat). models WalletTransaction
+  + WishlistItem (migration 0012). `domain/cuzdan` (ilerleme_orani, kurus_tl).
+  `tests/integration/test_cuzdan.py`.
+- **8.2 Ekran**: "Cüzdan" sekmesi — bakiye, gelir/gider ekle+liste+sil, iki aylık hedef
+  barı, wishlist (resim seç → `presentation/common/resim_acilma.py` ResimAcilma:
+  ilerledikçe görsel soldan sağa açılır; resim yoksa yeşil dolum çubuğu).
+
+## Sırada ⏸️ — Faz 9 (son faz)
+- **Faz 9**: lore (düşman lore fragmanları) + onboarding "Mentor" NPC (ilk açılış
+  tutorial) + açılış mesajı/günün sözü + gelişmiş animasyonlar. **Push edilmedi** ("hadi" bekle).
 
 ## Çalışma kuralları (özet — tam hâli CLAUDE.md'de)
 - Kullanıcı teknik değil → her değişiklikten sonra sade Türkçe anlat; soruları sonuç-odaklı sor; arayüz tamamen Türkçe.
