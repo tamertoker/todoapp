@@ -75,6 +75,7 @@ class DashboardView(QWidget):
         self._pixmap_cache: dict[str, QPixmap] = {}
         self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
         self._mod = "bugun"  # "bugun" | "tumu"
+        self._acik_seanslar: set[str] = set()  # açık (genişletilmiş) seans listeleri
         self._son_dusman: str | None = None
 
         title = QLabel("LevelTodo")
@@ -383,7 +384,17 @@ class DashboardView(QWidget):
             durdur=self._vm.seans_durdur,
             sil=self._vm.sil,
             seans_sil=self._vm.seans_sil,
+            seans_guncelle=self._vm.seans_guncelle,
+            seans_manuel_ekle=self._vm.seans_manuel_ekle,
+            acik=satir.kayit_id in self._acik_seanslar,
+            toggle_acik=self._toggle_acik,
         )
+
+    def _toggle_acik(self, kayit_id: str, acik: bool) -> None:
+        if acik:
+            self._acik_seanslar.add(kayit_id)
+        else:
+            self._acik_seanslar.discard(kayit_id)
 
     def _tick(self) -> None:
         simdi = self._container.saat.simdi()

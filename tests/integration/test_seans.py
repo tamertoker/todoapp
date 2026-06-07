@@ -49,6 +49,50 @@ def test_kisa_seans_odulsuz_ama_kaydedilir(db_url):
     assert c.gorevler.toplamlar()[0] == 0  # ödül yok
 
 
+def test_seans_silinince_gorev_suresi_eksilir(db_url):
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    c = build_container(db_url=db_url, saat=saat)
+    c.gorevler.gorev_olustur("Oku", Tekrar.YOK)
+    s = c.gorevler.bugunku_gorevler()[0]
+    for _ in range(2):
+        c.gorevler.seans_baslat(s.kayit_id)
+        saat.ilerlet(minutes=30)
+        c.gorevler.seans_durdur(s.kayit_id)
+    assert c.gorevler.bugunku_gorevler()[0].calisilan_saniye == 3600  # 1 saat
+
+    ilk = c.gorevler.seanslar(s.kayit_id)[0]
+    c.gorevler.seans_sil(ilk.seans_id)  # 30 dk sil
+    assert c.gorevler.bugunku_gorevler()[0].calisilan_saniye == 1800  # 30 dk kaldı
+    assert len(c.gorevler.seanslar(s.kayit_id)) == 1
+
+
+def test_seans_saati_duzenlenebilir(db_url):
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    c = build_container(db_url=db_url, saat=saat)
+    c.gorevler.gorev_olustur("Oku", Tekrar.YOK)
+    s = c.gorevler.bugunku_gorevler()[0]
+    c.gorevler.seans_baslat(s.kayit_id)
+    saat.ilerlet(minutes=30)
+    c.gorevler.seans_durdur(s.kayit_id)
+
+    se = c.gorevler.seanslar(s.kayit_id)[0]
+    assert c.gorevler.seans_guncelle(se.seans_id, "12:00", "12:45") is True
+    g = c.gorevler.seanslar(s.kayit_id)[0]
+    assert g.baslangic == "12:00" and g.bitis == "12:45" and g.sure == 45 * 60
+    assert c.gorevler.bugunku_gorevler()[0].calisilan_saniye == 45 * 60  # toplam güncellendi
+    assert c.gorevler.seans_guncelle(se.seans_id, "12:00", "11:00") is False  # geçersiz
+
+
+def test_manuel_seans_ekle(db_url):
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    c = build_container(db_url=db_url, saat=saat)
+    c.gorevler.gorev_olustur("Oku", Tekrar.YOK)
+    s = c.gorevler.bugunku_gorevler()[0]
+    assert c.gorevler.seans_manuel_ekle(s.kayit_id, "12:00", "12:30") is True
+    assert len(c.gorevler.seanslar(s.kayit_id)) == 1
+    assert c.gorevler.bugunku_gorevler()[0].calisilan_saniye == 1800
+
+
 def test_baska_gorev_baslayinca_onceki_seans_kapanir(db_url):
     saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
     c = build_container(db_url=db_url, saat=saat)

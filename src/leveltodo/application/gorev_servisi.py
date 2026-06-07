@@ -450,8 +450,61 @@ class GorevServisi:
         ]
 
     def seans_sil(self, seans_id: str) -> None:
-        if self._seans is not None:
-            self._seans.seans_sil(seans_id)
+        """Seansı siler ve süresini görevin toplamından (committed) düşer."""
+        if self._seans is None:
+            return
+        s = self._seans.getir(seans_id)
+        if s is None:
+            return
+        self._gorev.committed_ekle(s.instance_id, -s.duration)
+        self._seans.seans_sil(seans_id)
+
+    def _saat_birlestir(self, gun: date, hhmm: str) -> datetime | None:
+        try:
+            saat, dakika = hhmm.split(":")
+            return datetime(gun.year, gun.month, gun.day, int(saat), int(dakika))
+        except (ValueError, AttributeError):
+            return None
+
+    def seans_guncelle(self, seans_id: str, baslangic: str, bitis: str) -> bool:
+        """Bir seansın başlangıç–bitiş saatini (HH:MM) değiştirir; süreyi ve görevin
+        toplamını buna göre günceller. Geçersizse (bitiş ≤ başlangıç) False döner."""
+        if self._seans is None:
+            return False
+        s = self._seans.getir(seans_id)
+        if s is None:
+            return False
+        bas = self._saat_birlestir(s.day, baslangic)
+        bit = self._saat_birlestir(s.day, bitis)
+        if bas is None or bit is None or bit <= bas:
+            return False
+        yeni_sure = int((bit - bas).total_seconds())
+        self._gorev.committed_ekle(s.instance_id, yeni_sure - s.duration)
+        self._seans.guncelle(seans_id, bas, bit, yeni_sure)
+        return True
+
+    def seans_manuel_ekle(self, instance_id: str, baslangic: str, bitis: str) -> bool:
+        """Elle (sonradan) bir seans ekler: verilen HH:MM aralığıyla, bugüne. Görevin
+        toplamına süresini ekler. Geçersizse False."""
+        if self._seans is None:
+            return False
+        gun = self._bugun()
+        bas = self._saat_birlestir(gun, baslangic)
+        bit = self._saat_birlestir(gun, bitis)
+        if bas is None or bit is None or bit <= bas:
+            return False
+        sure = int((bit - bas).total_seconds())
+        self._seans.ekle_kapali(
+            id=new_id(),
+            instance_id=instance_id,
+            user_id=self._user_id,
+            day=gun,
+            start_at=bas,
+            end_at=bit,
+            duration=sure,
+        )
+        self._gorev.committed_ekle(instance_id, sure)
+        return True
 
     def gorev_sil(self, kayit_id: str) -> None:
         kayit = self._gorev.get_instance(kayit_id)

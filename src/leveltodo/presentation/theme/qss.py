@@ -56,6 +56,15 @@ def build_qss(palette: Palette, font_family: str, up_arrow: str, down_arrow: str
         color: {p.accent};
         background-color: {p.panel};
     }}
+    QPushButton#Expander {{
+        font-weight: bold;
+        padding: 2px;
+    }}
+    QPushButton#Expander:checked {{
+        background-color: {p.accent};
+        color: {p.accent_text};
+        border-color: {p.accent};
+    }}
     QComboBox, QSpinBox {{
         background-color: {p.bg};
         color: {p.text};

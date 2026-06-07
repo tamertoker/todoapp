@@ -78,6 +78,14 @@ class DashboardViewModel(QObject):
         self._gorevler.seans_sil(seans_id)
         self.changed.emit()
 
+    def seans_guncelle(self, seans_id: str, baslangic: str, bitis: str) -> None:
+        self._gorevler.seans_guncelle(seans_id, baslangic, bitis)
+        self.changed.emit()
+
+    def seans_manuel_ekle(self, kayit_id: str, baslangic: str, bitis: str) -> None:
+        self._gorevler.seans_manuel_ekle(kayit_id, baslangic, bitis)
+        self.changed.emit()
+
     def checkpoint(self) -> None:
         self._kronometre.checkpoint()
 

@@ -2,7 +2,8 @@
 
 Görev hiç "bitmez": Başlat ile yeni bir seans açılır, Durdur ile kapanır (süresine
 göre ödül). Başlık satırında o güne ait tüm seansların TOPLAM süresi kalın yazar;
-açılır bölümde tek tek seanslar (başlangıç–bitiş + süre) listelenir.
+açılır bölümde her seans (başlangıç–bitiş saatleri DÜZENLENEBİLİR + süre + sil), ayrıca
+elle seans ekleme satırı bulunur. Açık/kapalı durumu satır yeniden çizilse de korunur.
 """
 
 from __future__ import annotations
@@ -10,11 +11,13 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import datetime
 
+from PyQt6.QtCore import QTime
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QTimeEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -27,6 +30,21 @@ from leveltodo.presentation.views.dashboard.gorev_satir_widget import (
 )
 
 
+def _qtime(hhmm: str) -> QTime:
+    try:
+        s, d = hhmm.split(":")
+        return QTime(int(s), int(d))
+    except (ValueError, AttributeError):
+        return QTime(0, 0)
+
+
+def _saat_kutusu(hhmm: str) -> QTimeEdit:
+    kutu = QTimeEdit()
+    kutu.setDisplayFormat("HH:mm")
+    kutu.setTime(_qtime(hhmm))
+    return kutu
+
+
 def seansli_gorev_satir(
     satir: GorevSatiri,
     *,
@@ -37,6 +55,10 @@ def seansli_gorev_satir(
     durdur: Callable[[str], None],
     sil: Callable[[str], None],
     seans_sil: Callable[[str], None],
+    seans_guncelle: Callable[[str, str, str], None],
+    seans_manuel_ekle: Callable[[str, str, str], None],
+    acik: bool,
+    toggle_acik: Callable[[str, bool], None],
 ) -> QWidget:
     kap = QWidget()
     v = QVBoxLayout(kap)
@@ -49,9 +71,11 @@ def seansli_gorev_satir(
     h.setContentsMargins(12, 8, 12, 8)
     h.setSpacing(8)
 
-    expander = QPushButton("▸")
+    expander = QPushButton("▼" if acik else "▶")
+    expander.setObjectName("Expander")
     expander.setCheckable(True)
-    expander.setFixedWidth(28)
+    expander.setChecked(acik)
+    expander.setFixedWidth(30)
     h.addWidget(expander)
     h.addWidget(QLabel(satir.baslik))
     if satir.etiket_ad:
@@ -65,7 +89,7 @@ def seansli_gorev_satir(
         h.addWidget(seri)
 
     toplam = QLabel(format_sure(satir_canli_saniye(satir, simdi)))
-    toplam.setObjectName("Counter")  # toplam birikmiş süre kalın
+    toplam.setObjectName("Counter")
     h.addWidget(toplam)
     sure_etiketleri[satir.kayit_id] = (toplam, satir)
 
@@ -83,32 +107,82 @@ def seansli_gorev_satir(
 
     alt = QWidget()
     av = QVBoxLayout(alt)
-    av.setContentsMargins(36, 0, 12, 4)
-    av.setSpacing(2)
+    av.setContentsMargins(40, 2, 12, 6)
+    av.setSpacing(3)
     if not seanslar:
         bos = QLabel("Henüz seans yok. Başlat'a basınca ilki açılır.")
         bos.setObjectName("Tag")
         av.addWidget(bos)
-    else:
-        for se in seanslar:
-            aralik = (
-                f"{se.baslangic} – {se.bitis}" if se.bitis else f"{se.baslangic} – (çalışıyor)"
-            )
-            sh = QHBoxLayout()
-            aralik_l = QLabel(aralik)
-            aralik_l.setObjectName("Tag")
-            sure_l = QLabel(format_sure(se.sure))
-            sure_l.setObjectName("Timer")
-            ssil = QPushButton("Sil")
-            ssil.clicked.connect(lambda _c, sid=se.seans_id: seans_sil(sid))
-            sh.addWidget(aralik_l, stretch=1)
-            sh.addWidget(sure_l)
-            sh.addWidget(ssil)
-            kapx = QWidget()
-            kapx.setLayout(sh)
-            av.addWidget(kapx)
-    alt.setVisible(False)
-    expander.toggled.connect(alt.setVisible)
-    expander.toggled.connect(lambda on: expander.setText("▾" if on else "▸"))
+    for se in seanslar:
+        av.addWidget(_seans_satiri(se, seans_sil, seans_guncelle))
+    av.addWidget(_manuel_satir(satir.kayit_id, seans_manuel_ekle))
+
+    alt.setVisible(acik)
+
+    def _toggle(on: bool) -> None:
+        alt.setVisible(on)
+        expander.setText("▼" if on else "▶")
+        toggle_acik(satir.kayit_id, on)
+
+    expander.toggled.connect(_toggle)
     v.addWidget(alt)
+    return kap
+
+
+def _seans_satiri(
+    se: SeansSatiri,
+    seans_sil: Callable[[str], None],
+    seans_guncelle: Callable[[str, str, str], None],
+) -> QWidget:
+    kap = QWidget()
+    sh = QHBoxLayout(kap)
+    sh.setContentsMargins(0, 0, 0, 0)
+    sh.setSpacing(6)
+    if se.bitis is None:
+        # Hâlâ çalışan açık seans — düzenlenmez.
+        sh.addWidget(QLabel(f"{se.baslangic} – (çalışıyor)"))
+        sh.addStretch(1)
+        sh.addWidget(QLabel(format_sure(se.sure)))
+    else:
+        bas_edit = _saat_kutusu(se.baslangic)
+        bit_edit = _saat_kutusu(se.bitis)
+        sure_l = QLabel(format_sure(se.sure))
+        sure_l.setObjectName("Timer")
+        kaydet = QPushButton("Kaydet")
+        kaydet.clicked.connect(
+            lambda _c, sid=se.seans_id, b=bas_edit, e=bit_edit: seans_guncelle(
+                sid, b.time().toString("HH:mm"), e.time().toString("HH:mm")
+            )
+        )
+        ssil = QPushButton("Sil")
+        ssil.clicked.connect(lambda _c, sid=se.seans_id: seans_sil(sid))
+        sh.addWidget(bas_edit)
+        sh.addWidget(QLabel("–"))
+        sh.addWidget(bit_edit)
+        sh.addWidget(sure_l)
+        sh.addStretch(1)
+        sh.addWidget(kaydet)
+        sh.addWidget(ssil)
+    return kap
+
+
+def _manuel_satir(kayit_id: str, seans_manuel_ekle: Callable[[str, str, str], None]) -> QWidget:
+    kap = QWidget()
+    mh = QHBoxLayout(kap)
+    mh.setContentsMargins(0, 0, 0, 0)
+    mh.setSpacing(6)
+    m_bas = _saat_kutusu("12:00")
+    m_bit = _saat_kutusu("12:30")
+    ekle = QPushButton("Seans ekle")
+    ekle.clicked.connect(
+        lambda _c, b=m_bas, e=m_bit: seans_manuel_ekle(
+            kayit_id, b.time().toString("HH:mm"), e.time().toString("HH:mm")
+        )
+    )
+    mh.addWidget(QLabel("Elle:"))
+    mh.addWidget(m_bas)
+    mh.addWidget(QLabel("–"))
+    mh.addWidget(m_bit)
+    mh.addStretch(1)
+    mh.addWidget(ekle)
     return kap

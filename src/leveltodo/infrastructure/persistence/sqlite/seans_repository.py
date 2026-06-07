@@ -42,6 +42,47 @@ class SqlSeansRepository:
                 seans.duration = duration
                 s.commit()
 
+    def ekle_kapali(
+        self,
+        *,
+        id: str,
+        instance_id: str,
+        user_id: str,
+        day: date,
+        start_at: datetime,
+        end_at: datetime,
+        duration: int,
+    ) -> None:
+        """Doğrudan kapalı (bitmiş) seans ekler — manuel/elle seans için."""
+        with self._sf() as s:
+            s.add(
+                Session(
+                    id=id,
+                    instance_id=instance_id,
+                    user_id=user_id,
+                    day=day,
+                    start_at=start_at,
+                    end_at=end_at,
+                    duration=duration,
+                )
+            )
+            s.commit()
+
+    def getir(self, seans_id: str) -> Session | None:
+        with self._sf() as s:
+            return s.get(Session, seans_id)
+
+    def guncelle(
+        self, seans_id: str, start_at: datetime, end_at: datetime, duration: int
+    ) -> None:
+        with self._sf() as s:
+            seans = s.get(Session, seans_id)
+            if seans is not None:
+                seans.start_at = start_at
+                seans.end_at = end_at
+                seans.duration = duration
+                s.commit()
+
     def gun_seanslari(self, instance_id: str, day: date) -> list[Session]:
         with self._sf() as s:
             stmt = (

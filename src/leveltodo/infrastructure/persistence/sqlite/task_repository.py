@@ -110,6 +110,14 @@ class SqlTaskRepository:
             )
             return [tuple(satir) for satir in s.execute(stmt).all()]
 
+    def committed_ekle(self, instance_id: str, delta: int) -> None:
+        """Bir kaydın toplam süresine (committed_seconds) delta ekler (negatif olabilir)."""
+        with self._sf() as s:
+            inst = s.get(TaskInstance, instance_id)
+            if inst is not None:
+                inst.committed_seconds = max(0, inst.committed_seconds + delta)
+                s.commit()
+
     def gorev_serisi_guncelle(self, task_id: str, yeni_seri: int, son_gun: date) -> None:
         with self._sf() as s:
             task = s.get(Task, task_id)
