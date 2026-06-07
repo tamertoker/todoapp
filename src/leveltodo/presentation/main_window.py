@@ -72,7 +72,7 @@ class MainWindow(QWidget):
         self._magaza = MagazaView(container)
         settings_vm = SettingsViewModel(container.settings)
         self._settings = SettingsView(
-            settings_vm, container.yedekleyici, container.bildirim, self._ses
+            settings_vm, container.yedekleyici, container.bildirim, self._ses, container.stat
         )
         self._admin = AdminView(container)
 

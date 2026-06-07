@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QCheckBox,
+    QColorDialog,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -21,7 +22,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from leveltodo.domain.stats.statlar import GOREV_STATLARI, STAT_ETIKET, Stat
+from leveltodo.domain.stats.statlar import GOREV_STATLARI, STAT_ETIKET
 from leveltodo.domain.tasks.kurallar import Tekrar
 from leveltodo.presentation.common.autofill import AutoFill
 
@@ -42,12 +43,14 @@ class AddTaskDialog(QDialog):
         oneri_getir=None,
         sablon_getir=None,
         etiket=None,
+        stat_servisi=None,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Yeni Görev")
         self.setMinimumWidth(420)
         self._sablon_getir = sablon_getir
         self._etiket = etiket
+        self._stat_servisi = stat_servisi
 
         self._title = QLineEdit()
         self._title.setPlaceholderText("Görev başlığı")
@@ -64,8 +67,8 @@ class AddTaskDialog(QDialog):
         self._ay_widget, self._ay_spin = self._build_ay_widget()
 
         self._stat = QComboBox()
-        for stat in GOREV_STATLARI:
-            self._stat.addItem(STAT_ETIKET[stat], stat.value)
+        self._stat.currentIndexChanged.connect(self._stat_secildi)
+        self._stat_doldur()
 
         self._etiket_combo = QComboBox()
         self._etiket_combo.currentIndexChanged.connect(self._etiket_secildi)
@@ -150,6 +153,30 @@ class AddTaskDialog(QDialog):
         self._hafta_widget.setVisible(tekrar is Tekrar.HAFTALIK)
         self._ay_widget.setVisible(tekrar is Tekrar.AYLIK)
 
+    def _stat_doldur(self, secili: str | None = None) -> None:
+        self._stat.blockSignals(True)
+        self._stat.clear()
+        if self._stat_servisi is not None:
+            for b in self._stat_servisi.gorev_statlari():
+                self._stat.addItem(b.etiket, b.anahtar)
+            self._stat.addItem("+ Yeni alan…", "__yeni_stat__")
+        else:
+            for stat in GOREV_STATLARI:
+                self._stat.addItem(STAT_ETIKET[stat], stat.value)
+        idx = self._stat.findData(secili) if secili else 0
+        self._stat.setCurrentIndex(max(0, idx))
+        self._stat.blockSignals(False)
+
+    def _stat_secildi(self) -> None:
+        if self._stat.currentData() != "__yeni_stat__":
+            return
+        ad, ok = QInputDialog.getText(self, "Yeni gelişim alanı", "Alan adı (ör. Yazılım):")
+        if ok and ad.strip() and self._stat_servisi is not None:
+            yeni = self._stat_servisi.stat_ekle(ad.strip())
+            self._stat_doldur(yeni)
+        else:
+            self._stat_doldur()
+
     def _etiket_doldur(self, secili_id: str | None = None) -> None:
         self._etiket_combo.blockSignals(True)
         self._etiket_combo.clear()
@@ -167,7 +194,9 @@ class AddTaskDialog(QDialog):
             return
         ad, ok = QInputDialog.getText(self, "Yeni etiket", "Etiket adı:")
         if ok and ad.strip() and self._etiket is not None:
-            yeni_id = self._etiket.etiket_ekle(ad.strip())
+            renk = QColorDialog.getColor(parent=self, title="Etiket rengi (iptal = otomatik)")
+            renk_hex = renk.name() if renk.isValid() else None
+            yeni_id = self._etiket.etiket_ekle(ad.strip(), renk_hex)
             self._etiket_doldur(yeni_id)
         else:
             self._etiket_doldur()  # iptal → etiketsiz
@@ -221,7 +250,7 @@ class AddTaskDialog(QDialog):
     def _secili_gunler(self) -> list[int]:
         return [i for i, kutu in enumerate(self._gun_kutulari) if kutu.isChecked()]
 
-    def result_values(self) -> tuple[str, Tekrar, str, int | None, Stat, str | None]:
+    def result_values(self) -> tuple[str, Tekrar, str, int | None, str | None, str | None]:
         tekrar = self._tekrar.currentData()
         if tekrar is Tekrar.HER_X_GUN:
             parametre = str(self._x_spin.value())
@@ -232,7 +261,9 @@ class AddTaskDialog(QDialog):
         else:
             parametre = ""
         ozel_odul = self._override.value() if self._override_check.isChecked() else None
-        stat = Stat(self._stat.currentData())
+        stat_key = self._stat.currentData()
+        if stat_key == "__yeni_stat__":
+            stat_key = None
         tag_data = self._etiket_combo.currentData()
         tag_id = tag_data if isinstance(tag_data, str) and tag_data != "__yeni__" else None
-        return self._title.text().strip(), tekrar, parametre, ozel_odul, stat, tag_id
+        return self._title.text().strip(), tekrar, parametre, ozel_odul, stat_key, tag_id

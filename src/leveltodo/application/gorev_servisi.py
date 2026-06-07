@@ -85,6 +85,7 @@ class GorevServisi:
         combo: ComboServisi,
         rozet: RozetServisi,
         user_id: str = DEFAULT_USER_ID,
+        stat_anahtarlari_getir=None,
     ) -> None:
         self._gorev = gorev_repo
         self._defter = defter_repo
@@ -96,6 +97,8 @@ class GorevServisi:
         self._combo = combo
         self._rozet = rozet
         self._user_id = user_id
+        # Tüm stat anahtarları (yerleşik + özel). Verilmezse yalnızca yerleşik 4.
+        self._stat_anahtarlari = stat_anahtarlari_getir or (lambda: [s.value for s in Stat])
 
     def _bugun(self):
         return Gun.olustur(self._saat.simdi(), self._gun_baslangic()).tarih
@@ -105,7 +108,7 @@ class GorevServisi:
         baslik: str,
         tekrar: Tekrar,
         ozel_odul: int | None = None,
-        stat: Stat | None = None,
+        stat: str | Stat | None = None,
         parametre: str = "",
         tag_id: str | None = None,
     ) -> str:
@@ -117,7 +120,7 @@ class GorevServisi:
             recurrence=tekrar.value,
             recurrence_param=parametre or None,
             reward_override=ozel_odul,
-            stat=stat.value if stat is not None else None,
+            stat=str(stat) if stat is not None else None,  # Stat(StrEnum) ya da özel id
             created_at=self._saat.simdi(),
             tag_id=tag_id,
         )
@@ -363,9 +366,12 @@ class GorevServisi:
         return {s: seviye_hesapla(toplamlar.get(s.value, 0)) for s in Stat}
 
     def profil_durumu(self) -> tuple[int, UnvanDurumu]:
-        """Profil seviyesi (stat seviyelerinin toplamı) ve unvan durumu."""
-        durumlar = self.stat_durumlari()
-        profil = sum(d.seviye for d in durumlar.values())
+        """Profil seviyesi (TÜM stat seviyelerinin toplamı — özel statlar dahil)."""
+        toplamlar = self._defter.stat_xp_toplamlari(self._user_id)
+        profil = sum(
+            seviye_hesapla(toplamlar.get(anahtar, 0)).seviye
+            for anahtar in self._stat_anahtarlari()
+        )
         return profil, unvan_hesapla(profil)
 
     def _seviye_dondurma_kontrol(self) -> None:
@@ -373,7 +379,7 @@ class GorevServisi:
         profil, _ = self.profil_durumu()
         self._dondurma.seviye_odulu(profil)
 
-    def gelistirme_xp_ekle(self, stat: Stat, miktar: int) -> None:
+    def gelistirme_xp_ekle(self, stat: str | Stat, miktar: int) -> None:
         """Debug: bir stata doğrudan XP ekler (yalnızca geliştirme/test için)."""
         self._defter.record(
             user_id=self._user_id,
@@ -382,6 +388,6 @@ class GorevServisi:
             ref_id=None,
             xp=miktar,
             points=0,
-            stat=stat.value,
+            stat=str(stat),
         )
         self._seviye_dondurma_kontrol()

@@ -445,6 +445,7 @@ class DashboardView(QWidget):
             oneri_getir=self._container.gorevler.baslik_onerileri,
             sablon_getir=self._container.gorevler.sablon_oneri,
             etiket=self._container.etiket,
+            stat_servisi=self._container.stat,
         )
         if dialog.exec():
             baslik, tekrar, parametre, ozel_odul, stat, tag_id = dialog.result_values()

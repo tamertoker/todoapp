@@ -37,7 +37,7 @@ class DashboardViewModel(QObject):
         baslik: str,
         tekrar: Tekrar,
         ozel_odul: int | None,
-        stat: Stat | None = None,
+        stat: str | Stat | None = None,
         parametre: str = "",
         tag_id: str | None = None,
     ) -> None:

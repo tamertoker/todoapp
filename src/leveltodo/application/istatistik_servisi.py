@@ -50,6 +50,7 @@ class IstatistikServisi:
         saat: Saat,
         gun_baslangic_getir,
         user_id: str = DEFAULT_USER_ID,
+        stat_listesi_getir=None,
     ) -> None:
         self._defter = defter_repo
         self._gorev = gorev_repo
@@ -58,6 +59,8 @@ class IstatistikServisi:
         self._saat = saat
         self._gun_baslangic = gun_baslangic_getir
         self._user_id = user_id
+        # [(anahtar, etiket), ...] tüm statlar (yerleşik + özel). Yoksa yalnız yerleşik.
+        self._stat_listesi = stat_listesi_getir
 
     def bugun(self) -> date:
         return Gun.olustur(self._saat.simdi(), self._gun_baslangic()).tarih
@@ -92,6 +95,8 @@ class IstatistikServisi:
 
     def stat_dagilimi(self) -> dict[str, int]:
         toplamlar = self._defter.stat_xp_toplamlari(self._user_id)
+        if self._stat_listesi is not None:
+            return {etiket: toplamlar.get(anahtar, 0) for anahtar, etiket in self._stat_listesi()}
         return {STAT_ETIKET[s]: toplamlar.get(s.value, 0) for s in Stat}
 
     def rekorlar(self) -> Rekorlar:

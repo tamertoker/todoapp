@@ -239,6 +239,20 @@ class WishlistItem(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
+class CustomStat(Base):
+    """Kullanıcının eklediği özel gelişim alanı (stat). Yerleşik 4 stat enum'da;
+    bunlar ek statlar. Anahtarı = id. Görevlerden büyür, profil seviyesine katılır."""
+
+    __tablename__ = "custom_stats"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(40))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class Tag(Base):
     """Etiket (proje) — renkli bir nokta + ad. Görevler buna bağlanır (Task.tag_id)."""
 

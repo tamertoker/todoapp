@@ -9,6 +9,9 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
+# domain'de saat dosyasında simdi fonksiyonunu protokol ile beraber tanımlamıştım,
+# burada da hepsinde simdi olmak zorunda.
+
 
 class SistemSaati:
     def simdi(self) -> datetime:

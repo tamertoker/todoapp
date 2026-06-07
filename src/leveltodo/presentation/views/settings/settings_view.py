@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QMessageBox,
     QPushButton,
     QSpinBox,
@@ -57,12 +58,14 @@ class SettingsView(QWidget):
         yedekleyici: Yedekleyici | None = None,
         bildirim: BildirimServisi | None = None,
         ses=None,
+        stat=None,
     ) -> None:
         super().__init__()
         self.view_model = view_model
         self._yedekleyici = yedekleyici
         self._bildirim = bildirim
         self._ses = ses
+        self._stat = stat
 
         panel = QFrame()
         panel.setObjectName("Panel")
@@ -100,6 +103,8 @@ class SettingsView(QWidget):
         outer = QVBoxLayout(self)
         outer.setContentsMargins(16, 16, 16, 16)
         outer.addWidget(panel)
+        if self._stat is not None:
+            outer.addWidget(self._stat_panel())
         if self._ses is not None:
             outer.addWidget(self._ses_panel())
         if self._bildirim is not None:
@@ -109,6 +114,71 @@ class SettingsView(QWidget):
         outer.addStretch(1)
 
         self._load()
+
+    def _stat_panel(self) -> QFrame:
+        panel = QFrame()
+        panel.setObjectName("Panel")
+        v = QVBoxLayout(panel)
+        v.setContentsMargins(24, 20, 24, 20)
+        v.setSpacing(8)
+        baslik = QLabel("Gelişim alanları (stat)")
+        baslik.setObjectName("Title")
+        bilgi = QLabel(
+            "Kendi alanını ekle (ör. Yazılım); görevlere atanır, profil seviyene katılır."
+        )
+        bilgi.setObjectName("Subtitle")
+        v.addWidget(baslik)
+        v.addWidget(bilgi)
+
+        self._stat_liste = QVBoxLayout()
+        self._stat_liste.setSpacing(4)
+        v.addLayout(self._stat_liste)
+
+        self._yeni_stat = QLineEdit()
+        self._yeni_stat.setPlaceholderText("Yeni alan adı")
+        ekle = QPushButton("Alan ekle")
+        ekle.clicked.connect(self._stat_ekle)
+        satir = QHBoxLayout()
+        satir.addWidget(self._yeni_stat, stretch=1)
+        satir.addWidget(ekle)
+        v.addLayout(satir)
+
+        self._stat_listele()
+        return panel
+
+    def _stat_listele(self) -> None:
+        while self._stat_liste.count():
+            item = self._stat_liste.takeAt(0)
+            w = item.widget()
+            if w is not None:
+                w.setParent(None)
+                w.deleteLater()
+        ozel = [b for b in self._stat.tum_statlar() if b.silinebilir]
+        if not ozel:
+            bos = QLabel("Henüz özel alan yok. (Yerleşik 4 alan her zaman var.)")
+            bos.setObjectName("Tag")
+            self._stat_liste.addWidget(bos)
+            return
+        for b in ozel:
+            kap = QWidget()
+            h = QHBoxLayout(kap)
+            h.setContentsMargins(0, 0, 0, 0)
+            h.addWidget(QLabel(f"• {b.etiket}"), stretch=1)
+            sil = QPushButton("Sil")
+            sil.clicked.connect(lambda _c, sid=b.anahtar: self._stat_sil(sid))
+            h.addWidget(sil)
+            self._stat_liste.addWidget(kap)
+
+    def _stat_ekle(self) -> None:
+        ad = self._yeni_stat.text().strip()
+        if ad:
+            self._stat.stat_ekle(ad)
+            self._yeni_stat.clear()
+            self._stat_listele()
+
+    def _stat_sil(self, stat_id: str) -> None:
+        self._stat.stat_sil(stat_id)
+        self._stat_listele()
 
     def _ses_panel(self) -> QFrame:
         panel = QFrame()

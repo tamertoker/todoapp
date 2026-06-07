@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — Faz 0-8 burada, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **155 test yeşil**, ruff temiz (kendi kod). NOT: kullanıcı `domain/time/saat.py` ve `infrastructure/saat.py`'ye elle yorum ekledi → o iki dosya ruff'a takılıyor (uzun satır + import sırası), bizim değil; commit'lemedim.
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **158 test yeşil**, ruff temiz (`ruff check src/ tests/`).
 - Stack: Python 3.12.8 · PyQt6 (+QtMultimedia) · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid · plyer · pyqtgraph + numpy.
 
 ## Bitti ✅
@@ -124,7 +124,16 @@ statlar tam stat (profile katılır); etiket grafiği = etiket başına SÜRE; a
   `gorev_olustur(tag_id)`, `GorevSatiri.etiket_ad/renk` (today_rows/telafi Tag join),
   görev satırında renkli ● + ad, add_task_dialog'da etiket seçici + "Yeni etiket…".
   `tests/integration/test_etiket.py`.
-- **#1, #3, #4**: sırada.
+- **#1 Özel statlar ✅**: `custom_stats` tablosu (migration 0015), `SqlStatRepository`,
+  `StatServisi` (StatBilgi; tum_statlar=yerleşik4+özel, gorev_statlari, anahtarlar, etiket,
+  stat_ekle/sil; özel anahtar=id). `GorevServisi.profil_durumu` artık TÜM stat anahtarlarını
+  toplar (özel dahil); gorev_olustur stat str|Stat. `istatistik.stat_dagilimi` özel statları
+  da gösterir. add_task_dialog stat seçici=gorev_statlari + "+ Yeni alan…"; Ayarlar'da
+  "Gelişim alanları" yöneticisi (ekle/sil). Etikete **renk seçtirici** (QColorDialog) eklendi.
+  KARAR: dashboard 4-stat avatar paneli + rutin stat seçici yerleşik kalır (risk); özel
+  statlar görevlerde + profilde + İstatistik'te. saat.py yorumları ruff'a uygun hale getirildi.
+  `tests/integration/test_stat.py`.
+- **#3, #4**: sırada.
 
 ## Sırada ⏸️ — Faz 9 (son faz, yeni özelliklerden sonra)
 - **Faz 9**: lore (düşman lore fragmanları) + onboarding "Mentor" NPC (ilk açılış
