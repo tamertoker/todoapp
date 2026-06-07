@@ -79,9 +79,15 @@ def seansli_gorev_satir(
     h.addWidget(expander)
     h.addWidget(QLabel(satir.baslik))
     if satir.etiket_ad:
-        proje = QLabel(f"● {satir.etiket_ad}")
-        proje.setStyleSheet(f"color: {satir.etiket_renk or '#888888'}; font-weight: bold;")
-        h.addWidget(proje)
+        nokta = QLabel()
+        nokta.setFixedSize(12, 12)
+        nokta.setStyleSheet(
+            f"background-color: {satir.etiket_renk or '#888888'}; border-radius: 6px;"
+        )
+        ad = QLabel(satir.etiket_ad)
+        ad.setStyleSheet("font-weight: bold;")
+        h.addWidget(nokta)
+        h.addWidget(ad)
     h.addStretch(1)
     if satir.tekrar != "none":
         seri = QLabel(f"🔥 {satir.seri}")

@@ -159,10 +159,19 @@ statlar tam stat (profile katılır); etiket grafiği = etiket başına SÜRE; a
   HATIRLATMA bildirimi, gün başına tek, gece sessizliğine saygılı); app.py 60sn timer + açılışta.
   `tests/integration/test_hatirlatma.py`, test_seans XP-geri-alma.
 
+## RPG facelift (kodla, asset'siz) ✅
+- `qss.py` baştan yazıldı: degrade (qlineargradient) bevel butonlar + panel/kart çerçeveleri,
+  glossy ilerleme barları (acc_l→acc_d), başlık altı vurgu çizgisi, hover accent kenarlık,
+  RPG scrollbar, Expander dolu-durum. `_shift` ile renk açma/koyulaştırma; 7 temada da çalışır.
+- Başlık fontu DEĞİŞMEDİ (Press Start 2P'de Türkçe harf yok → kutu olurdu); başlıklar büyük+
+  bold+vurgu çizgisi.
+- **Etiket noktası ●** font glyph'i yerine **boyalı yuvarlak QLabel** (seans_widget,
+  gorev_satir_widget, pano) — her zaman görünür.
+- NOT: 🔥/❄/🗡 emojileri Pixelify'da □ çıkıyor → **ikon fazında** değişecek (asset).
+
 ## SIRADA (kullanıcı planı)
-- **2) Kodla RPG facelift** (asset'siz: Press Start 2P başlıklar, bevel QSS panel/buton,
-  segment'li barlar, hover glow, tık sesi, animasyon). 3) en son **ikon/asset entegrasyonu**
-  (kullanıcı `assets/icons/` üretip ekleyecek — ikon yükleyici + emoji fallback yazılacak).
+- **3) İkon/asset entegrasyonu** — kullanıcı `assets/icons/<ad>.png` üretip ekleyecek; ben
+  ikon yükleyici (emoji fallback) + emoji→ikon dönüşümünü yazacağım. (spec DURUM dışı, sohbette.)
 - Faz 9 (lore/onboarding/günün sözü) hâlâ açık.
 - **Seans UI düzeltmeleri** (kullanıcı geri bildirimi): expander açıkken dolu görünür
   (#Expander:checked QSS + ▼/▶) ve **açık kalır** (dashboard `_acik_seanslar` set, render'da

@@ -55,10 +55,16 @@ def kronometreli_satir(
     h.addWidget(QLabel(satir.baslik))
 
     if satir.etiket_ad:
-        proje = QLabel(f"● {satir.etiket_ad}")
-        proje.setStyleSheet(f"color: {satir.etiket_renk or '#888888'}; font-weight: bold;")
-        proje.setToolTip("Proje / etiket")
-        h.addWidget(proje)
+        nokta = QLabel()
+        nokta.setFixedSize(12, 12)
+        nokta.setStyleSheet(
+            f"background-color: {satir.etiket_renk or '#888888'}; border-radius: 6px;"
+        )
+        nokta.setToolTip("Proje / etiket")
+        proje_ad = QLabel(satir.etiket_ad)
+        proje_ad.setStyleSheet("font-weight: bold;")
+        h.addWidget(nokta)
+        h.addWidget(proje_ad)
     h.addStretch(1)
 
     if etiket_metni is not None:
