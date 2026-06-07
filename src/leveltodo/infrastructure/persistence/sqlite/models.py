@@ -91,6 +91,25 @@ class TaskInstance(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
+class Session(Base):
+    """Bir görev kaydına (instance) ait tek kronometre seansı: başlangıç–bitiş ve
+    süre. Kronometre başlatılınca açılır (end_at boş), durdurulunca kapanır. Aynı
+    başlık/instance altında birden çok seans birikir; toplam süre bunların toplamıdır."""
+
+    __tablename__ = "sessions"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    instance_id: Mapped[str] = mapped_column(
+        ForeignKey("task_instances.id", ondelete="CASCADE")
+    )
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    day: Mapped[date] = mapped_column(Date)
+    start_at: Mapped[datetime] = mapped_column(DateTime)
+    end_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    duration: Mapped[int] = mapped_column(Integer, default=0)  # saniye
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class XpEvent(Base):
     """Kazanılan her XP'nin kaydı (denetim/grafik için kaynak)."""
 

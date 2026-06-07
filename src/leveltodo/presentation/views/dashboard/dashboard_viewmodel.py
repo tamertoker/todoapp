@@ -62,13 +62,20 @@ class DashboardViewModel(QObject):
         self._gorevler.sablon_sil(task_id)
         self.changed.emit()
 
-    # — Kronometre —
-    def baslat(self, kayit_id: str) -> None:
-        self._kronometre.baslat(kayit_id)
+    # — Seanslar (kronometre = ardışık seanslar) —
+    def seans_baslat(self, kayit_id: str) -> None:
+        self._gorevler.seans_baslat(kayit_id)
         self.changed.emit()
 
-    def duraklat(self, kayit_id: str) -> None:
-        self._kronometre.duraklat(kayit_id)
+    def seans_durdur(self, kayit_id: str) -> None:
+        self._gorevler.seans_durdur(kayit_id)
+        self.changed.emit()
+
+    def seanslar(self, kayit_id: str):
+        return self._gorevler.seanslar(kayit_id)
+
+    def seans_sil(self, seans_id: str) -> None:
+        self._gorevler.seans_sil(seans_id)
         self.changed.emit()
 
     def checkpoint(self) -> None:

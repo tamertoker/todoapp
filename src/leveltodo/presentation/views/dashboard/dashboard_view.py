@@ -39,13 +39,12 @@ from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.mesajlar import combo_mesaji, kritik_mesaji, tamamlama_mesaji
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
-from leveltodo.presentation.views.dashboard.bitir_dialog import BitirDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
 from leveltodo.presentation.views.dashboard.gorev_satir_widget import (
     format_sure,
-    kronometreli_satir,
     satir_canli_saniye,
 )
+from leveltodo.presentation.views.dashboard.seans_widget import seansli_gorev_satir
 
 _STAT_SIRA = (Stat.ENTELEKTUELLIK, Stat.BEDEN, Stat.FARKINDALIK, Stat.DISIPLIN)
 _GUN_KISA = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
@@ -374,15 +373,16 @@ class DashboardView(QWidget):
         h.addWidget(sil)
         return frame
 
-    def _build_row(self, satir: GorevSatiri) -> QFrame:
-        return kronometreli_satir(
+    def _build_row(self, satir: GorevSatiri) -> QWidget:
+        return seansli_gorev_satir(
             satir,
             simdi=self._container.saat.simdi(),
             sure_etiketleri=self._sure_etiketleri,
-            baslat=self._vm.baslat,
-            duraklat=self._vm.duraklat,
-            bitir=self._on_bitir,
+            seanslar=self._vm.seanslar(satir.kayit_id),
+            baslat=self._vm.seans_baslat,
+            durdur=self._vm.seans_durdur,
             sil=self._vm.sil,
+            seans_sil=self._vm.seans_sil,
         )
 
     def _tick(self) -> None:
@@ -451,12 +451,6 @@ class DashboardView(QWidget):
             baslik, tekrar, parametre, ozel_odul, stat, tag_id = dialog.result_values()
             if baslik:
                 self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat, parametre, tag_id)
-
-    def _on_bitir(self, satir: GorevSatiri) -> None:
-        on_dakika = round(satir_canli_saniye(satir, self._container.saat.simdi()) / 60)
-        dialog = BitirDialog(on_dakika, self)
-        if dialog.exec():
-            self._vm.tamamla(satir.kayit_id, dialog.dakika())
 
     def _on_event(self, event: DomainEvent) -> None:
         if isinstance(event, AppStarted):

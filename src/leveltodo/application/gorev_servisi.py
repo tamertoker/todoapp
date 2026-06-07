@@ -69,7 +69,18 @@ class TekrarliGorevOzeti:
     sonraki: date | None
 
 
+@dataclass(frozen=True, slots=True)
+class SeansSatiri:
+    """Bir görevin tek bir kronometre seansı (görünüm için)."""
+
+    seans_id: str
+    baslangic: str  # "HH:MM"
+    bitis: str | None  # "HH:MM" ya da None (hâlâ açık)
+    sure: int  # saniye
+
+
 _TELAFI_PENCERE_GUN = 21  # son 3 hafta içindeki kaçırılanlar telafi edilebilir
+_SEANS_MIN_ODUL_SN = 60  # bu süreden kısa seanslar ödül vermez (spam önleme)
 
 
 class GorevServisi:
@@ -86,6 +97,7 @@ class GorevServisi:
         rozet: RozetServisi,
         user_id: str = DEFAULT_USER_ID,
         stat_anahtarlari_getir=None,
+        seans_repo=None,
     ) -> None:
         self._gorev = gorev_repo
         self._defter = defter_repo
@@ -97,6 +109,7 @@ class GorevServisi:
         self._combo = combo
         self._rozet = rozet
         self._user_id = user_id
+        self._seans = seans_repo
         # Tüm stat anahtarları (yerleşik + özel). Verilmezse yalnızca yerleşik 4.
         self._stat_anahtarlari = stat_anahtarlari_getir or (lambda: [s.value for s in Stat])
 
@@ -347,6 +360,98 @@ class GorevServisi:
         )
         self._seviye_dondurma_kontrol()
         return odul
+
+    # — Seanslar (kronometre = ardışık seanslar; her durdurma süreye göre ödül) —
+    def seans_baslat(self, instance_id: str) -> None:
+        """Kronometreyi başlatır + açık bir seans açar. Başka çalışan görev varsa
+        onun seansını kapatıp ödüllendirir (tek anda tek kronometre)."""
+        simdi = self._saat.simdi()
+        for r in self._gorev.calisan_kayitlar(self._user_id):
+            if r.id != instance_id:
+                self.seans_durdur(r.id)
+        self._gorev.timer_baslat(instance_id, simdi)
+        kayit = self._gorev.get_instance(instance_id)
+        if self._seans is not None and kayit is not None and kayit.timer_running:
+            self._seans.ac(
+                id=new_id(),
+                instance_id=instance_id,
+                user_id=self._user_id,
+                day=self._bugun(),
+                start_at=simdi,
+            )
+
+    def seans_durdur(self, instance_id: str) -> Odul | None:
+        """Kronometreyi durdurur, seansı kapatır ve seansın SÜRESİNE göre ödül verir
+        (özel ödül seansta kullanılmaz). Kısa seans (<1 dk) ödülsüzdür."""
+        kayit = self._gorev.get_instance(instance_id)
+        if kayit is None or not kayit.timer_running or kayit.segment_started_at is None:
+            return None
+        simdi = self._saat.simdi()
+        sure = max(0, int((simdi - kayit.segment_started_at).total_seconds()))
+        self._gorev.timer_duraklat(instance_id, simdi)  # süreyi committed'a ekler, durdurur
+        if self._seans is not None:
+            self._seans.kapat(instance_id, simdi, sure)
+        if sure < _SEANS_MIN_ODUL_SN:
+            return None
+        sablon = self._gorev.get_template(kayit.task_id)
+        odul = odul_hesapla(sure, None)  # süre-temelli
+        kritik = self._sans.kritik_mi(KRITIK_OLASILIK)
+        carpan = self._combo.carpan(simdi) * (KRITIK_CARPAN if kritik else 1)
+        if carpan != 1.0:
+            odul = Odul(xp=round(odul.xp * carpan), puan=round(odul.puan * carpan))
+        if (
+            sablon is not None
+            and sablon.recurrence != "none"
+            and kayit.day == self._bugun()
+            and self._seans is not None
+            and self._seans.gun_seans_sayisi(instance_id, kayit.day) == 1
+        ):
+            self._gorev_serisi_isle(sablon, kayit.day)  # o günün ilk seansı → seri
+        self._defter.record(
+            user_id=self._user_id,
+            day=self._bugun(),
+            source="session",
+            ref_id=instance_id,
+            xp=odul.xp,
+            points=odul.puan,
+            stat=sablon.stat if sablon is not None else None,
+        )
+        combo_tetik = self._combo.tamamlama_bildir(sure, simdi)
+        self._rozet.tamamlama_arttir()
+        if kritik:
+            self._rozet.kritik_isaretle()
+        if combo_tetik:
+            self._rozet.combo_isaretle()
+        self._olay_hatti.publish(
+            TaskCompleted(
+                occurred_at=simdi,
+                instance_id=instance_id,
+                xp=odul.xp,
+                points=odul.puan,
+                kritik=kritik,
+                combo_tetik=combo_tetik,
+            )
+        )
+        self._seviye_dondurma_kontrol()
+        return odul
+
+    def seanslar(self, instance_id: str, gun=None) -> list[SeansSatiri]:
+        if self._seans is None:
+            return []
+        g = gun or self._bugun()
+        return [
+            SeansSatiri(
+                seans_id=s.id,
+                baslangic=s.start_at.strftime("%H:%M"),
+                bitis=s.end_at.strftime("%H:%M") if s.end_at is not None else None,
+                sure=s.duration,
+            )
+            for s in self._seans.gun_seanslari(instance_id, g)
+        ]
+
+    def seans_sil(self, seans_id: str) -> None:
+        if self._seans is not None:
+            self._seans.seans_sil(seans_id)
 
     def gorev_sil(self, kayit_id: str) -> None:
         kayit = self._gorev.get_instance(kayit_id)

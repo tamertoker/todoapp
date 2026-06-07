@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — Faz 0-8 burada, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **159 test yeşil**, ruff temiz (`ruff check src/ tests/`).
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **162 test yeşil**, ruff temiz (`ruff check src/ tests/`).
 - Stack: Python 3.12.8 · PyQt6 (+QtMultimedia) · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid · plyer · pyqtgraph + numpy.
 
 ## Bitti ✅
@@ -138,7 +138,16 @@ statlar tam stat (profile katılır); etiket grafiği = etiket başına SÜRE; a
   küçüğe). `presentation/common/halka.py` (Halka donut QPainter), "Pano" sekmesi: aralık
   seçici (Bugün/Bu hafta/Bu ay/Özel=QDateEdit takvim) + halka + kırılım çubukları (etiket
   rengi + süre + %). `tests/integration/test_pano.py`.
-- **#3 Seanslar**: SON sırada (en büyük; çekirdek kronometre/ödül modeli).
+- **#3 Seanslar ✅**: `sessions` tablosu (migration 0016), `SqlSeansRepository`
+  (ac/kapat/gun_seanslari/gun_seans_sayisi/seans_sil/acik_seanslari_sil). `GorevServisi`:
+  `seans_baslat` (açık seans + başka çalışanı kapat), `seans_durdur` (kapat + SÜRE-temelli
+  ödül; <60sn ödülsüz; o günün ilk seansında seri; düşman/combo/kritik/rozet olaydan),
+  `seanslar`/`seans_sil` + `SeansSatiri` DTO. Dashboard: `seans_widget.py`
+  (başlık+toplam süre kalın + Başlat/Durdur + açılır seans listesi); Bitir kaldırıldı.
+  bootstrap açılışta açık seansları temizler. KARARLAR: ödül süre-temelli (özel ödül
+  artık yalnız Telafi'de), telafi eski akışta (tamamla 2×). `tests/integration/test_seans.py`.
+
+### KULLANICININ 4 İSTEĞİ TAMAM (#1 stat, #2 etiket, #3 seans, #4 etiket-grafik).
 
 ## Sırada ⏸️ — Faz 9 (son faz, yeni özelliklerden sonra)
 - **Faz 9**: lore (düşman lore fragmanları) + onboarding "Mentor" NPC (ilk açılış

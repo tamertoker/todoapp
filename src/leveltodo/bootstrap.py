@@ -48,6 +48,7 @@ from leveltodo.infrastructure.persistence.sqlite.magaza_repository import SqlMag
 from leveltodo.infrastructure.persistence.sqlite.migrations import upgrade_to_head
 from leveltodo.infrastructure.persistence.sqlite.models import DEFAULT_USER_ID
 from leveltodo.infrastructure.persistence.sqlite.rutin_repository import SqlRutinRepository
+from leveltodo.infrastructure.persistence.sqlite.seans_repository import SqlSeansRepository
 from leveltodo.infrastructure.persistence.sqlite.settings_repository import SqlSettingsRepository
 from leveltodo.infrastructure.persistence.sqlite.stat_repository import SqlStatRepository
 from leveltodo.infrastructure.persistence.sqlite.streak_repository import SqlStreakRepository
@@ -118,6 +119,8 @@ def build_container(
     gorev_repo = SqlTaskRepository(session_factory)
     defter_repo = SqlLedgerRepository(session_factory)
     stat = StatServisi(SqlStatRepository(session_factory))
+    seans_repo = SqlSeansRepository(session_factory)
+    seans_repo.acik_seanslari_sil(DEFAULT_USER_ID)  # açılışta yarım kalan seansları temizle
     gorevler = GorevServisi(
         gorev_repo=gorev_repo,
         defter_repo=defter_repo,
@@ -129,6 +132,7 @@ def build_container(
         combo=combo,
         rozet=rozet,
         stat_anahtarlari_getir=lambda: stat.anahtarlar(),
+        seans_repo=seans_repo,
     )
     etiket = EtiketServisi(SqlEtiketRepository(session_factory))
     kronometre = KronometreServisi(gorev_repo, aktif_saat)
