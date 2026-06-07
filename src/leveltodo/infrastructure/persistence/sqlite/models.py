@@ -61,6 +61,7 @@ class Task(Base):
     recurrence_param: Mapped[str | None] = mapped_column(String(60), nullable=True)
     reward_override: Mapped[int | None] = mapped_column(Integer, nullable=True)
     stat: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    tag_id: Mapped[str | None] = mapped_column(String(26), nullable=True)  # etiket (proje)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     streak_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -233,6 +234,20 @@ class WishlistItem(Base):
     name: Mapped[str] = mapped_column(String(200))
     price: Mapped[int] = mapped_column(Integer)  # kuruş
     image_path: Mapped[str | None] = mapped_column(String, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class Tag(Base):
+    """Etiket (proje) — renkli bir nokta + ad. Görevler buna bağlanır (Task.tag_id)."""
+
+    __tablename__ = "tags"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(80))
+    color: Mapped[str] = mapped_column(String(9))  # hex
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

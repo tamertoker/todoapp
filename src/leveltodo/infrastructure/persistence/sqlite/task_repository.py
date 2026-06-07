@@ -12,7 +12,7 @@ from datetime import date, datetime
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import sessionmaker
 
-from leveltodo.infrastructure.persistence.sqlite.models import Task, TaskInstance
+from leveltodo.infrastructure.persistence.sqlite.models import Tag, Task, TaskInstance
 
 
 class SqlTaskRepository:
@@ -31,6 +31,7 @@ class SqlTaskRepository:
         reward_override: int | None,
         stat: str | None,
         created_at: datetime,
+        tag_id: str | None = None,
     ) -> None:
         with self._sf() as s:
             s.add(
@@ -43,6 +44,7 @@ class SqlTaskRepository:
                     reward_override=reward_override,
                     stat=stat,
                     created_at=created_at,
+                    tag_id=tag_id,
                 )
             )
             s.commit()
@@ -87,12 +89,15 @@ class SqlTaskRepository:
         with self._sf() as s:
             return s.get(TaskInstance, instance_id)
 
-    def today_rows(self, user_id: str, day: date) -> list[tuple[TaskInstance, str, int]]:
-        """Bugünün listesi. Her satır (kayıt, tekrar-tipi, göreve-özel-seri)."""
+    def today_rows(
+        self, user_id: str, day: date
+    ) -> list[tuple[TaskInstance, str, int, str | None, str | None]]:
+        """Bugünün listesi. Her satır (kayıt, tekrar-tipi, seri, etiket-ad, etiket-renk)."""
         with self._sf() as s:
             stmt = (
-                select(TaskInstance, Task.recurrence, Task.streak_count)
+                select(TaskInstance, Task.recurrence, Task.streak_count, Tag.name, Tag.color)
                 .join(Task, Task.id == TaskInstance.task_id)
+                .outerjoin(Tag, Tag.id == Task.tag_id)
                 .where(
                     TaskInstance.user_id == user_id,
                     Task.is_active.is_(True),
@@ -103,7 +108,7 @@ class SqlTaskRepository:
                 )
                 .order_by(TaskInstance.status.desc(), TaskInstance.title)
             )
-            return [(inst, rec, seri) for inst, rec, seri in s.execute(stmt).all()]
+            return [tuple(satir) for satir in s.execute(stmt).all()]
 
     def gorev_serisi_guncelle(self, task_id: str, yeni_seri: int, son_gun: date) -> None:
         with self._sf() as s:
@@ -125,12 +130,13 @@ class SqlTaskRepository:
 
     def gecmis_bekleyen_satirlar(
         self, user_id: str, bugun: date, pencere_basi: date
-    ) -> list[tuple[TaskInstance, str, int]]:
+    ) -> list[tuple[TaskInstance, str, int, str | None, str | None]]:
         """Geçmiş günlere ait, henüz yapılmamış tekrarlı görev kayıtları (telafi)."""
         with self._sf() as s:
             stmt = (
-                select(TaskInstance, Task.recurrence, Task.streak_count)
+                select(TaskInstance, Task.recurrence, Task.streak_count, Tag.name, Tag.color)
                 .join(Task, Task.id == TaskInstance.task_id)
+                .outerjoin(Tag, Tag.id == Task.tag_id)
                 .where(
                     TaskInstance.user_id == user_id,
                     Task.is_active.is_(True),
@@ -141,7 +147,7 @@ class SqlTaskRepository:
                 )
                 .order_by(TaskInstance.day.desc(), TaskInstance.title)
             )
-            return [(inst, rec, seri) for inst, rec, seri in s.execute(stmt).all()]
+            return [tuple(satir) for satir in s.execute(stmt).all()]
 
     def gecmis_bekleyenleri_amnesti(
         self, user_id: str, bugun: date, pencere_basi: date, simdi: datetime

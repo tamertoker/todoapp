@@ -16,6 +16,7 @@ from leveltodo.application.combo_servisi import ComboServisi
 from leveltodo.application.cuzdan_servisi import CuzdanServisi
 from leveltodo.application.dondurma_servisi import DondurmaServisi
 from leveltodo.application.dusman_servisi import DusmanServisi
+from leveltodo.application.etiket_servisi import EtiketServisi
 from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.gunluk_servisi import GunlukServisi
 from leveltodo.application.irade_servisi import IradeServisi
@@ -38,6 +39,7 @@ from leveltodo.infrastructure.notifications.plyer_kanali import plyer_kanali
 from leveltodo.infrastructure.persistence.sqlite.bootstrap_data import ensure_default_user
 from leveltodo.infrastructure.persistence.sqlite.cuzdan_repository import SqlCuzdanRepository
 from leveltodo.infrastructure.persistence.sqlite.engine import create_engine_and_factory
+from leveltodo.infrastructure.persistence.sqlite.etiket_repository import SqlEtiketRepository
 from leveltodo.infrastructure.persistence.sqlite.gunluk_repository import SqlGunlukRepository
 from leveltodo.infrastructure.persistence.sqlite.irade_repository import SqlIradeRepository
 from leveltodo.infrastructure.persistence.sqlite.ledger_repository import SqlLedgerRepository
@@ -67,6 +69,7 @@ class Container:
     dusman: DusmanServisi
     rozet: RozetServisi
     gorevler: GorevServisi
+    etiket: EtiketServisi
     kronometre: KronometreServisi
     seri: SeriServisi
     irade: IradeServisi
@@ -122,6 +125,7 @@ def build_container(
         combo=combo,
         rozet=rozet,
     )
+    etiket = EtiketServisi(SqlEtiketRepository(session_factory))
     kronometre = KronometreServisi(gorev_repo, aktif_saat)
 
     streak_repo = SqlStreakRepository(session_factory)
@@ -210,6 +214,7 @@ def build_container(
         dusman=dusman,
         rozet=rozet,
         gorevler=gorevler,
+        etiket=etiket,
         kronometre=kronometre,
         seri=seri,
         irade=irade,

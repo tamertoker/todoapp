@@ -39,8 +39,9 @@ class DashboardViewModel(QObject):
         ozel_odul: int | None,
         stat: Stat | None = None,
         parametre: str = "",
+        tag_id: str | None = None,
     ) -> None:
-        self._gorevler.gorev_olustur(baslik, tekrar, ozel_odul, stat, parametre)
+        self._gorevler.gorev_olustur(baslik, tekrar, ozel_odul, stat, parametre, tag_id)
         self.changed.emit()
 
     def stat_durumlari(self) -> dict[Stat, SeviyeDurumu]:

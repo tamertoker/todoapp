@@ -444,11 +444,12 @@ class DashboardView(QWidget):
             self,
             oneri_getir=self._container.gorevler.baslik_onerileri,
             sablon_getir=self._container.gorevler.sablon_oneri,
+            etiket=self._container.etiket,
         )
         if dialog.exec():
-            baslik, tekrar, parametre, ozel_odul, stat = dialog.result_values()
+            baslik, tekrar, parametre, ozel_odul, stat, tag_id = dialog.result_values()
             if baslik:
-                self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat, parametre)
+                self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat, parametre, tag_id)
 
     def _on_bitir(self, satir: GorevSatiri) -> None:
         on_dakika = round(satir_canli_saniye(satir, self._container.saat.simdi()) / 60)

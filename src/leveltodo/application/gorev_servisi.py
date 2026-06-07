@@ -53,6 +53,8 @@ class GorevSatiri:
     segment_baslangici: datetime | None
     odul_xp: int | None
     odul_puan: int | None
+    etiket_ad: str | None = None
+    etiket_renk: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,6 +107,7 @@ class GorevServisi:
         ozel_odul: int | None = None,
         stat: Stat | None = None,
         parametre: str = "",
+        tag_id: str | None = None,
     ) -> str:
         gorev_id = new_id()
         self._gorev.add_template(
@@ -116,6 +119,7 @@ class GorevServisi:
             reward_override=ozel_odul,
             stat=stat.value if stat is not None else None,
             created_at=self._saat.simdi(),
+            tag_id=tag_id,
         )
         if tekrar is Tekrar.YOK:
             self._gorev.add_instance(
@@ -144,8 +148,10 @@ class GorevServisi:
                 segment_baslangici=kayit.segment_started_at,
                 odul_xp=kayit.reward_xp,
                 odul_puan=kayit.reward_points,
+                etiket_ad=etiket_ad,
+                etiket_renk=etiket_renk,
             )
-            for kayit, tekrar, seri in satirlar
+            for kayit, tekrar, seri, etiket_ad, etiket_renk in satirlar
         ]
 
     def tum_tekrarli_gorevler(self) -> list[TekrarliGorevOzeti]:
@@ -209,8 +215,10 @@ class GorevServisi:
                 segment_baslangici=kayit.segment_started_at,
                 odul_xp=kayit.reward_xp,
                 odul_puan=kayit.reward_points,
+                etiket_ad=etiket_ad,
+                etiket_renk=etiket_renk,
             )
-            for kayit, tekrar, seri in satirlar
+            for kayit, tekrar, seri, etiket_ad, etiket_renk in satirlar
         ]
 
     def baslik_onerileri(self) -> list[str]:

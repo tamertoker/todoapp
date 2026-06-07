@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QSpinBox,
@@ -40,11 +41,13 @@ class AddTaskDialog(QDialog):
         parent: QWidget | None = None,
         oneri_getir=None,
         sablon_getir=None,
+        etiket=None,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Yeni Görev")
         self.setMinimumWidth(420)
         self._sablon_getir = sablon_getir
+        self._etiket = etiket
 
         self._title = QLineEdit()
         self._title.setPlaceholderText("Görev başlığı")
@@ -63,6 +66,10 @@ class AddTaskDialog(QDialog):
         self._stat = QComboBox()
         for stat in GOREV_STATLARI:
             self._stat.addItem(STAT_ETIKET[stat], stat.value)
+
+        self._etiket_combo = QComboBox()
+        self._etiket_combo.currentIndexChanged.connect(self._etiket_secildi)
+        self._etiket_doldur()
 
         self._override_check = QCheckBox("Özel ödül belirle")
         self._override = QSpinBox()
@@ -93,6 +100,8 @@ class AddTaskDialog(QDialog):
         layout.addWidget(self._ay_widget)
         layout.addWidget(QLabel("Hangi alanı geliştirir?"))
         layout.addWidget(self._stat)
+        layout.addWidget(QLabel("Proje / etiket"))
+        layout.addWidget(self._etiket_combo)
         layout.addWidget(self._override_check)
         layout.addWidget(self._override)
         layout.addWidget(self._warning)
@@ -141,6 +150,28 @@ class AddTaskDialog(QDialog):
         self._hafta_widget.setVisible(tekrar is Tekrar.HAFTALIK)
         self._ay_widget.setVisible(tekrar is Tekrar.AYLIK)
 
+    def _etiket_doldur(self, secili_id: str | None = None) -> None:
+        self._etiket_combo.blockSignals(True)
+        self._etiket_combo.clear()
+        self._etiket_combo.addItem("(Etiketsiz)", None)
+        if self._etiket is not None:
+            for tag in self._etiket.etiketler():
+                self._etiket_combo.addItem(f"● {tag.name}", tag.id)
+            self._etiket_combo.addItem("+ Yeni etiket…", "__yeni__")
+        idx = self._etiket_combo.findData(secili_id) if secili_id else 0
+        self._etiket_combo.setCurrentIndex(max(0, idx))
+        self._etiket_combo.blockSignals(False)
+
+    def _etiket_secildi(self) -> None:
+        if self._etiket_combo.currentData() != "__yeni__":
+            return
+        ad, ok = QInputDialog.getText(self, "Yeni etiket", "Etiket adı:")
+        if ok and ad.strip() and self._etiket is not None:
+            yeni_id = self._etiket.etiket_ekle(ad.strip())
+            self._etiket_doldur(yeni_id)
+        else:
+            self._etiket_doldur()  # iptal → etiketsiz
+
     def _baslik_secildi(self, baslik: str) -> None:
         """Öneri seçilince o başlıklı son görevin ayarlarını forma doldur."""
         sablon = self._sablon_getir(baslik) if self._sablon_getir else None
@@ -168,6 +199,10 @@ class AddTaskDialog(QDialog):
             self._override.setValue(sablon.reward_override)
         else:
             self._override_check.setChecked(False)
+        if sablon.tag_id:
+            tidx = self._etiket_combo.findData(sablon.tag_id)
+            if tidx >= 0:
+                self._etiket_combo.setCurrentIndex(tidx)
         self._param_goster()
 
     def accept(self) -> None:
@@ -186,7 +221,7 @@ class AddTaskDialog(QDialog):
     def _secili_gunler(self) -> list[int]:
         return [i for i, kutu in enumerate(self._gun_kutulari) if kutu.isChecked()]
 
-    def result_values(self) -> tuple[str, Tekrar, str, int | None, Stat]:
+    def result_values(self) -> tuple[str, Tekrar, str, int | None, Stat, str | None]:
         tekrar = self._tekrar.currentData()
         if tekrar is Tekrar.HER_X_GUN:
             parametre = str(self._x_spin.value())
@@ -198,4 +233,6 @@ class AddTaskDialog(QDialog):
             parametre = ""
         ozel_odul = self._override.value() if self._override_check.isChecked() else None
         stat = Stat(self._stat.currentData())
-        return self._title.text().strip(), tekrar, parametre, ozel_odul, stat
+        tag_data = self._etiket_combo.currentData()
+        tag_id = tag_data if isinstance(tag_data, str) and tag_data != "__yeni__" else None
+        return self._title.text().strip(), tekrar, parametre, ozel_odul, stat, tag_id

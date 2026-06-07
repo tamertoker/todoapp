@@ -52,7 +52,14 @@ def kronometreli_satir(
     h.setContentsMargins(12, 8, 12, 8)
     h.setSpacing(8)
 
-    h.addWidget(QLabel(satir.baslik), stretch=1)
+    h.addWidget(QLabel(satir.baslik))
+
+    if satir.etiket_ad:
+        proje = QLabel(f"● {satir.etiket_ad}")
+        proje.setStyleSheet(f"color: {satir.etiket_renk or '#888888'}; font-weight: bold;")
+        proje.setToolTip("Proje / etiket")
+        h.addWidget(proje)
+    h.addStretch(1)
 
     if etiket_metni is not None:
         etiket = QLabel(etiket_metni)

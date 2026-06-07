@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — Faz 0-8 burada, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **152 test yeşil**, ruff temiz (kendi kod: `ruff check src/ tests/`; repo kökünde kullanıcının analiz scriptleri ruff'a takılır, bizim değil).
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **155 test yeşil**, ruff temiz (kendi kod). NOT: kullanıcı `domain/time/saat.py` ve `infrastructure/saat.py`'ye elle yorum ekledi → o iki dosya ruff'a takılıyor (uzun satır + import sırası), bizim değil; commit'lemedim.
 - Stack: Python 3.12.8 · PyQt6 (+QtMultimedia) · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid · plyer · pyqtgraph + numpy.
 
 ## Bitti ✅
@@ -115,7 +115,18 @@ karışmaz; Mağaza=Puan→dakika.
   widget'ı resmin boyutuna sabitler, maks 720×460, ortalı; siyah bar yok). Kullanıcı geri
   bildirimi: dar şeride sığdırma kötüydü.
 
-## Sırada ⏸️ — Faz 9 (son faz)
+## Yeni özellikler (kullanıcı isteği, plan dışı) — sırayla
+Kullanıcı 4 özellik istedi: **#2 etiket → #1 özel stat → #3 seans → #4 etiket-süre grafiği**.
+Kararlar: seans modelinde **her seans bitince ödül** (görev kapanmaz, "Bitir" yok); özel
+statlar tam stat (profile katılır); etiket grafiği = etiket başına SÜRE; ayrı commit'ler.
+- **#2 Etiketler ✅**: `domain/etiket` (renk paleti), `Tag` modeli + `tasks.tag_id`
+  (migration 0014), `SqlEtiketRepository`, `EtiketServisi` (ekle/sil, paletten renk).
+  `gorev_olustur(tag_id)`, `GorevSatiri.etiket_ad/renk` (today_rows/telafi Tag join),
+  görev satırında renkli ● + ad, add_task_dialog'da etiket seçici + "Yeni etiket…".
+  `tests/integration/test_etiket.py`.
+- **#1, #3, #4**: sırada.
+
+## Sırada ⏸️ — Faz 9 (son faz, yeni özelliklerden sonra)
 - **Faz 9**: lore (düşman lore fragmanları) + onboarding "Mentor" NPC (ilk açılış
   tutorial) + açılış mesajı/günün sözü + gelişmiş animasyonlar. **Push edilmedi** ("hadi" bekle).
 
