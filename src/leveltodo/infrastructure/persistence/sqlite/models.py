@@ -62,6 +62,8 @@ class Task(Base):
     reward_override: Mapped[int | None] = mapped_column(Integer, nullable=True)
     stat: Mapped[str | None] = mapped_column(String(20), nullable=True)
     tag_id: Mapped[str | None] = mapped_column(String(26), nullable=True)  # etiket (proje)
+    reminder: Mapped[str | None] = mapped_column(String(5), nullable=True)  # "HH:MM" hatırlatma
+    reminder_last: Mapped[date | None] = mapped_column(Date, nullable=True)  # son hatırlatılan gün
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     streak_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -107,6 +109,8 @@ class Session(Base):
     start_at: Mapped[datetime] = mapped_column(DateTime)
     end_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     duration: Mapped[int] = mapped_column(Integer, default=0)  # saniye
+    reward_xp: Mapped[int] = mapped_column(Integer, default=0)  # bu seansta verilen XP
+    reward_points: Mapped[int] = mapped_column(Integer, default=0)  # bu seansta verilen Puan
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 

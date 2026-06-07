@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — Faz 0-8 burada, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **165 test yeşil**, ruff temiz (`ruff check src/ tests/`).
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **168 test yeşil**, ruff temiz (`ruff check src/ tests/`).
 - Stack: Python 3.12.8 · PyQt6 (+QtMultimedia) · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid · plyer · pyqtgraph + numpy.
 
 ## Bitti ✅
@@ -148,6 +148,22 @@ statlar tam stat (profile katılır); etiket grafiği = etiket başına SÜRE; a
   artık yalnız Telafi'de), telafi eski akışta (tamamla 2×). `tests/integration/test_seans.py`.
 
 ### KULLANICININ 4 İSTEĞİ TAMAM (#1 stat, #2 etiket, #3 seans, #4 etiket-grafik).
+
+## İşlevsel iyileştirmeler (kullanıcı sırası: önce işlevsel, sonra facelift, en son asset)
+- **Açık uçlar**: (a) görev "Sil"→**"Arşivle"** (zaten soft, geçmiş korunur); (b) **"özel ödül"
+  alanı dialogdan kaldırıldı** (seans ödülü süre-temelli; tamamla yine reward_override'ı
+  kullanır=eski/telafi); (c) **seans silince XP/Puan da geri alınır** (Session.reward_xp/points
+  mig 0017, seans_durdur yazar, seans_sil ters kayıt "session_revert").
+- **Görev hatırlatıcıları**: tasks.reminder("HH:MM")+reminder_last (mig 0017); add_task_dialog
+  "Hatırlatma kur" + QTimeEdit; `HatirlatmaServisi.kontrol` (saat gelince + bugün geçerliyse →
+  HATIRLATMA bildirimi, gün başına tek, gece sessizliğine saygılı); app.py 60sn timer + açılışta.
+  `tests/integration/test_hatirlatma.py`, test_seans XP-geri-alma.
+
+## SIRADA (kullanıcı planı)
+- **2) Kodla RPG facelift** (asset'siz: Press Start 2P başlıklar, bevel QSS panel/buton,
+  segment'li barlar, hover glow, tık sesi, animasyon). 3) en son **ikon/asset entegrasyonu**
+  (kullanıcı `assets/icons/` üretip ekleyecek — ikon yükleyici + emoji fallback yazılacak).
+- Faz 9 (lore/onboarding/günün sözü) hâlâ açık.
 - **Seans UI düzeltmeleri** (kullanıcı geri bildirimi): expander açıkken dolu görünür
   (#Expander:checked QSS + ▼/▶) ve **açık kalır** (dashboard `_acik_seanslar` set, render'da
   korunur); **seans silince görev toplamı eksilir** (`committed_ekle(-sure)`); seans saatleri

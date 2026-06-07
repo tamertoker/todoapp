@@ -19,6 +19,7 @@ from leveltodo.application.dusman_servisi import DusmanServisi
 from leveltodo.application.etiket_servisi import EtiketServisi
 from leveltodo.application.gorev_servisi import GorevServisi
 from leveltodo.application.gunluk_servisi import GunlukServisi
+from leveltodo.application.hatirlatma_servisi import HatirlatmaServisi
 from leveltodo.application.irade_servisi import IradeServisi
 from leveltodo.application.istatistik_servisi import IstatistikServisi
 from leveltodo.application.kronometre_servisi import KronometreServisi
@@ -81,6 +82,7 @@ class Container:
     gunluk: GunlukServisi
     yedekleyici: Yedekleyici
     bildirim: BildirimServisi
+    hatirlatma: HatirlatmaServisi
     mentor: MentorServisi
     uyandirma: UyandirmaServisi
     istatistik: IstatistikServisi
@@ -175,6 +177,10 @@ def build_container(
     bildirim = BildirimServisi(settings, aktif_saat)
     bildirim.kanal_ekle(plyer_kanali)  # OS bildirimi (best-effort)
 
+    hatirlatma = HatirlatmaServisi(
+        gorev_repo, bildirim, aktif_saat, lambda: settings.day_start_hour
+    )
+
     uyandirma_repo = SqlUyandirmaRepository(session_factory)
     uyandirma = UyandirmaServisi(
         uyandirma_repo,
@@ -233,6 +239,7 @@ def build_container(
         gunluk=gunluk,
         yedekleyici=yedekleyici,
         bildirim=bildirim,
+        hatirlatma=hatirlatma,
         mentor=mentor,
         uyandirma=uyandirma,
         istatistik=istatistik,

@@ -459,9 +459,9 @@ class DashboardView(QWidget):
             stat_servisi=self._container.stat,
         )
         if dialog.exec():
-            baslik, tekrar, parametre, ozel_odul, stat, tag_id = dialog.result_values()
+            baslik, tekrar, parametre, ozel_odul, stat, tag_id, reminder = dialog.result_values()
             if baslik:
-                self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat, parametre, tag_id)
+                self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat, parametre, tag_id, reminder)
 
     def _on_event(self, event: DomainEvent) -> None:
         if isinstance(event, AppStarted):

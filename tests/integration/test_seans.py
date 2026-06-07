@@ -66,6 +66,22 @@ def test_seans_silinince_gorev_suresi_eksilir(db_url):
     assert len(c.gorevler.seanslar(s.kayit_id)) == 1
 
 
+def test_seans_silinince_xp_de_geri_alinir(db_url):
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    c = build_container(db_url=db_url, saat=saat)
+    c.gorevler.gorev_olustur("Oku", Tekrar.YOK, stat=Stat.ENTELEKTUELLIK)
+    s = c.gorevler.bugunku_gorevler()[0]
+    c.gorevler.seans_baslat(s.kayit_id)
+    saat.ilerlet(minutes=30)
+    c.gorevler.seans_durdur(s.kayit_id)
+    assert c.gorevler.stat_durumlari()[Stat.ENTELEKTUELLIK].bu_seviyedeki_xp == 30
+
+    se = c.gorevler.seanslar(s.kayit_id)[0]
+    c.gorevler.seans_sil(se.seans_id)
+    assert c.gorevler.stat_durumlari()[Stat.ENTELEKTUELLIK].bu_seviyedeki_xp == 0  # XP geri alındı
+    assert c.gorevler.bugunku_gorevler()[0].calisilan_saniye == 0
+
+
 def test_seans_saati_duzenlenebilir(db_url):
     saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
     c = build_container(db_url=db_url, saat=saat)

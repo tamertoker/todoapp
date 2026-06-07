@@ -124,6 +124,7 @@ class GorevServisi:
         stat: str | Stat | None = None,
         parametre: str = "",
         tag_id: str | None = None,
+        reminder: str | None = None,
     ) -> str:
         gorev_id = new_id()
         self._gorev.add_template(
@@ -136,6 +137,7 @@ class GorevServisi:
             stat=str(stat) if stat is not None else None,  # Stat(StrEnum) ya da özel id
             created_at=self._saat.simdi(),
             tag_id=tag_id,
+            reminder=reminder,
         )
         if tekrar is Tekrar.YOK:
             self._gorev.add_instance(
@@ -389,16 +391,18 @@ class GorevServisi:
         simdi = self._saat.simdi()
         sure = max(0, int((simdi - kayit.segment_started_at).total_seconds()))
         self._gorev.timer_duraklat(instance_id, simdi)  # süreyi committed'a ekler, durdurur
-        if self._seans is not None:
-            self._seans.kapat(instance_id, simdi, sure)
-        if sure < _SEANS_MIN_ODUL_SN:
-            return None
         sablon = self._gorev.get_template(kayit.task_id)
+        if sure < _SEANS_MIN_ODUL_SN:
+            if self._seans is not None:
+                self._seans.kapat(instance_id, simdi, sure, 0, 0)  # kısa seans: ödülsüz
+            return None
         odul = odul_hesapla(sure, None)  # süre-temelli
         kritik = self._sans.kritik_mi(KRITIK_OLASILIK)
         carpan = self._combo.carpan(simdi) * (KRITIK_CARPAN if kritik else 1)
         if carpan != 1.0:
             odul = Odul(xp=round(odul.xp * carpan), puan=round(odul.puan * carpan))
+        if self._seans is not None:
+            self._seans.kapat(instance_id, simdi, sure, odul.xp, odul.puan)
         if (
             sablon is not None
             and sablon.recurrence != "none"
@@ -450,13 +454,26 @@ class GorevServisi:
         ]
 
     def seans_sil(self, seans_id: str) -> None:
-        """Seansı siler ve süresini görevin toplamından (committed) düşer."""
+        """Seansı siler; süresini görevin toplamından düşer VE bu seansta kazanılan
+        XP/Puan'ı ters kayıtla geri alır (tutarlılık)."""
         if self._seans is None:
             return
         s = self._seans.getir(seans_id)
         if s is None:
             return
         self._gorev.committed_ekle(s.instance_id, -s.duration)
+        if s.reward_xp or s.reward_points:
+            kayit = self._gorev.get_instance(s.instance_id)
+            sablon = self._gorev.get_template(kayit.task_id) if kayit is not None else None
+            self._defter.record(
+                user_id=self._user_id,
+                day=self._bugun(),
+                source="session_revert",
+                ref_id=s.instance_id,
+                xp=-s.reward_xp,
+                points=-s.reward_points,
+                stat=sablon.stat if sablon is not None else None,
+            )
         self._seans.seans_sil(seans_id)
 
     def _saat_birlestir(self, gun: date, hhmm: str) -> datetime | None:

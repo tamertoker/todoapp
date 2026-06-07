@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QSpinBox,
+    QTimeEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -74,12 +75,11 @@ class AddTaskDialog(QDialog):
         self._etiket_combo.currentIndexChanged.connect(self._etiket_secildi)
         self._etiket_doldur()
 
-        self._override_check = QCheckBox("Özel ödül belirle")
-        self._override = QSpinBox()
-        self._override.setRange(1, 1000)
-        self._override.setValue(10)
-        self._override.setEnabled(False)
-        self._override_check.toggled.connect(self._override.setEnabled)
+        self._hatirlatma_check = QCheckBox("Hatırlatma kur")
+        self._hatirlatma = QTimeEdit()
+        self._hatirlatma.setDisplayFormat("HH:mm")
+        self._hatirlatma.setEnabled(False)
+        self._hatirlatma_check.toggled.connect(self._hatirlatma.setEnabled)
 
         self._warning = QLabel()
         self._warning.setStyleSheet("color: #ff6b6b;")
@@ -105,8 +105,8 @@ class AddTaskDialog(QDialog):
         layout.addWidget(self._stat)
         layout.addWidget(QLabel("Proje / etiket"))
         layout.addWidget(self._etiket_combo)
-        layout.addWidget(self._override_check)
-        layout.addWidget(self._override)
+        layout.addWidget(self._hatirlatma_check)
+        layout.addWidget(self._hatirlatma)
         layout.addWidget(self._warning)
         layout.addWidget(buttons)
 
@@ -223,11 +223,6 @@ class AddTaskDialog(QDialog):
             sidx = self._stat.findData(sablon.stat)
             if sidx >= 0:
                 self._stat.setCurrentIndex(sidx)
-        if sablon.reward_override is not None:
-            self._override_check.setChecked(True)
-            self._override.setValue(sablon.reward_override)
-        else:
-            self._override_check.setChecked(False)
         if sablon.tag_id:
             tidx = self._etiket_combo.findData(sablon.tag_id)
             if tidx >= 0:
@@ -250,7 +245,9 @@ class AddTaskDialog(QDialog):
     def _secili_gunler(self) -> list[int]:
         return [i for i, kutu in enumerate(self._gun_kutulari) if kutu.isChecked()]
 
-    def result_values(self) -> tuple[str, Tekrar, str, int | None, str | None, str | None]:
+    def result_values(
+        self,
+    ) -> tuple[str, Tekrar, str, int | None, str | None, str | None, str | None]:
         tekrar = self._tekrar.currentData()
         if tekrar is Tekrar.HER_X_GUN:
             parametre = str(self._x_spin.value())
@@ -260,10 +257,21 @@ class AddTaskDialog(QDialog):
             parametre = str(self._ay_spin.value())
         else:
             parametre = ""
-        ozel_odul = self._override.value() if self._override_check.isChecked() else None
+        ozel_odul = None  # özel ödül kaldırıldı (seans ödülü süre-temelli)
         stat_key = self._stat.currentData()
         if stat_key == "__yeni_stat__":
             stat_key = None
         tag_data = self._etiket_combo.currentData()
         tag_id = tag_data if isinstance(tag_data, str) and tag_data != "__yeni__" else None
-        return self._title.text().strip(), tekrar, parametre, ozel_odul, stat_key, tag_id
+        hatirlatma = None
+        if self._hatirlatma_check.isChecked():
+            hatirlatma = self._hatirlatma.time().toString("HH:mm")
+        return (
+            self._title.text().strip(),
+            tekrar,
+            parametre,
+            ozel_odul,
+            stat_key,
+            tag_id,
+            hatirlatma,
+        )

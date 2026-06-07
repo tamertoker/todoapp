@@ -100,9 +100,10 @@ def seansli_gorev_satir(
         btn = QPushButton("Başlat")
         btn.clicked.connect(lambda _c, i=satir.kayit_id: baslat(i))
     h.addWidget(btn)
-    sil_btn = QPushButton("Sil")
-    sil_btn.clicked.connect(lambda _c, i=satir.kayit_id: sil(i))
-    h.addWidget(sil_btn)
+    arsiv_btn = QPushButton("Arşivle")
+    arsiv_btn.setToolTip("Görevi listeden kaldırır; geçmiş süre/istatistikler korunur.")
+    arsiv_btn.clicked.connect(lambda _c, i=satir.kayit_id: sil(i))
+    h.addWidget(arsiv_btn)
     v.addWidget(header)
 
     alt = QWidget()

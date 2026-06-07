@@ -47,6 +47,12 @@ class LevelTodoApp:
         self._mentor_timer.timeout.connect(container.mentor.periyodik_kontrol)
         self._mentor_timer.start()
 
+        # Görev hatırlatmalarını sık kontrol et (saat hassasiyeti için dakikada bir).
+        self._hatirlatma_timer = QTimer(self.qapp)
+        self._hatirlatma_timer.setInterval(60 * 1000)  # 1 dakika
+        self._hatirlatma_timer.timeout.connect(container.hatirlatma.kontrol)
+        self._hatirlatma_timer.start()
+
     def _apply_theme(self, theme: str) -> None:
         palette = get_palette(theme)
         up_arrow, down_arrow = ok_yollari(palette.text)
@@ -63,4 +69,5 @@ class LevelTodoApp:
         self.window.show()
         self.container.olay_hatti.publish(AppStarted(occurred_at=self.container.saat.simdi()))
         self.container.mentor.periyodik_kontrol()  # açılışta bir kez
+        self.container.hatirlatma.kontrol()
         return self.qapp.exec()

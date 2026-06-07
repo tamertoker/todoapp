@@ -60,7 +60,7 @@ def test_add_task_dialog_esnek_tekrar(qapp):
     dialog._tekrar.setCurrentIndex(2)  # "Her X günde bir"
     dialog._x_spin.setValue(5)
 
-    baslik, tekrar, parametre, _ozel, _stat, _tag = dialog.result_values()
+    baslik, tekrar, parametre, _ozel, _stat, _tag, _hat = dialog.result_values()
     assert baslik == "Her 5 günde"
     assert tekrar is Tekrar.HER_X_GUN
     assert parametre == "5"

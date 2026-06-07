@@ -27,8 +27,15 @@ class SqlSeansRepository:
             )
             s.commit()
 
-    def kapat(self, instance_id: str, end_at: datetime, duration: int) -> None:
-        """Açık (bitmemiş) seansı kapatır: bitiş + süre yazar."""
+    def kapat(
+        self,
+        instance_id: str,
+        end_at: datetime,
+        duration: int,
+        reward_xp: int = 0,
+        reward_points: int = 0,
+    ) -> None:
+        """Açık (bitmemiş) seansı kapatır: bitiş + süre + verilen ödül yazar."""
         with self._sf() as s:
             stmt = (
                 select(Session)
@@ -40,6 +47,8 @@ class SqlSeansRepository:
             if seans is not None:
                 seans.end_at = end_at
                 seans.duration = duration
+                seans.reward_xp = reward_xp
+                seans.reward_points = reward_points
                 s.commit()
 
     def ekle_kapali(

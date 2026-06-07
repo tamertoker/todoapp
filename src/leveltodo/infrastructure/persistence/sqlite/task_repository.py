@@ -32,6 +32,7 @@ class SqlTaskRepository:
         stat: str | None,
         created_at: datetime,
         tag_id: str | None = None,
+        reminder: str | None = None,
     ) -> None:
         with self._sf() as s:
             s.add(
@@ -45,6 +46,7 @@ class SqlTaskRepository:
                     stat=stat,
                     created_at=created_at,
                     tag_id=tag_id,
+                    reminder=reminder,
                 )
             )
             s.commit()
@@ -58,6 +60,23 @@ class SqlTaskRepository:
             task = s.get(Task, task_id)
             if task is not None:
                 task.is_active = False
+                s.commit()
+
+    def hatirlatmali_sablonlar(self, user_id: str) -> list[Task]:
+        """Hatırlatma saati ayarlı, aktif görev şablonları."""
+        with self._sf() as s:
+            stmt = select(Task).where(
+                Task.user_id == user_id,
+                Task.is_active.is_(True),
+                Task.reminder.is_not(None),
+            )
+            return list(s.scalars(stmt))
+
+    def reminder_last_yaz(self, task_id: str, gun: date) -> None:
+        with self._sf() as s:
+            task = s.get(Task, task_id)
+            if task is not None:
+                task.reminder_last = gun
                 s.commit()
 
     def aktif_tekrarli_sablonlar(self, user_id: str) -> list[Task]:
