@@ -280,6 +280,30 @@ class SqlTaskRepository:
                 )
             )
 
+    def etiket_sure_dagilimi(
+        self, user_id: str, bas: date, bit: date
+    ) -> list[tuple[str | None, str | None, int]]:
+        """Aralıkta etiket başına toplam çalışma saniyesi (etiket-ad, renk, saniye).
+        Etiketsiz görevler tek grupta (ad=None) toplanır."""
+        with self._sf() as s:
+            stmt = (
+                select(
+                    Tag.name,
+                    Tag.color,
+                    func.coalesce(func.sum(TaskInstance.committed_seconds), 0),
+                )
+                .select_from(TaskInstance)
+                .join(Task, Task.id == TaskInstance.task_id)
+                .outerjoin(Tag, Tag.id == Task.tag_id)
+                .where(
+                    TaskInstance.user_id == user_id,
+                    TaskInstance.day >= bas,
+                    TaskInstance.day <= bit,
+                )
+                .group_by(Tag.id)
+            )
+            return [(ad, renk, int(sn)) for ad, renk, sn in s.execute(stmt).all()]
+
     def en_cok_gorev_gun(self, user_id: str) -> tuple[date | None, int]:
         with self._sf() as s:
             stmt = (

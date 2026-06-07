@@ -99,6 +99,17 @@ class IstatistikServisi:
             return {etiket: toplamlar.get(anahtar, 0) for anahtar, etiket in self._stat_listesi()}
         return {STAT_ETIKET[s]: toplamlar.get(s.value, 0) for s in Stat}
 
+    def etiket_sure_dagilimi(self, bas: date, bit: date) -> list[tuple[str, str, int]]:
+        """Aralıkta etiket başına çalışma süresi (etiket, renk, saniye), büyükten küçüğe.
+        Etiketsiz görevler '(Etiketsiz)' altında toplanır; sıfır süreler atlanır."""
+        sonuc = [
+            (ad or "(Etiketsiz)", renk or "#888888", sn)
+            for ad, renk, sn in self._gorev.etiket_sure_dagilimi(self._user_id, bas, bit)
+            if sn > 0
+        ]
+        sonuc.sort(key=lambda x: x[2], reverse=True)
+        return sonuc
+
     def rekorlar(self) -> Rekorlar:
         seri_best = max(
             (en_iyi for _, en_iyi in self._streak.hepsi(self._user_id).values()),

@@ -37,6 +37,7 @@ from leveltodo.presentation.views.gunluk.gunluk_view import GunlukView
 from leveltodo.presentation.views.irade.irade_view import IradeView
 from leveltodo.presentation.views.istatistik.istatistik_view import IstatistikView
 from leveltodo.presentation.views.magaza.magaza_view import MagazaView
+from leveltodo.presentation.views.pano.pano_view import PanoView
 from leveltodo.presentation.views.rozetler.rozet_view import RozetView
 from leveltodo.presentation.views.rutin.rutin_view import RutinView
 from leveltodo.presentation.views.settings.settings_view import SettingsView
@@ -67,6 +68,7 @@ class MainWindow(QWidget):
         self._avatar_editor = AvatarEditorView()
         self._rozetler = RozetView(container, self._ses)
         self._istatistik = IstatistikView(container)
+        self._pano = PanoView(container)
         self._cuzdan = CuzdanView(container)
         self._wishlist = WishlistView(container)
         self._magaza = MagazaView(container)
@@ -85,6 +87,7 @@ class MainWindow(QWidget):
         self._stack.addWidget(self._avatar_editor)
         self._stack.addWidget(self._rozetler)
         self._stack.addWidget(self._istatistik)
+        self._stack.addWidget(self._pano)
         self._stack.addWidget(self._cuzdan)
         self._stack.addWidget(self._wishlist)
         self._stack.addWidget(self._magaza)
@@ -144,6 +147,7 @@ class MainWindow(QWidget):
                 "Avatar",
                 "Rozetler",
                 "İstatistik",
+                "Pano",
                 "Cüzdan",
                 "İstek Listesi",
                 "Mağaza",

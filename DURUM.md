@@ -6,7 +6,7 @@
 ## Kısa özet
 - Dal: `claude/faz5-rutin-gunluk` (main'den açıldı) — Faz 0-8 burada, **push edilmedi**.
 - Çalıştır: `.\.venv\Scripts\python.exe -m leveltodo`
-- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **158 test yeşil**, ruff temiz (`ruff check src/ tests/`).
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` → **159 test yeşil**, ruff temiz (`ruff check src/ tests/`).
 - Stack: Python 3.12.8 · PyQt6 (+QtMultimedia) · SQLAlchemy 2.0 + Alembic · blinker · python-dateutil · platformdirs · python-ulid · plyer · pyqtgraph + numpy.
 
 ## Bitti ✅
@@ -133,7 +133,12 @@ statlar tam stat (profile katılır); etiket grafiği = etiket başına SÜRE; a
   KARAR: dashboard 4-stat avatar paneli + rutin stat seçici yerleşik kalır (risk); özel
   statlar görevlerde + profilde + İstatistik'te. saat.py yorumları ruff'a uygun hale getirildi.
   `tests/integration/test_stat.py`.
-- **#3, #4**: sırada.
+- **#4 Etiket-süre panosu ✅**: `task_repo.etiket_sure_dagilimi` (Tag join, committed_seconds
+  toplamı, group by tag), `istatistik.etiket_sure_dagilimi` (etiketsiz='(Etiketsiz)', büyükten
+  küçüğe). `presentation/common/halka.py` (Halka donut QPainter), "Pano" sekmesi: aralık
+  seçici (Bugün/Bu hafta/Bu ay/Özel=QDateEdit takvim) + halka + kırılım çubukları (etiket
+  rengi + süre + %). `tests/integration/test_pano.py`.
+- **#3 Seanslar**: SON sırada (en büyük; çekirdek kronometre/ödül modeli).
 
 ## Sırada ⏸️ — Faz 9 (son faz, yeni özelliklerden sonra)
 - **Faz 9**: lore (düşman lore fragmanları) + onboarding "Mentor" NPC (ilk açılış
