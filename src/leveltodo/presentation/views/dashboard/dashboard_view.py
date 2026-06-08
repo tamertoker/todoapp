@@ -78,6 +78,7 @@ class DashboardView(QWidget):
         self._mevcut_rank_indeks: int | None = None
         self._pixmap_cache: dict[str, QPixmap] = {}
         self._arkaplan_cache: dict[str, QPixmap | None] = {}
+        self._son_arkaplan_ad: str | None = None
         self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
         self._mod = "bugun"  # "bugun" | "tumu"
         self._acik_seanslar: set[str] = set()  # açık (genişletilmiş) seans listeleri
@@ -260,6 +261,9 @@ class DashboardView(QWidget):
 
     def _render_arkaplan(self) -> None:
         ad = "avatar_" + zaman_dilimi(self._container.saat.simdi().hour)
+        if ad == self._son_arkaplan_ad:
+            return  # zaman dilimi değişmediyse boşuna yeniden çizme
+        self._son_arkaplan_ad = ad
         if ad not in self._arkaplan_cache:
             self._arkaplan_cache[ad] = arkaplan_pixmap(paths.assets_dir(), ad)
         self._avatar_arkaplan.arkaplan_ayarla(self._arkaplan_cache[ad])
@@ -418,6 +422,7 @@ class DashboardView(QWidget):
         for _kayit_id, (etiket, satir) in self._sure_etiketleri.items():
             if satir.calisiyor:
                 etiket.setText(format_sure(satir_canli_saniye(satir, simdi)))
+        self._render_arkaplan()  # saat dilimi sınırını geçince arkaplan kendi değişsin
 
     # — Avatar önizleme (ok'larla gelecek seviyeleri gözetleme) —
     def _kilit_yolu(self) -> Path:
