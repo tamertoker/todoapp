@@ -34,9 +34,13 @@ from leveltodo.infrastructure.assets.avatar import (
     avatar_katmanlari,
     kilitli_goruntu,
 )
-from leveltodo.infrastructure.assets.dusman import dusman_resmi
 from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
+from leveltodo.presentation.common.arkaplan import (
+    ArkaplanCerceve,
+    arkaplan_pixmap,
+    zaman_dilimi,
+)
 from leveltodo.presentation.mesajlar import combo_mesaji, kritik_mesaji, tamamlama_mesaji
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
@@ -73,10 +77,10 @@ class DashboardView(QWidget):
         self._onizleme_indeks = 0
         self._mevcut_rank_indeks: int | None = None
         self._pixmap_cache: dict[str, QPixmap] = {}
+        self._arkaplan_cache: dict[str, QPixmap | None] = {}
         self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
         self._mod = "bugun"  # "bugun" | "tumu"
         self._acik_seanslar: set[str] = set()  # açık (genişletilmiş) seans listeleri
-        self._son_dusman: str | None = None
 
         title = QLabel("LevelTodo")
         title.setObjectName("Title")
@@ -112,27 +116,12 @@ class DashboardView(QWidget):
         seri_satiri.addWidget(self._combo_label)
         seri_satiri.addStretch(1)
 
-        self._dusman_sprite = QLabel()
-        self._dusman_ad = QLabel()
-        self._dusman_ad.setObjectName("ProfileBar")
-        self._dusman_hp_bar = QProgressBar()
-        self._dusman_hp_bar.setObjectName("DusmanHpBar")
-        dusman_ic = QVBoxLayout()
-        dusman_ic.addWidget(self._dusman_ad)
-        dusman_ic.addWidget(self._dusman_hp_bar)
-        dusman_frame = QFrame()
-        dusman_frame.setObjectName("AvatarFrame")
-        dusman_h = QHBoxLayout(dusman_frame)
-        dusman_h.addWidget(self._dusman_sprite)
-        dusman_h.addLayout(dusman_ic, stretch=1)
-
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
         layout.addLayout(ust)
         layout.addWidget(self._unvan_label)
         layout.addLayout(seri_satiri)
-        layout.addWidget(dusman_frame)
         layout.addLayout(orta, stretch=1)
 
         self._vm.changed.connect(self._render)
@@ -159,13 +148,14 @@ class DashboardView(QWidget):
         v.setContentsMargins(0, 0, 0, 0)
         v.setSpacing(12)
 
-        avatar_frame = QFrame()
-        avatar_frame.setObjectName("AvatarFrame")
-        af = QVBoxLayout(avatar_frame)
+        self._avatar_arkaplan = ArkaplanCerceve(radius=14)
+        self._avatar_arkaplan.setMinimumHeight(300)
+        af = QVBoxLayout(self._avatar_arkaplan)
         self._avatar_label = QLabel()
         self._avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._avatar_label.setStyleSheet("background: transparent;")
         af.addWidget(self._avatar_label)
-        v.addWidget(avatar_frame)
+        v.addWidget(self._avatar_arkaplan)
 
         # Oklar avatarın altındaki unvan yazısının iki yanında (üst panele dokunmaz).
         self._geri_btn = QPushButton("◀")
@@ -194,6 +184,11 @@ class DashboardView(QWidget):
             self._stat_bar[stat] = bar
             v.addWidget(etiket)
             v.addWidget(bar)
+
+        # Kullanıcının eklediği özel statlar buraya dizilir (aşağı kaydırınca görünür).
+        self._ozel_stat_layout = QVBoxLayout()
+        self._ozel_stat_layout.setSpacing(8)
+        v.addLayout(self._ozel_stat_layout)
         v.addStretch(1)
         return panel
 
@@ -258,21 +253,16 @@ class DashboardView(QWidget):
         self._xp_label.setText(f"XP  {xp}")
         self._points_label.setText(f"Puan  {puan}")
 
+        self._render_arkaplan()
         self._render_profil_ve_statlar()
         self._render_seriler()
-        self._render_dusman()
         self._render_gorevler()
 
-    def _render_dusman(self) -> None:
-        dusman, hp, maks, tier = self._container.dusman.durum()
-        self._dusman_ad.setText(f"🗡 {dusman.ad}  ·  Tier {tier + 1}")
-        hp = max(0, hp)
-        self._dusman_hp_bar.setMaximum(max(1, maks))
-        self._dusman_hp_bar.setValue(hp)
-        self._dusman_hp_bar.setFormat(f"Can: {hp} / {maks}")
-        if self._son_dusman != dusman.anahtar:
-            self._son_dusman = dusman.anahtar
-            self._dusman_sprite.setPixmap(dusman_resmi(paths.assets_dir(), dusman.anahtar, 96))
+    def _render_arkaplan(self) -> None:
+        ad = "avatar_" + zaman_dilimi(self._container.saat.simdi().hour)
+        if ad not in self._arkaplan_cache:
+            self._arkaplan_cache[ad] = arkaplan_pixmap(paths.assets_dir(), ad)
+        self._avatar_arkaplan.arkaplan_ayarla(self._arkaplan_cache[ad])
 
     def _render_seriler(self) -> None:
         giris, _ = self._container.seri.durumlar()[SeriTipi.GIRIS]
@@ -304,7 +294,34 @@ class DashboardView(QWidget):
             bar.setMaximum(max(1, durum.sonraki_seviye_esigi))
             bar.setValue(durum.bu_seviyedeki_xp)
 
+        self._render_ozel_statlar()
         self._avatar_onizleme_ciz()
+
+    def _render_ozel_statlar(self) -> None:
+        while self._ozel_stat_layout.count():
+            item = self._ozel_stat_layout.takeAt(0)
+            w = item.widget()
+            if w is not None:
+                w.setParent(None)
+                w.deleteLater()
+
+        ozel = [b for b in self._container.stat.tum_statlar() if b.silinebilir]
+        if not ozel:
+            return
+        durumlar = self._vm.stat_durumlari_anahtar([b.anahtar for b in ozel])
+        baslik = QLabel("Özel Statlar")
+        baslik.setObjectName("Subtitle")
+        self._ozel_stat_layout.addWidget(baslik)
+        for b in ozel:
+            durum = durumlar[b.anahtar]
+            etiket = QLabel(f"{b.etiket}  ·  Sv {durum.seviye}")
+            bar = QProgressBar()
+            bar.setTextVisible(True)
+            bar.setFormat("%v / %m")
+            bar.setMaximum(max(1, durum.sonraki_seviye_esigi))
+            bar.setValue(durum.bu_seviyedeki_xp)
+            self._ozel_stat_layout.addWidget(etiket)
+            self._ozel_stat_layout.addWidget(bar)
 
     def _render_gorevler(self) -> None:
         self._sure_etiketleri = {}

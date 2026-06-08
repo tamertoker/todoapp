@@ -37,6 +37,35 @@ def test_dashboard_task_flow_updates_counter(db_url, qapp):
     assert "5" in dashboard._xp_label.text()
 
 
+def test_dusman_page_vur_ve_hazine(db_url, qapp):
+    container = build_container(db_url=db_url)
+    app = LevelTodoApp(container)
+    dusman_view = app.window._dusman
+
+    container.dusman.hasar_biriktir(200)  # düşmanı devirmeye yeter
+    dusman_view.yenile()
+    assert dusman_view._vur_btn.isEnabled()
+
+    dusman_view._vur()  # tek darbe → devrilir → hazine bırakır
+    assert container.dusman.bekleyen_hazine_sayisi() >= 1
+
+    dusman_view._hazine_ac()
+    assert container.dusman.bekleyen_hazine_sayisi() == 0
+
+
+def test_pano_takvim_gorunumu_kurulur(db_url, qapp):
+    container = build_container(db_url=db_url)
+    app = LevelTodoApp(container)
+    pano = app.window._pano
+
+    pano._gorunum_degis(1)  # Takvim
+    assert pano._stack.currentIndex() == 1
+    pano._takvim._mod_degis("hafta")
+    pano._takvim._zoom(16)  # yakınlaştır
+    pano._gorunum_degis(0)  # Dağılım'a geri
+    assert pano._stack.currentIndex() == 0
+
+
 def test_add_task_dialog_blocks_empty_title(qapp):
     from PyQt6.QtWidgets import QDialog
 

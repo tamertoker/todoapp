@@ -34,6 +34,7 @@ def test_dusman_devrilince_olay_yayinlanir(db_url):
     olaylar = []
     c.olay_hatti.subscribe(DusmanDevrildi, olaylar.append)
 
-    c.dusman.hasar_ver(100)  # 100 can → 0 → devrildi (tier 0)
+    c.dusman.hasar_biriktir(100)  # biriktir
+    c.dusman.vur()  # 100 can → 0 → devrildi (tier 0)
     assert len(olaylar) == 1
     assert olaylar[0].tier == 0

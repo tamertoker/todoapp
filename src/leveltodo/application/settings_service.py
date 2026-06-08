@@ -31,6 +31,8 @@ DEFAULTS: dict[str, Any] = {
     "dusman_tier": 0,
     "dusman_hp": -1,
     "dusman_son_etkinlik": "",
+    "dusman_biriken_hasar": 0,
+    "dusman_hazineler": [],
     "bildirim_hatirlatma": True,
     "bildirim_kutlama": True,
     "bildirim_uyari": True,

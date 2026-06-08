@@ -10,6 +10,7 @@ from __future__ import annotations
 import sys
 
 from PyQt6.QtCore import QTimer
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QApplication
 
 from leveltodo.bootstrap import Container
@@ -30,6 +31,7 @@ class LevelTodoApp:
         self.qapp = QApplication.instance() or QApplication(sys.argv)
         load_all_fonts()  # tüm .ttf'leri Qt'ye yükle
         self._font_family = gecerli_font(str(container.settings.get("font")))
+        self.qapp.setFont(QFont(self._font_family))  # QSS dışı widget'lara da uygula
 
         self.bridge = QtEventBridge(container.olay_hatti)
         self.window = MainWindow(container, self.bridge)
@@ -63,6 +65,7 @@ class LevelTodoApp:
 
     def _apply_font(self, font: str) -> None:
         self._font_family = gecerli_font(font)
+        self.qapp.setFont(QFont(self._font_family))
         self._apply_theme(self.container.settings.theme)
 
     def run(self) -> int:

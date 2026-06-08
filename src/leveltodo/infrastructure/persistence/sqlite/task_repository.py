@@ -12,7 +12,7 @@ from datetime import date, datetime
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import sessionmaker
 
-from leveltodo.infrastructure.persistence.sqlite.models import Tag, Task, TaskInstance
+from leveltodo.infrastructure.persistence.sqlite.models import Session, Tag, Task, TaskInstance
 
 
 class SqlTaskRepository:
@@ -330,6 +330,58 @@ class SqlTaskRepository:
                 .group_by(Tag.id)
             )
             return [(ad, renk, int(sn)) for ad, renk, sn in s.execute(stmt).all()]
+
+    def seans_bloklari(self, user_id: str, bas: date, bit: date) -> list[tuple]:
+        """Takvim için: aralıktaki kapanmış seanslar (instance_id, gün, başlangıç,
+        bitiş, başlık, etiket-renk)."""
+        with self._sf() as s:
+            stmt = (
+                select(
+                    Session.instance_id,
+                    Session.day,
+                    Session.start_at,
+                    Session.end_at,
+                    TaskInstance.title,
+                    Tag.color,
+                )
+                .select_from(Session)
+                .join(TaskInstance, TaskInstance.id == Session.instance_id)
+                .join(Task, Task.id == TaskInstance.task_id)
+                .outerjoin(Tag, Tag.id == Task.tag_id)
+                .where(
+                    Session.user_id == user_id,
+                    Session.day >= bas,
+                    Session.day <= bit,
+                    Session.end_at.is_not(None),
+                )
+                .order_by(Session.start_at)
+            )
+            return [tuple(satir) for satir in s.execute(stmt).all()]
+
+    def tamamlanan_kayitlar(self, user_id: str, bas: date, bit: date) -> list[tuple]:
+        """Takvim için: aralıkta tamamlanmış görev kayıtları (instance_id, gün,
+        tamamlanma zamanı, başlık, etiket-renk)."""
+        with self._sf() as s:
+            stmt = (
+                select(
+                    TaskInstance.id,
+                    TaskInstance.day,
+                    TaskInstance.completed_at,
+                    TaskInstance.title,
+                    Tag.color,
+                )
+                .select_from(TaskInstance)
+                .join(Task, Task.id == TaskInstance.task_id)
+                .outerjoin(Tag, Tag.id == Task.tag_id)
+                .where(
+                    TaskInstance.user_id == user_id,
+                    TaskInstance.day >= bas,
+                    TaskInstance.day <= bit,
+                    TaskInstance.completed_at.is_not(None),
+                )
+                .order_by(TaskInstance.completed_at)
+            )
+            return [tuple(satir) for satir in s.execute(stmt).all()]
 
     def en_cok_gorev_gun(self, user_id: str) -> tuple[date | None, int]:
         with self._sf() as s:

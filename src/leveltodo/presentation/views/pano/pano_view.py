@@ -11,19 +11,23 @@ from datetime import date, timedelta
 from PyQt6.QtCore import QDate
 from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (
+    QButtonGroup,
     QComboBox,
     QDateEdit,
     QFrame,
     QHBoxLayout,
     QLabel,
     QProgressBar,
+    QPushButton,
     QScrollArea,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
 
 from leveltodo.bootstrap import Container
 from leveltodo.presentation.common.halka import Halka
+from leveltodo.presentation.views.pano.takvim_view import TakvimView
 
 
 def _sure_metni(saniye: int) -> str:
@@ -41,8 +45,24 @@ class PanoView(QWidget):
 
         title = QLabel("Pano")
         title.setObjectName("Title")
-        bilgi = QLabel("Etiketlere göre çalışma süresi dağılımı.")
+        bilgi = QLabel("Çalışma sürelerin: etiket dağılımı ve gün/hafta takvimi.")
         bilgi.setObjectName("Subtitle")
+
+        self._dagilim_btn = QPushButton("Dağılım")
+        self._takvim_btn = QPushButton("Takvim")
+        for b in (self._dagilim_btn, self._takvim_btn):
+            b.setObjectName("NavButton")
+            b.setCheckable(True)
+        self._dagilim_btn.setChecked(True)
+        gorunum_grup = QButtonGroup(self)
+        gorunum_grup.addButton(self._dagilim_btn)
+        gorunum_grup.addButton(self._takvim_btn)
+        self._dagilim_btn.clicked.connect(lambda: self._gorunum_degis(0))
+        self._takvim_btn.clicked.connect(lambda: self._gorunum_degis(1))
+        gorunum_satiri = QHBoxLayout()
+        gorunum_satiri.addWidget(self._dagilim_btn)
+        gorunum_satiri.addWidget(self._takvim_btn)
+        gorunum_satiri.addStretch(1)
 
         self._aralik = QComboBox()
         for etiket, kip in (
@@ -89,13 +109,28 @@ class PanoView(QWidget):
         govde.addWidget(self._halka, stretch=1)
         govde.addWidget(kirilim_scroll, stretch=2)
 
+        # Dağılım (halka) sayfası
+        dagilim_sayfa = QWidget()
+        dagilim_l = QVBoxLayout(dagilim_sayfa)
+        dagilim_l.setContentsMargins(0, 0, 0, 0)
+        dagilim_l.setSpacing(10)
+        dagilim_l.addLayout(secici)
+        dagilim_l.addLayout(govde, stretch=1)
+
+        # Takvim sayfası
+        self._takvim = TakvimView(self._container)
+
+        self._stack = QStackedWidget()
+        self._stack.addWidget(dagilim_sayfa)
+        self._stack.addWidget(self._takvim)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
         layout.addWidget(title)
         layout.addWidget(bilgi)
-        layout.addLayout(secici)
-        layout.addLayout(govde, stretch=1)
+        layout.addLayout(gorunum_satiri)
+        layout.addWidget(self._stack, stretch=1)
 
         self._tarihleri_baslat()
         self.yenile()
@@ -108,6 +143,13 @@ class PanoView(QWidget):
         self._bit_tarih.setDate(QDate(bugun.year, bugun.month, bugun.day))
         self._bas_tarih.blockSignals(False)
         self._bit_tarih.blockSignals(False)
+
+    def _gorunum_degis(self, indeks: int) -> None:
+        self._stack.setCurrentIndex(indeks)
+        if indeks == 1:
+            self._takvim.yenile()
+        else:
+            self.yenile()
 
     def _aralik_degisti(self) -> None:
         ozel = self._aralik.currentData() == "ozel"
@@ -130,7 +172,10 @@ class PanoView(QWidget):
 
     def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
-        self.yenile()
+        if self._stack.currentIndex() == 1:
+            self._takvim.yenile()
+        else:
+            self.yenile()
 
     def yenile(self) -> None:
         bas, bit = self._aralik_hesapla()

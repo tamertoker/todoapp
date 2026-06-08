@@ -112,14 +112,19 @@ def build_container(
     dondurma = DondurmaServisi(settings, olay_hatti, aktif_saat)
     combo = ComboServisi(settings)
     rozet = RozetServisi(settings)
+    defter_repo = SqlLedgerRepository(session_factory)
     dusman = DusmanServisi(
-        settings, aktif_saat, lambda: settings.day_start_hour, olay_hatti
+        settings,
+        aktif_saat,
+        lambda: settings.day_start_hour,
+        olay_hatti,
+        defter_repo=defter_repo,
+        combo=combo,
     )
-    # Görev tamamlanınca kazanılan XP kadar düşmana hasar (olay tabanlı).
-    olay_hatti.subscribe(TaskCompleted, lambda olay: dusman.hasar_ver(olay.xp))
+    # Görev tamamlanınca kazanılan XP, düşmana inecek "biriken hasar"a eklenir.
+    olay_hatti.subscribe(TaskCompleted, lambda olay: dusman.hasar_biriktir(olay.xp))
 
     gorev_repo = SqlTaskRepository(session_factory)
-    defter_repo = SqlLedgerRepository(session_factory)
     stat = StatServisi(SqlStatRepository(session_factory))
     seans_repo = SqlSeansRepository(session_factory)
     seans_repo.acik_seanslari_sil(DEFAULT_USER_ID)  # açılışta yarım kalan seansları temizle

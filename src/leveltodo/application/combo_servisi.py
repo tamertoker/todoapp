@@ -31,6 +31,11 @@ class ComboServisi:
     def carpan(self, simdi: datetime) -> float:
         return self.CARPAN if self.aktif_mi(simdi) else 1.0
 
+    def odul_baslat(self, simdi: datetime, dakika: int | None = None) -> None:
+        """Combo'yu ödül olarak zorla başlatır/uzatır (ör. hazineden çıkınca)."""
+        sure = dakika if dakika is not None else self.SURE_DK
+        self._settings.set(self.BITIS, (simdi + timedelta(minutes=sure)).isoformat())
+
     def kalan_dakika(self, simdi: datetime) -> int:
         bitis = self._settings.get(self.BITIS)
         if not bitis:

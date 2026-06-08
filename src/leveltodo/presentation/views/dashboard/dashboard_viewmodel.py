@@ -50,6 +50,9 @@ class DashboardViewModel(QObject):
     def stat_durumlari(self) -> dict[Stat, SeviyeDurumu]:
         return self._gorevler.stat_durumlari()
 
+    def stat_durumlari_anahtar(self, anahtarlar: list[str]) -> dict[str, SeviyeDurumu]:
+        return self._gorevler.stat_durumlari_anahtar(anahtarlar)
+
     def profil_durumu(self) -> tuple[int, UnvanDurumu]:
         return self._gorevler.profil_durumu()
 

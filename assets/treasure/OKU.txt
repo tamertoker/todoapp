@@ -1,0 +1,16 @@
+Bu klasöre hazine sandığı görsellerini koy (üretmezsen 🎁 emoji yer-tutucu kullanılır):
+
+  sandik_kapali.png   (kapalı sandık)
+  sandik_acik.png     (açık sandık)
+
+Özellik: 128x128 px, ŞEFFAF arkaplan (PNG), pixel-art, sıcak altın + koyu ahşap.
+
+Örnek üretim promptu (bir yapay zekâ görsel aracına):
+  Kapalı: pixel art treasure chest, closed, ornate gold trim on dark wood,
+          glowing sparkles, RPG loot item, transparent background, centered,
+          128x128, crisp pixels, dark fantasy palette
+  Açık:   pixel art treasure chest, open lid, golden light and coins overflowing,
+          magical glow, RPG loot, transparent background, centered, 128x128,
+          crisp pixels, dark fantasy palette
+
+Dosyaları buraya koyunca uygulama otomatik kullanır (kod değişmez).

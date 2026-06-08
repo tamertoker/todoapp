@@ -540,6 +540,11 @@ class GorevServisi:
         toplamlar = self._defter.stat_xp_toplamlari(self._user_id)
         return {s: seviye_hesapla(toplamlar.get(s.value, 0)) for s in Stat}
 
+    def stat_durumlari_anahtar(self, anahtarlar: list[str]) -> dict[str, SeviyeDurumu]:
+        """Verilen stat anahtarları (özel statlar dahil) için durum — tek sorguda."""
+        toplamlar = self._defter.stat_xp_toplamlari(self._user_id)
+        return {a: seviye_hesapla(toplamlar.get(a, 0)) for a in anahtarlar}
+
     def profil_durumu(self) -> tuple[int, UnvanDurumu]:
         """Profil seviyesi (TÜM stat seviyelerinin toplamı — özel statlar dahil)."""
         toplamlar = self._defter.stat_xp_toplamlari(self._user_id)

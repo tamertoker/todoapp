@@ -8,14 +8,16 @@ iner ve arka planda yaşamaya devam eder (ileride çalışan kronometre için ş
 
 from __future__ import annotations
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction, QCloseEvent, QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QButtonGroup,
+    QFrame,
     QHBoxLayout,
     QMenu,
     QPushButton,
+    QScrollArea,
     QStackedWidget,
     QSystemTrayIcon,
     QVBoxLayout,
@@ -33,6 +35,7 @@ from leveltodo.presentation.views.admin.admin_view import AdminView
 from leveltodo.presentation.views.avatar.avatar_view import AvatarEditorView
 from leveltodo.presentation.views.cuzdan.cuzdan_view import CuzdanView
 from leveltodo.presentation.views.dashboard.dashboard_view import DashboardView
+from leveltodo.presentation.views.dusman.dusman_view import DusmanView
 from leveltodo.presentation.views.gunluk.gunluk_view import GunlukView
 from leveltodo.presentation.views.irade.irade_view import IradeView
 from leveltodo.presentation.views.istatistik.istatistik_view import IstatistikView
@@ -61,6 +64,7 @@ class MainWindow(QWidget):
 
         # — Sayfalar —
         self._dashboard = DashboardView(container, bridge)
+        self._dusman = DusmanView(container)
         self._irade = IradeView(container, self._ses)
         self._rutin = RutinView(container)
         self._gunluk = GunlukView(container)
@@ -78,21 +82,27 @@ class MainWindow(QWidget):
         )
         self._admin = AdminView(container)
 
+        # Her sayfa dikey kaydırılabilir bir alana sarılır: tam ekranda sığmayan
+        # içerik sıkışmak yerine aşağı kaydırılır.
         self._stack = QStackedWidget()
-        self._stack.addWidget(self._dashboard)
-        self._stack.addWidget(self._irade)
-        self._stack.addWidget(self._rutin)
-        self._stack.addWidget(self._gunluk)
-        self._stack.addWidget(self._telafi)
-        self._stack.addWidget(self._avatar_editor)
-        self._stack.addWidget(self._rozetler)
-        self._stack.addWidget(self._istatistik)
-        self._stack.addWidget(self._pano)
-        self._stack.addWidget(self._cuzdan)
-        self._stack.addWidget(self._wishlist)
-        self._stack.addWidget(self._magaza)
-        self._stack.addWidget(self._settings)
-        self._stack.addWidget(self._admin)
+        for sayfa in (
+            self._dashboard,
+            self._dusman,
+            self._irade,
+            self._rutin,
+            self._gunluk,
+            self._telafi,
+            self._avatar_editor,
+            self._rozetler,
+            self._istatistik,
+            self._pano,
+            self._cuzdan,
+            self._wishlist,
+            self._magaza,
+            self._settings,
+            self._admin,
+        ):
+            self._stack.addWidget(self._kaydirilabilir(sayfa))
 
         # — Sol menü —
         nav = self._build_nav()
@@ -113,6 +123,7 @@ class MainWindow(QWidget):
         self._rutin.degisti.connect(self._dashboard.refresh_day)
         self._gunluk.degisti.connect(self._dashboard.refresh_day)
         self._magaza.degisti.connect(self._dashboard.refresh_day)
+        self._dusman.degisti.connect(self._dashboard.refresh_day)
 
         self._tray = self._build_tray()
 
@@ -131,6 +142,14 @@ class MainWindow(QWidget):
         elif isinstance(event, DusmanDevrildi):
             self._ses.cal("dusman_devrildi")
 
+    def _kaydirilabilir(self, w: QWidget) -> QScrollArea:
+        sa = QScrollArea()
+        sa.setWidgetResizable(True)
+        sa.setFrameShape(QFrame.Shape.NoFrame)
+        sa.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        sa.setWidget(w)
+        return sa
+
     def _build_nav(self) -> QVBoxLayout:
         nav = QVBoxLayout()
         nav.setContentsMargins(8, 16, 8, 16)
@@ -140,6 +159,7 @@ class MainWindow(QWidget):
         for index, label in enumerate(
             (
                 "Anasayfa",
+                "Düşman",
                 "İrade",
                 "Rutin",
                 "Günlük",

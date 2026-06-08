@@ -9,7 +9,7 @@ gün aralığı için günlük seri döner; ekran bunu ısı haritası ya da çi
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from leveltodo.domain.rutinler.rutinler import RutinTuru
 from leveltodo.domain.stats.statlar import STAT_ETIKET, Stat
@@ -30,6 +30,16 @@ class Metrik:
     anahtar: str
     etiket: str
     birim: str  # "XP", "dk", "adet", "" (rutin)
+
+
+@dataclass(frozen=True, slots=True)
+class TakvimBlok:
+    gun: date  # mantıksal gün (gün-başlangıç saatine göre)
+    baslangic: datetime  # gerçek başlangıç saati
+    bitis: datetime  # gerçek bitiş (işaret için = başlangıç)
+    baslik: str
+    renk: str
+    tamamlandi: bool  # True = süresiz tamamlanan görev işareti
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,6 +119,26 @@ class IstatistikServisi:
         ]
         sonuc.sort(key=lambda x: x[2], reverse=True)
         return sonuc
+
+    def takvim_bloklari(self, bas: date, bit: date) -> list[TakvimBlok]:
+        """Takvim için aralıktaki çalışma blokları: kapanmış seanslar + (süre
+        tutulmadan) tamamlanan görevlerin işaretleri."""
+        bloklar: list[TakvimBlok] = []
+        seansli: set[str] = set()
+        for inst_id, gun, bsl, bts, baslik, renk in self._gorev.seans_bloklari(
+            self._user_id, bas, bit
+        ):
+            if bts is None:
+                continue
+            bloklar.append(TakvimBlok(gun, bsl, bts, baslik, renk or "#7a6f99", False))
+            seansli.add(inst_id)
+        for inst_id, gun, tamam_at, baslik, renk in self._gorev.tamamlanan_kayitlar(
+            self._user_id, bas, bit
+        ):
+            if tamam_at is None or inst_id in seansli:
+                continue  # seansı olanı iki kez gösterme
+            bloklar.append(TakvimBlok(gun, tamam_at, tamam_at, baslik, renk or "#7a6f99", True))
+        return bloklar
 
     def rekorlar(self) -> Rekorlar:
         seri_best = max(
