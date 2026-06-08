@@ -17,6 +17,7 @@ from leveltodo.bootstrap import Container
 from leveltodo.domain.events import AppStarted
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.common.icon import make_app_icon
+from leveltodo.presentation.common.ikonlar import uygulama_ikonu
 from leveltodo.presentation.main_window import MainWindow
 from leveltodo.presentation.theme.arrows import ok_yollari
 from leveltodo.presentation.theme.fonts import gecerli_font, load_all_fonts
@@ -59,7 +60,7 @@ class LevelTodoApp:
         palette = get_palette(theme)
         up_arrow, down_arrow = ok_yollari(palette.text)
         self.qapp.setStyleSheet(build_qss(palette, self._font_family, up_arrow, down_arrow))
-        icon = make_app_icon(palette)
+        icon = uygulama_ikonu() or make_app_icon(palette)
         self.qapp.setWindowIcon(icon)
         self.window.set_icon(icon)
 

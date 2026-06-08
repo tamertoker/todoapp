@@ -10,7 +10,7 @@ sınırları kullanıcının verdiği değerler: 5, 21, 40, 80, 150 gün.
 from __future__ import annotations
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QWidget
 
 from leveltodo.infrastructure.config import paths
@@ -65,6 +65,16 @@ def seri_ikon(gun: int, boy: int = 24) -> QPixmap | None:
     if kademe == 0:
         return None
     return ikon(f"streak{kademe}", boy)
+
+
+def uygulama_ikonu() -> QIcon | None:
+    """Uygulama/pencere ikonu: assets/icons/rekor_xp.png varsa onu döndürür, yoksa None."""
+    yol = paths.assets_dir() / "icons" / "rekor_xp.png"
+    if yol.exists():
+        ic = QIcon(str(yol))
+        if not ic.isNull():
+            return ic
+    return None
 
 
 def ikonlu_baslik(metin: str, ikon_ad: str, ikon_boy: int = 28) -> QWidget:
