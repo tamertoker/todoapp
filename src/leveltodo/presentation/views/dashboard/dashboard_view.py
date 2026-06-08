@@ -306,7 +306,7 @@ class DashboardView(QWidget):
         simdi = self._container.saat.simdi()
         if self._container.combo.aktif_mi(simdi):
             kalan = self._container.combo.kalan_dakika(simdi)
-            combo_px = ikon("combo", 28)
+            combo_px = ikon("combo", 40)
             if combo_px is not None:
                 self._combo_ikon.setPixmap(combo_px)
                 self._combo_label.setText(f"Combo ×1.5 ({kalan} dk)")
