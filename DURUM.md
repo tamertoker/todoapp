@@ -150,7 +150,12 @@ statlar tam stat (profile katılır); etiket grafiği = etiket başına SÜRE; a
 ### KULLANICININ 4 İSTEĞİ TAMAM (#1 stat, #2 etiket, #3 seans, #4 etiket-grafik).
 
 ## İşlevsel iyileştirmeler (kullanıcı sırası: önce işlevsel, sonra facelift, en son asset)
-- **Açık uçlar**: (a) görev "Sil"→**"Arşivle"** (zaten soft, geçmiş korunur); (b) **"özel ödül"
+- **Açık uçlar**: (a) görev silme düğmesi **"Sil"** (kullanıcı isteğiyle "Arşivle" denemesi geri
+  alındı — kafa karıştırdı; düğme soft-deactivate, geçmiş korunur). **"Bitir" düğmesi GERİ
+  GELDİ** (kullanıcı isteği): `seans_widget`'a Başlat/Durdur ile Sil arası "Bitir" eklendi →
+  `vm.tamamla` (XP+Puan + görev tamamlanır + seri ilerler). NOT: seans Durdur'u da XP veriyor →
+  Bitir ile çift kazanç olur; kullanıcıya soruldu (yanıtsız), en az riskli yol seçildi (seans
+  dokunulmadı, Bitir eklendi); istenirse "sadece Bitir versin"e çevrilecek; (b) **"özel ödül"
   alanı dialogdan kaldırıldı** (seans ödülü süre-temelli; tamamla yine reward_override'ı
   kullanır=eski/telafi); (c) **seans silince XP/Puan da geri alınır** (Session.reward_xp/points
   mig 0017, seans_durdur yazar, seans_sil ters kayıt "session_revert").

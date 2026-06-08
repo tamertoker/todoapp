@@ -12,6 +12,7 @@ from collections.abc import Callable
 from datetime import datetime
 
 from PyQt6.QtCore import QTime
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -24,6 +25,7 @@ from PyQt6.QtWidgets import (
 
 from leveltodo.application.gorev_servisi import GorevSatiri, SeansSatiri
 from leveltodo.domain.streaks.seriler import seri_rengi
+from leveltodo.presentation.common.ikonlar import ikon, seri_ikon
 from leveltodo.presentation.views.dashboard.gorev_satir_widget import (
     format_sure,
     satir_canli_saniye,
@@ -53,6 +55,7 @@ def seansli_gorev_satir(
     seanslar: list[SeansSatiri],
     baslat: Callable[[str], None],
     durdur: Callable[[str], None],
+    tamamla: Callable[[str], None],
     sil: Callable[[str], None],
     seans_sil: Callable[[str], None],
     seans_guncelle: Callable[[str, str, str], None],
@@ -90,7 +93,14 @@ def seansli_gorev_satir(
         h.addWidget(ad)
     h.addStretch(1)
     if satir.tekrar != "none":
-        seri = QLabel(f"🔥 {satir.seri}")
+        seri_px = seri_ikon(satir.seri, 18)
+        if seri_px is not None:
+            seri_ik = QLabel()
+            seri_ik.setPixmap(seri_px)
+            h.addWidget(seri_ik)
+            seri = QLabel(str(satir.seri))
+        else:
+            seri = QLabel(f"🔥 {satir.seri}")
         seri.setStyleSheet(f"color: {seri_rengi(satir.seri)}; font-weight: bold;")
         h.addWidget(seri)
 
@@ -102,14 +112,24 @@ def seansli_gorev_satir(
     if satir.calisiyor:
         btn = QPushButton("Durdur")
         btn.clicked.connect(lambda _c, i=satir.kayit_id: durdur(i))
+        _btn_px = ikon("durdur", 18)
     else:
         btn = QPushButton("Başlat")
         btn.clicked.connect(lambda _c, i=satir.kayit_id: baslat(i))
+        _btn_px = ikon("baslat", 18)
+    if _btn_px is not None:
+        btn.setIcon(QIcon(_btn_px))
     h.addWidget(btn)
-    arsiv_btn = QPushButton("Arşivle")
-    arsiv_btn.setToolTip("Görevi listeden kaldırır; geçmiş süre/istatistikler korunur.")
-    arsiv_btn.clicked.connect(lambda _c, i=satir.kayit_id: sil(i))
-    h.addWidget(arsiv_btn)
+    bitir_btn = QPushButton("Bitir")
+    bitir_btn.setToolTip(
+        "Görevi tamamlar ve XP verir. (Sadece süre tutmak istersen Başlat/Durdur'u kullan.)"
+    )
+    bitir_btn.clicked.connect(lambda _c, i=satir.kayit_id: tamamla(i))
+    h.addWidget(bitir_btn)
+    sil_btn = QPushButton("Sil")
+    sil_btn.setToolTip("Görevi listeden kaldırır; geçmiş süre/istatistikler korunur.")
+    sil_btn.clicked.connect(lambda _c, i=satir.kayit_id: sil(i))
+    h.addWidget(sil_btn)
     v.addWidget(header)
 
     alt = QWidget()

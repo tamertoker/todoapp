@@ -22,6 +22,7 @@ DEFAULTS: dict[str, Any] = {
     "minimize_to_tray": True,
     "dondurma_stok": 0,
     "dondurma_son_seviye": 0,
+    "seri_kademe_son": -1,  # son gösterilen giriş-serisi kademesi (-1 = henüz eşitlenmedi)
     "combo_bitis": "",
     "combo_zamanlar": [],
     "kazanilan_rozetler": [],

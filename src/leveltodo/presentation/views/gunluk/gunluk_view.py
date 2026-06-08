@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import (
 )
 
 from leveltodo.bootstrap import Container
+from leveltodo.presentation.common.ikonlar import ikonlu_baslik
 
 
 class GunlukView(QWidget):
@@ -33,8 +34,7 @@ class GunlukView(QWidget):
         super().__init__()
         self._container = container
 
-        title = QLabel("Günlük")
-        title.setObjectName("Title")
+        title = ikonlu_baslik("Günlük", "gunluk")
         bilgi = QLabel("Günü kapat — kısa bir yansıma, küçük bir XP. Her gün biraz daha.")
         bilgi.setObjectName("Subtitle")
 

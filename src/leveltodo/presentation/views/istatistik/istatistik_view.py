@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import (
 
 from leveltodo.bootstrap import Container
 from leveltodo.presentation.common.heatmap import IsiHaritasi
+from leveltodo.presentation.common.ikonlar import ikon
 
 pg.setConfigOption("background", None)  # tema arka planını kullan
 pg.setConfigOption("foreground", "#8a8a8a")
@@ -115,7 +116,19 @@ class IstatistikView(QWidget):
         v.setSpacing(4)
         baslik = QLabel("Kişisel rekorlar")
         baslik.setObjectName("Tag")
-        v.addWidget(baslik)
+        rekor_px = ikon("rekor_sure", 18)
+        if rekor_px is not None:
+            baslik_satiri = QHBoxLayout()
+            baslik_satiri.setContentsMargins(0, 0, 0, 0)
+            baslik_satiri.setSpacing(6)
+            ik = QLabel()
+            ik.setPixmap(rekor_px)
+            baslik_satiri.addWidget(ik)
+            baslik_satiri.addWidget(baslik)
+            baslik_satiri.addStretch(1)
+            v.addLayout(baslik_satiri)
+        else:
+            v.addWidget(baslik)
         self._rekor_label = QLabel()
         self._rekor_label.setWordWrap(True)
         v.addWidget(self._rekor_label)

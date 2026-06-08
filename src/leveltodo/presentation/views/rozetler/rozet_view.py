@@ -10,6 +10,7 @@ from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (
     QFrame,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
     QScrollArea,
     QVBoxLayout,
@@ -19,6 +20,7 @@ from PyQt6.QtWidgets import (
 from leveltodo.bootstrap import Container
 from leveltodo.domain.rozetler.rozetler import Rozet, RozetDurumu
 from leveltodo.domain.streaks.seriler import SeriTipi
+from leveltodo.presentation.common.ikonlar import ikon, ikonlu_baslik
 
 _SUTUN = 3
 
@@ -29,8 +31,7 @@ class RozetView(QWidget):
         self._container = container
         self._ses = ses
 
-        title = QLabel("Rozetler")
-        title.setObjectName("Title")
+        title = ikonlu_baslik("Rozetler", "rozet")
         bilgi = QLabel("Kazandıkların renkli; kilitliler silik. Başardıkça açılır.")
         bilgi.setObjectName("Subtitle")
 
@@ -87,12 +88,26 @@ class RozetView(QWidget):
         v.setContentsMargins(12, 10, 12, 10)
         v.setSpacing(4)
 
-        ad = QLabel(("🏅 " if kazanildi else "🔒 ") + rozet.ad)
+        rozet_px = ikon("rozet", 18) if kazanildi else None
+        ad_kap = QWidget()
+        ad_h = QHBoxLayout(ad_kap)
+        ad_h.setContentsMargins(0, 0, 0, 0)
+        ad_h.setSpacing(6)
+        if rozet_px is not None:
+            ik = QLabel()
+            ik.setPixmap(rozet_px)
+            ad_h.addWidget(ik)
+        if rozet_px is not None:
+            ad = QLabel(rozet.ad)
+        else:
+            ad = QLabel(("🏅 " if kazanildi else "🔒 ") + rozet.ad)
         ad.setObjectName("Counter" if kazanildi else "Subtitle")
+        ad_h.addWidget(ad)
+        ad_h.addStretch(1)
         aciklama = QLabel(rozet.aciklama)
         aciklama.setObjectName("Subtitle")
         aciklama.setWordWrap(True)
 
-        v.addWidget(ad)
+        v.addWidget(ad_kap)
         v.addWidget(aciklama)
         return frame

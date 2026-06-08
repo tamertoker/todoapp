@@ -42,6 +42,7 @@ from leveltodo.presentation.common.arkaplan import (
     arkaplan_pixmap,
     zaman_dilimi,
 )
+from leveltodo.presentation.common.ikonlar import ikon, seri_ikon, seri_kademe, seri_sonraki_esik
 from leveltodo.presentation.mesajlar import combo_mesaji, kritik_mesaji, tamamlama_mesaji
 from leveltodo.presentation.views.dashboard.add_task_dialog import AddTaskDialog
 from leveltodo.presentation.views.dashboard.dashboard_viewmodel import DashboardViewModel
@@ -50,6 +51,7 @@ from leveltodo.presentation.views.dashboard.gorev_satir_widget import (
     satir_canli_saniye,
 )
 from leveltodo.presentation.views.dashboard.seans_widget import seansli_gorev_satir
+from leveltodo.presentation.views.dashboard.seri_kademe_dialog import kademe_atlama_goster
 
 _STAT_SIRA = (Stat.ENTELEKTUELLIK, Stat.BEDEN, Stat.FARKINDALIK, Stat.DISIPLIN)
 _GUN_KISA = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
@@ -93,11 +95,21 @@ class DashboardView(QWidget):
         self._xp_label.setObjectName("Counter")
         self._points_label = QLabel()
         self._points_label.setObjectName("Counter")
+        xp_ikon = QLabel()
+        _xp_px = ikon("xp", 22)
+        if _xp_px is not None:
+            xp_ikon.setPixmap(_xp_px)
+        puan_ikon = QLabel()
+        _puan_px = ikon("puan", 22)
+        if _puan_px is not None:
+            puan_ikon.setPixmap(_puan_px)
         ust = QHBoxLayout()
         ust.addWidget(title)
         ust.addStretch(1)
+        ust.addWidget(xp_ikon)
         ust.addWidget(self._xp_label)
         ust.addSpacing(20)
+        ust.addWidget(puan_ikon)
         ust.addWidget(self._points_label)
 
         sol = self._build_sol_panel()
@@ -107,14 +119,18 @@ class DashboardView(QWidget):
         orta.addWidget(sol)
         orta.addLayout(sag, stretch=1)
 
+        self._giris_seri_ikon = QLabel()
         self._giris_seri_label = QLabel()
         self._dondurma_label = QLabel()
+        self._combo_ikon = QLabel()
         self._combo_label = QLabel()
         seri_satiri = QHBoxLayout()
+        seri_satiri.addWidget(self._giris_seri_ikon)
         seri_satiri.addWidget(self._giris_seri_label)
         seri_satiri.addSpacing(20)
         seri_satiri.addWidget(self._dondurma_label)
         seri_satiri.addSpacing(20)
+        seri_satiri.addWidget(self._combo_ikon)
         seri_satiri.addWidget(self._combo_label)
         seri_satiri.addStretch(1)
 
@@ -252,8 +268,8 @@ class DashboardView(QWidget):
 
     def _render(self) -> None:
         xp, puan = self._vm.toplamlar()
-        self._xp_label.setText(f"XP  {xp}")
-        self._points_label.setText(f"Puan  {puan}")
+        self._xp_label.setText(str(xp) if ikon("xp", 22) is not None else f"XP  {xp}")
+        self._points_label.setText(str(puan) if ikon("puan", 22) is not None else f"Puan  {puan}")
 
         self._render_arkaplan()
         self._render_profil_ve_statlar()
@@ -269,17 +285,50 @@ class DashboardView(QWidget):
 
     def _render_seriler(self) -> None:
         giris, _ = self._container.seri.durumlar()[SeriTipi.GIRIS]
-        self._giris_seri_label.setText(f"🔥 Giriş serisi: {giris} gün")
+        seri_px = seri_ikon(giris, 24)
+        if seri_px is not None:
+            self._giris_seri_ikon.setPixmap(seri_px)
+            self._giris_seri_label.setText(f"Giriş serisi: {giris} gün")
+        else:
+            self._giris_seri_ikon.clear()
+            self._giris_seri_label.setText(f"🔥 Giriş serisi: {giris} gün")
         self._giris_seri_label.setStyleSheet(f"color: {seri_rengi(giris)}; font-weight: bold;")
         self._dondurma_label.setText(f"❄ Dondurma: {self._container.dondurma.stok()}")
 
         simdi = self._container.saat.simdi()
         if self._container.combo.aktif_mi(simdi):
             kalan = self._container.combo.kalan_dakika(simdi)
-            self._combo_label.setText(f"🔥 Combo ×1.5 ({kalan} dk)")
+            combo_px = ikon("combo", 20)
+            if combo_px is not None:
+                self._combo_ikon.setPixmap(combo_px)
+                self._combo_label.setText(f"Combo ×1.5 ({kalan} dk)")
+            else:
+                self._combo_ikon.clear()
+                self._combo_label.setText(f"🔥 Combo ×1.5 ({kalan} dk)")
             self._combo_label.setStyleSheet("color: #ff7a4d; font-weight: bold;")
         else:
+            self._combo_ikon.clear()
             self._combo_label.setText("")
+
+        self._seri_kademe_kontrol(giris)
+
+    def _seri_kademe_kontrol(self, giris: int) -> None:
+        """Giriş serisi yeni bir kademeye geçtiyse ekran ortasında çift bildirim gösterir.
+
+        Son gösterilen kademe ayarda tutulur; aynı kademede tekrar tetiklenmez. İlk
+        açılışta (henüz eşitlenmemişse) sessizce mevcut kademeye eşitlenir.
+        """
+        kademe = seri_kademe(giris)
+        son = int(self._container.settings.get("seri_kademe_son"))
+        if son < 0:  # ilk kez: bildirim göstermeden mevcut kademeye eşitle
+            self._container.settings.set("seri_kademe_son", kademe)
+            return
+        if kademe == son:
+            return
+        # Önce kaydet ki bildirim sırasında render tekrar tetiklenmesin.
+        self._container.settings.set("seri_kademe_son", kademe)
+        if kademe > son and kademe >= 2:
+            kademe_atlama_goster(self, kademe, giris, seri_sonraki_esik(giris))
 
     def _render_profil_ve_statlar(self) -> None:
         durumlar = self._vm.stat_durumlari()
@@ -369,7 +418,8 @@ class DashboardView(QWidget):
         baslik = QLabel(ozet.baslik)
         aciklama = QLabel(_tekrar_aciklama(ozet.tekrar, ozet.parametre))
         aciklama.setObjectName("Tag")
-        seri = QLabel(f"🔥 {ozet.seri}")
+        seri_px = seri_ikon(ozet.seri, 18)
+        seri = QLabel(str(ozet.seri) if seri_px is not None else f"🔥 {ozet.seri}")
         seri.setStyleSheet(f"color: {seri_rengi(ozet.seri)}; font-weight: bold;")
 
         bugun = Gun.olustur(
@@ -389,6 +439,10 @@ class DashboardView(QWidget):
 
         h.addWidget(baslik, stretch=1)
         h.addWidget(aciklama)
+        if seri_px is not None:
+            seri_ik = QLabel()
+            seri_ik.setPixmap(seri_px)
+            h.addWidget(seri_ik)
         h.addWidget(seri)
         h.addWidget(sonraki)
         h.addWidget(sil)
@@ -402,6 +456,7 @@ class DashboardView(QWidget):
             seanslar=self._vm.seanslar(satir.kayit_id),
             baslat=self._vm.seans_baslat,
             durdur=self._vm.seans_durdur,
+            tamamla=self._vm.tamamla,
             sil=self._vm.sil,
             seans_sil=self._vm.seans_sil,
             seans_guncelle=self._vm.seans_guncelle,
