@@ -100,9 +100,28 @@ def ai_avatar_yolu(assets_dizini: Path, unvan: str) -> Path | None:
     ascii_ad = UNVAN_DOSYA.get(unvan)
     if ascii_ad is not None:
         adaylar.append(ascii_ad)
+        if ascii_ad == "makine":
+            adaylar.append("makina")
     adaylar.append(unvan.lower())  # Türkçe küçük harf, ör. "aydın"
     for ad in adaylar:
         yol = assets_dizini / "avatar_ai" / f"{ad}.png"
+        if yol.is_file():
+            return yol
+    return None
+
+
+def avatar_gun_yolu(assets_dizini: Path, unvan: str, zaman: str) -> Path | None:
+    """Belirli bir unvan ve zaman dilimi için (ör. cirak_sabah.png)
+    assets/avatar_gun klasöründe görsel varsa yolunu döndürür."""
+    adaylar = []
+    ascii_ad = UNVAN_DOSYA.get(unvan)
+    if ascii_ad is not None:
+        adaylar.append(ascii_ad)
+        if ascii_ad == "makine":
+            adaylar.append("makina")
+    adaylar.append(unvan.lower())
+    for ad in adaylar:
+        yol = assets_dizini / "avatar_gun" / f"{ad}_{zaman}.png"
         if yol.is_file():
             return yol
     return None

@@ -31,6 +31,7 @@ from leveltodo.domain.time.gun import Gun
 from leveltodo.infrastructure.assets.avatar import (
     AvatarOlusturucu,
     ai_avatar_yolu,
+    avatar_gun_yolu,
     avatar_katmanlari,
     kilitli_goruntu,
 )
@@ -260,13 +261,11 @@ class DashboardView(QWidget):
         self._render_gorevler()
 
     def _render_arkaplan(self) -> None:
-        ad = "avatar_" + zaman_dilimi(self._container.saat.simdi().hour)
-        if ad == self._son_arkaplan_ad:
-            return  # zaman dilimi değişmediyse boşuna yeniden çizme
-        self._son_arkaplan_ad = ad
-        if ad not in self._arkaplan_cache:
-            self._arkaplan_cache[ad] = arkaplan_pixmap(paths.assets_dir(), ad)
-        self._avatar_arkaplan.arkaplan_ayarla(self._arkaplan_cache[ad])
+        zaman = zaman_dilimi(self._container.saat.simdi().hour)
+        if hasattr(self, "_son_zaman_dilimi") and zaman == self._son_zaman_dilimi:
+            return
+        self._son_zaman_dilimi = zaman
+        self._avatar_onizleme_ciz()
 
     def _render_seriler(self) -> None:
         giris, _ = self._container.seri.durumlar()[SeriTipi.GIRIS]
@@ -460,10 +459,33 @@ class DashboardView(QWidget):
         indeks = self._onizleme_indeks
         ad, min_lv = liste[indeks]
         kilitli = indeks > mevcut_idx
-        pixmap = self._rank_pixmap(ad, min_lv)
-        if kilitli:
-            pixmap = kilitli_goruntu(pixmap, self._kilit_yolu())
-        self._avatar_label.setPixmap(pixmap)
+        
+        zaman = zaman_dilimi(self._container.saat.simdi().hour)
+        gun_yolu = avatar_gun_yolu(paths.assets_dir(), ad, zaman)
+        
+        if gun_yolu is not None:
+            # Kombine görsel var
+            cache_key = f"{ad}_{zaman}_kombine"
+            if cache_key not in self._pixmap_cache:
+                self._pixmap_cache[cache_key] = QPixmap(str(gun_yolu))
+            
+            pixmap = self._pixmap_cache[cache_key]
+            if kilitli:
+                pixmap = kilitli_goruntu(pixmap, self._kilit_yolu())
+                
+            self._avatar_arkaplan.arkaplan_ayarla(pixmap)
+            self._avatar_label.setPixmap(QPixmap())  # Ön planı temizle
+        else:
+            # Kombine görsel yok, eski usul birleştirme
+            arkaplan_ad = "avatar_" + zaman
+            if arkaplan_ad not in self._arkaplan_cache:
+                self._arkaplan_cache[arkaplan_ad] = arkaplan_pixmap(paths.assets_dir(), arkaplan_ad)
+            self._avatar_arkaplan.arkaplan_ayarla(self._arkaplan_cache[arkaplan_ad])
+            
+            pixmap = self._rank_pixmap(ad, min_lv)
+            if kilitli:
+                pixmap = kilitli_goruntu(pixmap, self._kilit_yolu())
+            self._avatar_label.setPixmap(pixmap)
 
         etiket = f"{ad} · Sv {min_lv}+"
         if kilitli:
