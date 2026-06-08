@@ -88,7 +88,7 @@ class RozetView(QWidget):
         v.setContentsMargins(12, 10, 12, 10)
         v.setSpacing(4)
 
-        rozet_px = ikon("rozet", 18) if kazanildi else None
+        rozet_px = ikon("rozet", 24) if kazanildi else None
         ad_kap = QWidget()
         ad_h = QHBoxLayout(ad_kap)
         ad_h.setContentsMargins(0, 0, 0, 0)

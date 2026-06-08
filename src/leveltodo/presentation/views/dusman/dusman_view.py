@@ -14,6 +14,7 @@ from PyQt6.QtCore import (
     QPropertyAnimation,
     QSize,
     Qt,
+    QTimer,
     pyqtSignal,
 )
 from PyQt6.QtGui import QIcon, QShowEvent
@@ -49,6 +50,7 @@ class DusmanView(QWidget):
         self._odul_efekt: QGraphicsOpacityEffect | None = None
         self._odul_anim: QPropertyAnimation | None = None
         self._son_anahtar: str | None = None
+        self._hazine_modu = False
 
         title = QLabel("Düşman")
         title.setObjectName("Title")
@@ -78,6 +80,20 @@ class DusmanView(QWidget):
         self._sprite.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._sprite.setStyleSheet(_SAYDAM)
 
+        # Düşman devrilince sprite yerine arenada beliren tıklanabilir sandık (hover'da parlar).
+        self._sandik_btn = QPushButton()
+        self._sandik_btn.setObjectName("SandikBtn")
+        self._sandik_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._sandik_btn.setIconSize(QSize(150, 150))
+        self._sandik_btn.setToolTip("Sandığı aç")
+        self._sandik_btn.setStyleSheet(
+            "QPushButton#SandikBtn { background: transparent; border: none; padding: 14px; }"
+            "QPushButton#SandikBtn:hover { background: rgba(255,200,60,0.20);"
+            " border: 2px solid #ffcf57; border-radius: 20px; }"
+        )
+        self._sandik_btn.clicked.connect(self._hazine_ac)
+        self._sandik_btn.hide()
+
         # Uçan hasar sayısı (vuruşta beliren "−N") — arena'nın serbest çocuğu.
         self._hasar_etiketi = QLabel("", self._arena)
         self._hasar_etiketi.setStyleSheet(
@@ -89,6 +105,7 @@ class DusmanView(QWidget):
         arena_l.addLayout(balon_satir)
         arena_l.addStretch(1)
         arena_l.addWidget(self._sprite, alignment=Qt.AlignmentFlag.AlignHCenter)
+        arena_l.addWidget(self._sandik_btn, alignment=Qt.AlignmentFlag.AlignHCenter)
         arena_l.addStretch(1)
 
         # — Ad + tier + can —
@@ -112,20 +129,11 @@ class DusmanView(QWidget):
         vur_satir.addStretch(1)
         vur_satir.addWidget(self._vur_btn)
 
-        # — Hazine (sandık görseli + tıkla-aç) —
-        self._hazine_btn = QPushButton()
-        self._hazine_btn.setMinimumHeight(52)
-        self._hazine_btn.setIcon(QIcon(hazine_resmi(self._assets, acik=False, hedef=44)))
-        self._hazine_btn.setIconSize(QSize(40, 40))
-        self._hazine_btn.clicked.connect(self._hazine_ac)
+        # — Hazineden çıkan ödülün yazısı (sandık arenada; burada metni görünür) —
         self._odul_label = QLabel()
         self._odul_label.setObjectName("Counter")
         self._odul_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._odul_label.setWordWrap(True)
-        hazine_satir = QHBoxLayout()
-        hazine_satir.addStretch(1)
-        hazine_satir.addWidget(self._hazine_btn)
-        hazine_satir.addStretch(1)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
@@ -136,7 +144,6 @@ class DusmanView(QWidget):
         layout.addWidget(self._ad_label)
         layout.addWidget(self._hp_bar)
         layout.addLayout(vur_satir)
-        layout.addLayout(hazine_satir)
         layout.addWidget(self._odul_label)
 
         self.yenile()
@@ -148,11 +155,33 @@ class DusmanView(QWidget):
 
     def yenile(self) -> None:
         self._arena.arkaplan_ayarla(arkaplan_pixmap(self._assets, "dusman_arena"))
+        if self._container.dusman.bekleyen_hazine_sayisi() > 0:
+            self._hazine_moduna_gec()  # açılmamış sandık varsa onu göster
+        else:
+            self._dusman_moduna_gec()
+
+    def _dusman_moduna_gec(self) -> None:
+        """Arenada düşmanı göster; sandığı gizle."""
+        self._hazine_modu = False
+        self._sandik_btn.hide()
+        self._sprite.show()
+        self._hp_bar.show()
+        self._ad_label.show()
         self._yenile_dusman(animasyonsuz=True)
         self._biriken_guncelle()
-        self._hazine_guncelle()
-        if not self._balon.text():
-            self._balon.setText("Hadi bakalım, gücün varsa göster kendini...")
+        self._balon.setText("Hadi bakalım, gücün varsa göster kendini...")
+
+    def _hazine_moduna_gec(self) -> None:
+        """Düşman devrildi: sprite yerine kapalı sandığı arenaya koy, vuruşu kapat."""
+        self._hazine_modu = True
+        self._sprite.hide()
+        self._hp_bar.hide()
+        self._ad_label.hide()
+        self._sandik_btn.setIcon(QIcon(hazine_resmi(self._assets, acik=False, hedef=150)))
+        self._sandik_btn.setEnabled(True)
+        self._sandik_btn.show()
+        self._vur_btn.setEnabled(False)
+        self._balon.setText("Düşman devrildi! Sandığa dokun, içinden ne çıktığına bak.")
 
     def _yenile_dusman(self, *, animasyonsuz: bool = False) -> None:
         dusman, hp, maks, tier = self._container.dusman.durum()
@@ -172,12 +201,6 @@ class DusmanView(QWidget):
         self._vur_btn.setEnabled(biriken > 0)
         if biriken <= 0:
             self._vur_btn.setToolTip("Görev yaptıkça hasar birikir, sonra buradan vurursun.")
-
-    def _hazine_guncelle(self) -> None:
-        adet = self._container.dusman.bekleyen_hazine_sayisi()
-        self._hazine_btn.setVisible(adet > 0)
-        if adet > 0:
-            self._hazine_btn.setText(f"🎁  Hazineyi Aç{f'  (×{adet})' if adet > 1 else ''}")
 
     # — Vuruş —
     def _vur(self) -> None:
@@ -199,9 +222,9 @@ class DusmanView(QWidget):
         self.degisti.emit()
 
     def _devrilme_sonrasi(self) -> None:
-        self._yenile_dusman(animasyonsuz=True)
-        self._hazine_guncelle()
-        self._vur_btn.setEnabled(self._container.dusman.biriken_hasar() > 0)
+        # Düşman devrildi: arenada onun yerine kapalı sandık belirir (vuruş kapanır).
+        self._hazine_moduna_gec()
+        self.degisti.emit()
 
     def _anim_calistir(self, bas: int, son: int, bitince=None) -> None:
         anim = QPropertyAnimation(self._hp_bar, b"value", self)
@@ -256,10 +279,20 @@ class DusmanView(QWidget):
         odul = self._container.dusman.hazine_ac()
         if odul is None:
             return
+        # Sandık açık görsele geçer, içinden çıkan yazılır; birkaç saniye sonra sıradaki gelir.
+        self._sandik_btn.setIcon(QIcon(hazine_resmi(self._assets, acik=True, hedef=150)))
+        self._sandik_btn.setEnabled(False)  # çift tıkı engelle
+        self._balon.setText(odul.mesaj)
         self._odul_label.setText(odul.mesaj)
         self._odul_parlat()
-        self._hazine_guncelle()
         self.degisti.emit()
+        QTimer.singleShot(2600, self._hazine_sonrasi)
+
+    def _hazine_sonrasi(self) -> None:
+        if self._container.dusman.bekleyen_hazine_sayisi() > 0:
+            self._hazine_moduna_gec()  # başka sandık varsa onu göster
+        else:
+            self._dusman_moduna_gec()  # yeni düşman sahneye gelir
 
     def _odul_parlat(self) -> None:
         efekt = QGraphicsOpacityEffect(self._odul_label)

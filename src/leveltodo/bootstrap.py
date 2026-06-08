@@ -31,7 +31,6 @@ from leveltodo.application.seri_servisi import SeriServisi
 from leveltodo.application.settings_service import SettingsService
 from leveltodo.application.stat_servisi import StatServisi
 from leveltodo.application.uyandirma_servisi import UyandirmaServisi
-from leveltodo.domain.events import TaskCompleted
 from leveltodo.domain.sans import Sans
 from leveltodo.domain.time.saat import Saat
 from leveltodo.infrastructure.backup.yedekleme import Yedekleyici, db_dosya_yolu
@@ -90,6 +89,43 @@ class Container:
     magaza: MagazaServisi
 
 
+class HasarliDefter:
+    """XP defteri sarmalayıcı: pozitif XP kaydedildikçe düşmana o kadar 'biriken hasar'
+    ekler. Böylece görev/seans/günlük/irade/rutin/uyandırma — XP veren her eylem düşmana
+    zarar verir. `record` dışındaki tüm çağrılar gerçek deftere geçer (__getattr__).
+    Düşmanın kendi hazine ödülü HAM deftere yazılır (kendini vurmasın diye)."""
+
+    def __init__(self, gercek, dusman) -> None:
+        self._gercek = gercek
+        self._dusman = dusman
+
+    def record(
+        self,
+        *,
+        user_id: str,
+        day,
+        source: str,
+        ref_id,
+        xp: int,
+        points: int,
+        stat=None,
+    ) -> None:
+        self._gercek.record(
+            user_id=user_id,
+            day=day,
+            source=source,
+            ref_id=ref_id,
+            xp=xp,
+            points=points,
+            stat=stat,
+        )
+        if xp > 0:
+            self._dusman.hasar_biriktir(xp)
+
+    def __getattr__(self, ad: str):
+        return getattr(self._gercek, ad)
+
+
 def build_container(
     db_url: str | None = None, saat: Saat | None = None, sans: Sans | None = None
 ) -> Container:
@@ -121,8 +157,9 @@ def build_container(
         defter_repo=defter_repo,
         combo=combo,
     )
-    # Görev tamamlanınca kazanılan XP, düşmana inecek "biriken hasar"a eklenir.
-    olay_hatti.subscribe(TaskCompleted, lambda olay: dusman.hasar_biriktir(olay.xp))
+    # XP veren her eylem (görev/seans/günlük/irade/rutin/uyandırma) düşmana "biriken hasar"
+    # ekler: bu servislere ham defter yerine hasar biriktiren sarmalayıcı verilir.
+    hasarli_defter = HasarliDefter(defter_repo, dusman)
 
     gorev_repo = SqlTaskRepository(session_factory)
     stat = StatServisi(SqlStatRepository(session_factory))
@@ -130,7 +167,7 @@ def build_container(
     seans_repo.acik_seanslari_sil(DEFAULT_USER_ID)  # açılışta yarım kalan seansları temizle
     gorevler = GorevServisi(
         gorev_repo=gorev_repo,
-        defter_repo=defter_repo,
+        defter_repo=hasarli_defter,
         saat=aktif_saat,
         olay_hatti=olay_hatti,
         gun_baslangic_getir=lambda: settings.day_start_hour,
@@ -150,7 +187,7 @@ def build_container(
     irade_repo = SqlIradeRepository(session_factory)
     irade = IradeServisi(
         irade_repo,
-        defter_repo,
+        hasarli_defter,
         aktif_saat,
         lambda: settings.day_start_hour,
         dondurma,
@@ -160,7 +197,7 @@ def build_container(
     rutin_repo = SqlRutinRepository(session_factory)
     rutin = RutinServisi(
         rutin_repo,
-        defter_repo,
+        hasarli_defter,
         aktif_saat,
         lambda: settings.day_start_hour,
         dondurma,
@@ -170,7 +207,7 @@ def build_container(
     gunluk_repo = SqlGunlukRepository(session_factory)
     gunluk = GunlukServisi(
         gunluk_repo,
-        defter_repo,
+        hasarli_defter,
         aktif_saat,
         lambda: settings.day_start_hour,
         dondurma,
@@ -189,7 +226,7 @@ def build_container(
     uyandirma_repo = SqlUyandirmaRepository(session_factory)
     uyandirma = UyandirmaServisi(
         uyandirma_repo,
-        defter_repo,
+        hasarli_defter,
         settings,
         aktif_saat,
         lambda: settings.day_start_hour,

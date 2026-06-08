@@ -93,7 +93,7 @@ def seansli_gorev_satir(
         h.addWidget(ad)
     h.addStretch(1)
     if satir.tekrar != "none":
-        seri_px = seri_ikon(satir.seri, 18)
+        seri_px = seri_ikon(satir.seri, 24)
         if seri_px is not None:
             seri_ik = QLabel()
             seri_ik.setPixmap(seri_px)
@@ -112,11 +112,11 @@ def seansli_gorev_satir(
     if satir.calisiyor:
         btn = QPushButton("Durdur")
         btn.clicked.connect(lambda _c, i=satir.kayit_id: durdur(i))
-        _btn_px = ikon("durdur", 18)
+        _btn_px = ikon("durdur", 22)
     else:
         btn = QPushButton("Başlat")
         btn.clicked.connect(lambda _c, i=satir.kayit_id: baslat(i))
-        _btn_px = ikon("baslat", 18)
+        _btn_px = ikon("baslat", 22)
     if _btn_px is not None:
         btn.setIcon(QIcon(_btn_px))
     h.addWidget(btn)

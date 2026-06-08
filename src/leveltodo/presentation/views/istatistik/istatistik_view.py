@@ -116,7 +116,7 @@ class IstatistikView(QWidget):
         v.setSpacing(4)
         baslik = QLabel("Kişisel rekorlar")
         baslik.setObjectName("Tag")
-        rekor_px = ikon("rekor_sure", 18)
+        rekor_px = ikon("rekor_sure", 24)
         if rekor_px is not None:
             baslik_satiri = QHBoxLayout()
             baslik_satiri.setContentsMargins(0, 0, 0, 0)

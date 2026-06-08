@@ -96,11 +96,11 @@ class DashboardView(QWidget):
         self._points_label = QLabel()
         self._points_label.setObjectName("Counter")
         xp_ikon = QLabel()
-        _xp_px = ikon("xp", 22)
+        _xp_px = ikon("xp", 30)
         if _xp_px is not None:
             xp_ikon.setPixmap(_xp_px)
         puan_ikon = QLabel()
-        _puan_px = ikon("puan", 22)
+        _puan_px = ikon("puan", 30)
         if _puan_px is not None:
             puan_ikon.setPixmap(_puan_px)
         ust = QHBoxLayout()
@@ -121,6 +121,7 @@ class DashboardView(QWidget):
 
         self._giris_seri_ikon = QLabel()
         self._giris_seri_label = QLabel()
+        self._dondurma_ikon = QLabel()
         self._dondurma_label = QLabel()
         self._combo_ikon = QLabel()
         self._combo_label = QLabel()
@@ -128,6 +129,7 @@ class DashboardView(QWidget):
         seri_satiri.addWidget(self._giris_seri_ikon)
         seri_satiri.addWidget(self._giris_seri_label)
         seri_satiri.addSpacing(20)
+        seri_satiri.addWidget(self._dondurma_ikon)
         seri_satiri.addWidget(self._dondurma_label)
         seri_satiri.addSpacing(20)
         seri_satiri.addWidget(self._combo_ikon)
@@ -268,8 +270,8 @@ class DashboardView(QWidget):
 
     def _render(self) -> None:
         xp, puan = self._vm.toplamlar()
-        self._xp_label.setText(str(xp) if ikon("xp", 22) is not None else f"XP  {xp}")
-        self._points_label.setText(str(puan) if ikon("puan", 22) is not None else f"Puan  {puan}")
+        self._xp_label.setText(str(xp) if ikon("xp", 30) is not None else f"XP  {xp}")
+        self._points_label.setText(str(puan) if ikon("puan", 30) is not None else f"Puan  {puan}")
 
         self._render_arkaplan()
         self._render_profil_ve_statlar()
@@ -285,7 +287,7 @@ class DashboardView(QWidget):
 
     def _render_seriler(self) -> None:
         giris, _ = self._container.seri.durumlar()[SeriTipi.GIRIS]
-        seri_px = seri_ikon(giris, 24)
+        seri_px = seri_ikon(giris, 34)
         if seri_px is not None:
             self._giris_seri_ikon.setPixmap(seri_px)
             self._giris_seri_label.setText(f"Giriş serisi: {giris} gün")
@@ -293,12 +295,18 @@ class DashboardView(QWidget):
             self._giris_seri_ikon.clear()
             self._giris_seri_label.setText(f"🔥 Giriş serisi: {giris} gün")
         self._giris_seri_label.setStyleSheet(f"color: {seri_rengi(giris)}; font-weight: bold;")
-        self._dondurma_label.setText(f"❄ Dondurma: {self._container.dondurma.stok()}")
+        dond_px = ikon("dondurma", 28)
+        if dond_px is not None:
+            self._dondurma_ikon.setPixmap(dond_px)
+            self._dondurma_label.setText(f"Dondurma: {self._container.dondurma.stok()}")
+        else:
+            self._dondurma_ikon.clear()
+            self._dondurma_label.setText(f"❄ Dondurma: {self._container.dondurma.stok()}")
 
         simdi = self._container.saat.simdi()
         if self._container.combo.aktif_mi(simdi):
             kalan = self._container.combo.kalan_dakika(simdi)
-            combo_px = ikon("combo", 20)
+            combo_px = ikon("combo", 28)
             if combo_px is not None:
                 self._combo_ikon.setPixmap(combo_px)
                 self._combo_label.setText(f"Combo ×1.5 ({kalan} dk)")
@@ -418,7 +426,7 @@ class DashboardView(QWidget):
         baslik = QLabel(ozet.baslik)
         aciklama = QLabel(_tekrar_aciklama(ozet.tekrar, ozet.parametre))
         aciklama.setObjectName("Tag")
-        seri_px = seri_ikon(ozet.seri, 18)
+        seri_px = seri_ikon(ozet.seri, 24)
         seri = QLabel(str(ozet.seri) if seri_px is not None else f"🔥 {ozet.seri}")
         seri.setStyleSheet(f"color: {seri_rengi(ozet.seri)}; font-weight: bold;")
 

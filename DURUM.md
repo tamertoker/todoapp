@@ -149,6 +149,19 @@ statlar tam stat (profile katılır); etiket grafiği = etiket başına SÜRE; a
 
 ### KULLANICININ 4 İSTEĞİ TAMAM (#1 stat, #2 etiket, #3 seans, #4 etiket-grafik).
 
+## Düşman/hazine + XP→hasar + ikon boyutu (kullanıcı isteği)
+- **Hazine akışı yeniden**: düşman devrilince arenada sprite yerine **kapalı sandık**
+  (`_sandik_btn`, hover'da altın parıltı) belirir; tıklayınca **açık sandık** görseline geçer +
+  içinden çıkan yazılır (balon+odul_label), **2.6 sn sonra** sıradaki düşman (veya bekleyen başka
+  sandık) gelir. Eski alttaki "Hazineyi Aç" butonu kaldırıldı. (`dusman_view.py`; assets/treasure
+  sandik_kapali/acik.png).
+- **XP veren her eylem düşmana zarar verir**: bootstrap'a `HasarliDefter` sarmalayıcı eklendi;
+  görev/seans/günlük/irade/rutin/uyandırma'ya ham defter yerine bu verildi → pozitif XP'de
+  `dusman.hasar_biriktir`. Düşman/mağaza/istatistik/mentor HAM defter (hazine ödülü kendini
+  vurmasın). Eski `TaskCompleted→hasar` aboneliği kaldırıldı (çift sayma yok). test eklendi.
+- **İkon boyutları büyütüldü** (çok küçüktü): XP/Puan 30, giriş-seri 34, combo 28, dondurma 28,
+  per-görev seri 24, Başlat/Durdur 22, başlık ikonları 32, rozet/rekor 24. dondurma.png bağlandı.
+
 ## İşlevsel iyileştirmeler (kullanıcı sırası: önce işlevsel, sonra facelift, en son asset)
 - **Açık uçlar**: (a) görev silme düğmesi **"Sil"** (kullanıcı isteğiyle "Arşivle" denemesi geri
   alındı — kafa karıştırdı; düğme soft-deactivate, geçmiş korunur). **"Bitir" düğmesi GERİ

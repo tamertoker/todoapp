@@ -107,3 +107,12 @@ def test_gorev_tamamlama_biriken_hasara_eklenir(db_url):
 
     c.dusman.vur()
     assert c.dusman.durum()[1] == 80  # 100 - 20
+
+
+def test_gunluk_doldurmak_da_biriken_hasara_eklenir(db_url):
+    # XP veren her eylem düşmana zarar verir: görev dışında günlük de hasar biriktirmeli.
+    saat = SahteSaat(datetime(2026, 6, 1, 10, 0))
+    c = build_container(db_url=db_url, saat=saat)
+    assert c.dusman.biriken_hasar() == 0
+    c.gunluk.kaydet("Bugün iyiydi.")  # Farkındalık XP → düşmana biriken hasar
+    assert c.dusman.biriken_hasar() == hasar(40)  # günlük taban ödülü 40 XP

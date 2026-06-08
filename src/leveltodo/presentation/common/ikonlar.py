@@ -77,7 +77,7 @@ def uygulama_ikonu() -> QIcon | None:
     return None
 
 
-def ikonlu_baslik(metin: str, ikon_ad: str, ikon_boy: int = 28) -> QWidget:
+def ikonlu_baslik(metin: str, ikon_ad: str, ikon_boy: int = 32) -> QWidget:
     """Sol başta ikon, yanında "Title" stilli başlık olan satır. İkon yoksa sadece başlık."""
     kap = QWidget()
     h = QHBoxLayout(kap)
