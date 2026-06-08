@@ -1,17 +1,14 @@
 import json
-import os
 
-batches_file = r'C:\Users\tamer\Desktop\todoapp\todoapp\.understand-anything\intermediate\batches.json'
-
-with open(batches_file, 'r', encoding='utf-8') as f:
+with open(".understand-anything/intermediate/batches.json", "r") as f:
     data = json.load(f)
 
-target_batches = [36, 37, 38, 39, 40, 41, 42]
-result = {}
+batches_to_extract = [1, 2, 3, 4]
+extracted = {}
 
-for batch in data['batches']:
-    idx = batch['batchIndex']
-    if idx in target_batches:
-        result[idx] = [f['path'] for f in batch['files'] if f['path'].endswith('.py')]
+for batch in data.get("batches", []):
+    idx = batch.get("batchIndex")
+    if idx in batches_to_extract:
+        extracted[idx] = [f["path"] for f in batch.get("files", [])]
 
-print(json.dumps(result, indent=2))
+print(json.dumps(extracted, indent=2))
