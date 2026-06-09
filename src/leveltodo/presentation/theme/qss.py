@@ -100,12 +100,16 @@ def build_qss(palette: Palette, font_family: str, up_arrow: str, down_arrow: str
         border: 2px solid {p.accent};
     }}
     QPushButton#NavButton {{
-        background-color: transparent;
+        background-color: {p.panel};
         text-align: left;
         border: none;
         border-left: 4px solid transparent;
+        border-bottom: 1px solid {p.border};
         font-weight: normal;
-        padding: 6px 10px;
+        font-size: 15px;
+        padding: 11px 14px;
+        margin: 2px 0;
+        min-width: 150px;
     }}
     QPushButton#NavButton:hover {{
         color: {p.accent};
@@ -114,7 +118,8 @@ def build_qss(palette: Palette, font_family: str, up_arrow: str, down_arrow: str
     QPushButton#NavButton:checked {{
         border-left: 4px solid {p.accent};
         color: {p.accent};
-        background-color: {p.panel};
+        background-color: {p.bg};
+        font-weight: bold;
     }}
     QPushButton#Expander {{
         font-weight: bold;

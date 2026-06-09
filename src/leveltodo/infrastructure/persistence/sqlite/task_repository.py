@@ -33,6 +33,7 @@ class SqlTaskRepository:
         created_at: datetime,
         tag_id: str | None = None,
         reminder: str | None = None,
+        hedef_sure: int | None = None,
     ) -> None:
         with self._sf() as s:
             s.add(
@@ -47,6 +48,7 @@ class SqlTaskRepository:
                     created_at=created_at,
                     tag_id=tag_id,
                     reminder=reminder,
+                    hedef_sure=hedef_sure,
                 )
             )
             s.commit()
@@ -110,22 +112,56 @@ class SqlTaskRepository:
 
     def today_rows(
         self, user_id: str, day: date
-    ) -> list[tuple[TaskInstance, str, int, str | None, str | None]]:
+    ) -> list[tuple[TaskInstance, str, int, str | None, str | None, int | None]]:
         """Bugünün listesi. Her satır (kayıt, tekrar-tipi, seri, etiket-ad, etiket-renk)."""
         with self._sf() as s:
             stmt = (
-                select(TaskInstance, Task.recurrence, Task.streak_count, Tag.name, Tag.color)
+                select(
+                    TaskInstance,
+                    Task.recurrence,
+                    Task.streak_count,
+                    Tag.name,
+                    Tag.color,
+                    Task.hedef_sure,
+                )
                 .join(Task, Task.id == TaskInstance.task_id)
                 .outerjoin(Tag, Tag.id == Task.tag_id)
                 .where(
                     TaskInstance.user_id == user_id,
                     Task.is_active.is_(True),
+                    TaskInstance.status == "pending",  # bitenler ayrı 'Tamamlananlar' bölümüne
                     or_(
                         and_(Task.recurrence != "none", TaskInstance.day == day),
-                        and_(Task.recurrence == "none", TaskInstance.status == "pending"),
+                        Task.recurrence == "none",
                     ),
                 )
-                .order_by(TaskInstance.status.desc(), TaskInstance.title)
+                .order_by(TaskInstance.title)
+            )
+            return [tuple(satir) for satir in s.execute(stmt).all()]
+
+    def bugun_tamamlananlar(
+        self, user_id: str, day: date
+    ) -> list[tuple[TaskInstance, str, int, str | None, str | None, int | None]]:
+        """Bugün tamamlanan görev oluşumları — 'Tamamlananlar' bölümü için."""
+        with self._sf() as s:
+            stmt = (
+                select(
+                    TaskInstance,
+                    Task.recurrence,
+                    Task.streak_count,
+                    Tag.name,
+                    Tag.color,
+                    Task.hedef_sure,
+                )
+                .join(Task, Task.id == TaskInstance.task_id)
+                .outerjoin(Tag, Tag.id == Task.tag_id)
+                .where(
+                    TaskInstance.user_id == user_id,
+                    TaskInstance.day == day,
+                    TaskInstance.status == "done",
+                    Task.is_active.is_(True),
+                )
+                .order_by(TaskInstance.completed_at.desc())
             )
             return [tuple(satir) for satir in s.execute(stmt).all()]
 
@@ -145,6 +181,23 @@ class SqlTaskRepository:
                 task.streak_last_day = son_gun
                 s.commit()
 
+    def gun_ilerleme(self, user_id: str, day: date) -> tuple[int, int]:
+        """(bugün tamamlanan, bugün toplam) — yalnızca silinmemiş (aktif) görevler sayılır."""
+        with self._sf() as s:
+            taban = (
+                select(func.count())
+                .select_from(TaskInstance)
+                .join(Task, Task.id == TaskInstance.task_id)
+                .where(
+                    TaskInstance.user_id == user_id,
+                    TaskInstance.day == day,
+                    Task.is_active.is_(True),
+                )
+            )
+            toplam = s.scalar(taban) or 0
+            biten = s.scalar(taban.where(TaskInstance.status == "done")) or 0
+            return int(biten), int(toplam)
+
     # — Telafi (catchup) —
     def done_instance_var_mi(self, task_id: str, day: date) -> bool:
         with self._sf() as s:
@@ -157,11 +210,18 @@ class SqlTaskRepository:
 
     def gecmis_bekleyen_satirlar(
         self, user_id: str, bugun: date, pencere_basi: date
-    ) -> list[tuple[TaskInstance, str, int, str | None, str | None]]:
+    ) -> list[tuple[TaskInstance, str, int, str | None, str | None, int | None]]:
         """Geçmiş günlere ait, henüz yapılmamış tekrarlı görev kayıtları (telafi)."""
         with self._sf() as s:
             stmt = (
-                select(TaskInstance, Task.recurrence, Task.streak_count, Tag.name, Tag.color)
+                select(
+                    TaskInstance,
+                    Task.recurrence,
+                    Task.streak_count,
+                    Tag.name,
+                    Tag.color,
+                    Task.hedef_sure,
+                )
                 .join(Task, Task.id == TaskInstance.task_id)
                 .outerjoin(Tag, Tag.id == Task.tag_id)
                 .where(

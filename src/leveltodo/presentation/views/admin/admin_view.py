@@ -1,8 +1,8 @@
-"""Debug / Admin menüsü — yalnızca geliştirme ve test için.
+"""debug menusu, yalnizca gelistirme icin.
 
-Tarihi ileri/geri kaydırarak tekrarlı görevleri, ve statlara doğrudan XP
-ekleyerek seviye/avatar/unvan evrimini elle deneyebilirsin. Değişiklikten sonra
-'degisti' sinyali yayılır; ana ekran kendini tazeler.
+tarihi ileri geri alarak tekrarli gorevleri, statlara dogrudan xp ekleyerek
+seviye/avatar/unvan evrimini elle deneyebilirsin. degisiklikten sonra degisti
+sinyali yayilir, ana ekran kendini tazeler.
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ class AdminView(QWidget):
 
         title = QLabel("Debug / Admin")
         title.setObjectName("Title")
-        uyari = QLabel("Sadece geliştirme/test için: tarihi ve stat XP'sini elle değiştir.")
+        uyari = QLabel("Sadece geliştirme için: tarihi ve stat XP'sini elle değiştir.")
         uyari.setObjectName("Subtitle")
 
         self._gun_label = QLabel()
@@ -64,10 +64,20 @@ class AdminView(QWidget):
         xp_satiri.addWidget(xp_btn)
         xp_satiri.addStretch(1)
 
+        # Zaman dilimine atla — avatar arka planı saate göre değişir; burada deneyebilirsin.
+        zaman_bandlari = (("Sabah", 8), ("Öğle", 12), ("İkindi", 16), ("Akşam", 20), ("Gece", 23))
+        zaman_satiri = QHBoxLayout()
+        for etiket, saat in zaman_bandlari:
+            b = QPushButton(etiket)
+            b.clicked.connect(lambda _c, s=saat: self._zamana_atla(s))
+            zaman_satiri.addWidget(b)
+        zaman_satiri.addStretch(1)
+        self._zaman_satiri = zaman_satiri
+
         self._dondurma_btn = QPushButton("+1 Dondurma jetonu")
         self._dondurma_btn.clicked.connect(self._dondurma_ekle)
 
-        test_bildirim_btn = QPushButton("Test bildirimi gönder")
+        test_bildirim_btn = QPushButton("Bildirim dene")
         test_bildirim_btn.clicked.connect(self._test_bildirim)
         mentor_btn = QPushButton("Mentor/kışkırtma kontrolünü çalıştır")
         mentor_btn.clicked.connect(self._mentor_calistir)
@@ -86,11 +96,13 @@ class AdminView(QWidget):
         layout.addWidget(QLabel("Tarih"))
         layout.addWidget(self._gun_label)
         layout.addLayout(tarih_satiri)
-        layout.addWidget(QLabel("Stat XP ekle (seviye/avatar/unvan testi)"))
+        layout.addWidget(QLabel("Zaman dilimi (avatar arka planı)"))
+        layout.addLayout(self._zaman_satiri)
+        layout.addWidget(QLabel("Stat XP ekle (seviye/avatar/unvan)"))
         layout.addLayout(xp_satiri)
         layout.addWidget(QLabel("Seri dondurma"))
         layout.addWidget(self._dondurma_btn)
-        layout.addWidget(QLabel("Bildirim testi"))
+        layout.addWidget(QLabel("Bildirim denemesi"))
         layout.addLayout(bildirim_satiri)
         layout.addWidget(self._bildirim_sonuc)
         layout.addStretch(1)
@@ -111,16 +123,22 @@ class AdminView(QWidget):
         self._gun_guncelle()
         self.degisti.emit()
 
+    def _zamana_atla(self, saat: int) -> None:
+        if hasattr(self._container.saat, "saate_atla"):
+            self._container.saat.saate_atla(saat)
+        self._gun_guncelle()
+        self.degisti.emit()  # ana ekran tazelenir → avatar arka planı yeni zamana göre çizilir
+
     def _test_bildirim(self) -> None:
         # 1) Kuralları atlayarak doğrudan göster (mekanizma çalışıyor mu?).
         self._container.bildirim.kanallara_gonder(
             BildirimKategori.KUTLAMA,
-            "Test bildirimi (zorla)",
+            "Bildirim (zorla)",
             "Bunu gördüysen bildirim mekanizması çalışıyor.",
         )
         # 2) Normal yoldan dene (kurallar bastırıyor mu?).
         kurala_gore = self._container.bildirim.bildir(
-            BildirimKategori.KUTLAMA, "Test (kurallı)", "Normal yoldan."
+            BildirimKategori.KUTLAMA, "Deneme (kurallı)", "Normal yoldan."
         )
         if kurala_gore:
             self._bildirim_sonuc.setText(

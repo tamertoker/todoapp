@@ -12,11 +12,11 @@ from collections.abc import Callable
 from datetime import datetime
 
 from PyQt6.QtCore import QTime
-from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
+    QProgressBar,
     QPushButton,
     QTimeEdit,
     QVBoxLayout,
@@ -25,7 +25,7 @@ from PyQt6.QtWidgets import (
 
 from leveltodo.application.gorev_servisi import GorevSatiri, SeansSatiri
 from leveltodo.domain.streaks.seriler import seri_rengi
-from leveltodo.presentation.common.ikonlar import ikon, seri_ikon
+from leveltodo.presentation.common.ikonlar import seri_ikon
 from leveltodo.presentation.views.dashboard.gorev_satir_widget import (
     format_sure,
     satir_canli_saniye,
@@ -52,6 +52,7 @@ def seansli_gorev_satir(
     *,
     simdi: datetime,
     sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]],
+    ilerleme_barlari: dict[str, tuple[QProgressBar, GorevSatiri]] | None = None,
     seanslar: list[SeansSatiri],
     baslat: Callable[[str], None],
     durdur: Callable[[str], None],
@@ -112,13 +113,9 @@ def seansli_gorev_satir(
     if satir.calisiyor:
         btn = QPushButton("Durdur")
         btn.clicked.connect(lambda _c, i=satir.kayit_id: durdur(i))
-        _btn_px = ikon("durdur", 22)
     else:
         btn = QPushButton("Başlat")
         btn.clicked.connect(lambda _c, i=satir.kayit_id: baslat(i))
-        _btn_px = ikon("baslat", 22)
-    if _btn_px is not None:
-        btn.setIcon(QIcon(_btn_px))
     h.addWidget(btn)
     bitir_btn = QPushButton("Bitir")
     bitir_btn.setToolTip(
@@ -130,6 +127,20 @@ def seansli_gorev_satir(
     sil_btn.setToolTip("Görevi listeden kaldırır; geçmiş süre/istatistikler korunur.")
     sil_btn.clicked.connect(lambda _c, i=satir.kayit_id: sil(i))
     h.addWidget(sil_btn)
+
+    # Hedef süre verilmişse görev satırının ÜSTÜNDE mikro ilerleme barı (silik metinli).
+    if satir.hedef_sure:
+        bar = QProgressBar()
+        bar.setObjectName("MikroBar")
+        bar.setTextVisible(True)
+        bar.setMaximumHeight(14)
+        bar.setMaximum(max(1, satir.hedef_sure))
+        calisilan = satir_canli_saniye(satir, simdi)
+        bar.setValue(min(calisilan, satir.hedef_sure))
+        bar.setFormat(f"{format_sure(calisilan)} / {format_sure(satir.hedef_sure)}")
+        v.addWidget(bar)
+        if ilerleme_barlari is not None:
+            ilerleme_barlari[satir.kayit_id] = (bar, satir)
     v.addWidget(header)
 
     alt = QWidget()

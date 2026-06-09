@@ -6,7 +6,7 @@ Ekran ile ayar deposu arasındaki katman. Görevleri:
 - Sık okunan ayarlar için küçük bir bellek-içi kopya (cache) tutmak.
 
 Depo (repository) detaylarını bilmez; sadece ISettingsRepository sözleşmesini
-kullanır. Bu yüzden saf, test edilebilir application kodudur.
+kullanır. Bu yüzden saf application kodudur.
 """
 
 from __future__ import annotations
@@ -42,12 +42,14 @@ DEFAULTS: dict[str, Any] = {
     "bildirim_sessiz_baslangic": 23,
     "bildirim_sessiz_bitis": 7,
     "mentor_son_durtme_gun": "",
+    "mentor_aksam_gorev_gun": "",
     "dusman_son_kiskirtma_gun": "",
     "amnesti_son_uyari_gun": "",
     "uyandirma_hedef": "07:00",
     "ses_acik": True,
     "ses_duzeyi": 70,
-    "font": "Pixelify Sans",
+    "font": "Geo",
+    "imlec": "mavi.png",  # ozel imlec dosyasi (assets/cursors/); bos birakilirsa sistem imleci
     "tasarruf_hedefi": 0,  # kuruş, aylık
     "harcama_butcesi": 0,  # kuruş, aylık
 }

@@ -37,6 +37,8 @@ from leveltodo.presentation.common.arkaplan import ArkaplanCerceve, arkaplan_pix
 
 _SAYDAM = "background: transparent;"
 _TABAN_BOYUT = 150  # tier 0 düşman sprite kenarı (px); boyut çarpanıyla büyür
+# Bazı karakterlerin sprite'ı görsel olarak küçük kalıyor; ekranda dengelemek için ek çarpan.
+_KARAKTER_OLCEK: dict[str, float] = {"karanlik_erteleme": 1.4}
 
 
 class DusmanView(QWidget):
@@ -185,11 +187,12 @@ class DusmanView(QWidget):
 
     def _yenile_dusman(self, *, animasyonsuz: bool = False) -> None:
         dusman, hp, maks, tier = self._container.dusman.durum()
-        hedef = round(_TABAN_BOYUT * boyut_carpani(tier))
+        olcek = _KARAKTER_OLCEK.get(dusman.anahtar, 1.0)
+        hedef = round(_TABAN_BOYUT * boyut_carpani(tier) * olcek)
         if self._son_anahtar != dusman.anahtar or animasyonsuz:
             self._son_anahtar = dusman.anahtar
         self._sprite.setPixmap(dusman_resmi(self._assets, dusman.anahtar, hedef))
-        self._ad_label.setText(f"🗡  {dusman.ad}  ·  Seviye {tier + 1}")
+        self._ad_label.setText(f"{dusman.ad}  ·  Seviye {tier + 1}")
         self._hp_bar.setMaximum(max(1, maks))
         if animasyonsuz:
             self._hp_bar.setValue(max(0, hp))

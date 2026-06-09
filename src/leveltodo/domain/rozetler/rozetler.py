@@ -1,4 +1,4 @@
-"""Rozet (badge) tanımları ve koşulları — saf, test edilebilir.
+"""Rozet (badge) tanımları ve koşulları — saf.
 
 Her rozetin bir koşulu var; kullanıcının o anki durumuna (RozetDurumu) bakılarak
 kazanılıp kazanılmadığı belirlenir.

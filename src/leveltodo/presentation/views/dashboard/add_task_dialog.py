@@ -81,6 +81,12 @@ class AddTaskDialog(QDialog):
         self._hatirlatma.setEnabled(False)
         self._hatirlatma_check.toggled.connect(self._hatirlatma.setEnabled)
 
+        # Hedef çalışma süresi (dakika; 0 = hedef yok). Görev satırında ilerleme barı olur.
+        self._hedef_sure = QSpinBox()
+        self._hedef_sure.setRange(0, 100000)
+        self._hedef_sure.setSuffix(" dk")
+        self._hedef_sure.setSpecialValueText("Hedef yok")
+
         self._warning = QLabel()
         self._warning.setStyleSheet("color: #ff6b6b;")
         self._warning.setVisible(False)
@@ -107,6 +113,8 @@ class AddTaskDialog(QDialog):
         layout.addWidget(self._etiket_combo)
         layout.addWidget(self._hatirlatma_check)
         layout.addWidget(self._hatirlatma)
+        layout.addWidget(QLabel("Hedef çalışma süresi (ilerleme barı için)"))
+        layout.addWidget(self._hedef_sure)
         layout.addWidget(self._warning)
         layout.addWidget(buttons)
 
@@ -227,6 +235,8 @@ class AddTaskDialog(QDialog):
             tidx = self._etiket_combo.findData(sablon.tag_id)
             if tidx >= 0:
                 self._etiket_combo.setCurrentIndex(tidx)
+        if getattr(sablon, "hedef_sure", None):
+            self._hedef_sure.setValue(sablon.hedef_sure // 60)
         self._param_goster()
 
     def accept(self) -> None:
@@ -247,7 +257,7 @@ class AddTaskDialog(QDialog):
 
     def result_values(
         self,
-    ) -> tuple[str, Tekrar, str, int | None, str | None, str | None, str | None]:
+    ) -> tuple[str, Tekrar, str, int | None, str | None, str | None, str | None, int | None]:
         tekrar = self._tekrar.currentData()
         if tekrar is Tekrar.HER_X_GUN:
             parametre = str(self._x_spin.value())
@@ -266,6 +276,7 @@ class AddTaskDialog(QDialog):
         hatirlatma = None
         if self._hatirlatma_check.isChecked():
             hatirlatma = self._hatirlatma.time().toString("HH:mm")
+        hedef_sure = self._hedef_sure.value() * 60 if self._hedef_sure.value() > 0 else None
         return (
             self._title.text().strip(),
             tekrar,
@@ -274,4 +285,5 @@ class AddTaskDialog(QDialog):
             stat_key,
             tag_id,
             hatirlatma,
+            hedef_sure,
         )

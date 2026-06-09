@@ -19,6 +19,7 @@ class ComboServisi:
     GEREKEN = 3  # bu kadar görev
     MIN_SANIYE = 600  # her biri en az 10 dk kronometre
     SURE_DK = 60  # combo aktif kalma süresi
+    MAKS_DK = 120  # makul üst sınır (hazine combo'su en fazla bu kadar); üstü bayat sayılır
     CARPAN = 1.5
 
     def __init__(self, settings: SettingsService) -> None:
@@ -26,7 +27,12 @@ class ComboServisi:
 
     def aktif_mi(self, simdi: datetime) -> bool:
         bitis = self._settings.get(self.BITIS)
-        return bool(bitis) and simdi < datetime.fromisoformat(bitis)
+        if not bitis:
+            return False
+        kalan = (datetime.fromisoformat(bitis) - simdi).total_seconds()
+        # 0 < kalan <= üst sınır: gerçek combo. Çok büyük kalan = bayat kayıt
+        # (ör. debug'da saat ileri kaydırılıp combo başlamış); aktif sayma.
+        return 0 < kalan <= self.MAKS_DK * 60
 
     def carpan(self, simdi: datetime) -> float:
         return self.CARPAN if self.aktif_mi(simdi) else 1.0

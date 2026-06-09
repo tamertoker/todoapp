@@ -55,6 +55,7 @@ class GorevSatiri:
     odul_puan: int | None
     etiket_ad: str | None = None
     etiket_renk: str | None = None
+    hedef_sure: int | None = None  # hedef çalışma süresi (saniye); mikro ilerleme barı
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,6 +126,7 @@ class GorevServisi:
         parametre: str = "",
         tag_id: str | None = None,
         reminder: str | None = None,
+        hedef_sure: int | None = None,
     ) -> str:
         gorev_id = new_id()
         self._gorev.add_template(
@@ -138,6 +140,7 @@ class GorevServisi:
             created_at=self._saat.simdi(),
             tag_id=tag_id,
             reminder=reminder,
+            hedef_sure=hedef_sure,
         )
         if tekrar is Tekrar.YOK:
             self._gorev.add_instance(
@@ -168,9 +171,41 @@ class GorevServisi:
                 odul_puan=kayit.reward_points,
                 etiket_ad=etiket_ad,
                 etiket_renk=etiket_renk,
+                hedef_sure=hedef_sure,
             )
-            for kayit, tekrar, seri, etiket_ad, etiket_renk in satirlar
+            for kayit, tekrar, seri, etiket_ad, etiket_renk, hedef_sure in satirlar
         ]
+
+    def bugun_tamamlanan_gorevler(self) -> list[GorevSatiri]:
+        """Bugün tamamlanan görevler (Tamamlananlar bölümünde silik gösterilir)."""
+        gun = self._bugun()
+        return [
+            GorevSatiri(
+                kayit_id=kayit.id,
+                gun=kayit.day,
+                baslik=kayit.title,
+                durum=kayit.status,
+                tekrar=tekrar,
+                seri=seri,
+                calisilan_saniye=kayit.committed_seconds,
+                calisiyor=kayit.timer_running,
+                segment_baslangici=kayit.segment_started_at,
+                odul_xp=kayit.reward_xp,
+                odul_puan=kayit.reward_points,
+                etiket_ad=etiket_ad,
+                etiket_renk=etiket_renk,
+                hedef_sure=hedef_sure,
+            )
+            for kayit, tekrar, seri, etiket_ad, etiket_renk, hedef_sure in (
+                self._gorev.bugun_tamamlananlar(self._user_id, gun)
+            )
+        ]
+
+    def gun_gorev_ilerleme(self) -> tuple[int, int]:
+        """Bugünün görev ilerlemesi: (tamamlanan, toplam). Makro ilerleme barı için."""
+        gun = self._bugun()
+        self._gunluk_kayitlari_uret(gun)
+        return self._gorev.gun_ilerleme(self._user_id, gun)
 
     def tum_tekrarli_gorevler(self) -> list[TekrarliGorevOzeti]:
         """'Tümü' görünümü: bugün görünmeyenler dahil tüm tekrarlı görevler."""
@@ -235,8 +270,9 @@ class GorevServisi:
                 odul_puan=kayit.reward_points,
                 etiket_ad=etiket_ad,
                 etiket_renk=etiket_renk,
+                hedef_sure=hedef_sure,
             )
-            for kayit, tekrar, seri, etiket_ad, etiket_renk in satirlar
+            for kayit, tekrar, seri, etiket_ad, etiket_renk, hedef_sure in satirlar
         ]
 
     def baslik_onerileri(self) -> list[str]:

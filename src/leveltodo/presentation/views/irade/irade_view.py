@@ -7,7 +7,7 @@ Altta son eylemlerin listesi görünür.
 
 from __future__ import annotations
 
-from PyQt6.QtCore import QTime, pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (
     QFrame,
@@ -17,7 +17,6 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSpinBox,
-    QTimeEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -29,10 +28,9 @@ from leveltodo.presentation.common.autofill import AutoFill
 class IradeView(QWidget):
     degisti = pyqtSignal()
 
-    def __init__(self, container: Container, ses=None) -> None:
+    def __init__(self, container: Container) -> None:
         super().__init__()
         self._container = container
-        self._ses = ses
 
         title = QLabel("İrade")
         title.setObjectName("Title")
@@ -70,65 +68,11 @@ class IradeView(QWidget):
         layout.setSpacing(10)
         layout.addWidget(title)
         layout.addWidget(bilgi)
-        layout.addWidget(self._uyandirma_karti())
         layout.addLayout(form)
         layout.addWidget(QLabel("Son irade eylemlerin"))
         layout.addWidget(scroll, stretch=1)
 
         self.yenile()
-
-    def _uyandirma_karti(self) -> QFrame:
-        frame = QFrame()
-        frame.setObjectName("TaskRow")
-        h = QHBoxLayout(frame)
-        h.setContentsMargins(12, 8, 12, 8)
-        h.setSpacing(8)
-        h.addWidget(QLabel("Uyandırma disiplini"))
-        h.addWidget(QLabel("Hedef:"))
-        self._hedef_edit = QTimeEdit()
-        self._hedef_edit.setDisplayFormat("HH:mm")
-        self._hedef_edit.setTime(self._saat_parse(self._container.uyandirma.hedef))
-        self._hedef_edit.timeChanged.connect(self._hedef_kaydet)
-        h.addWidget(self._hedef_edit)
-        h.addWidget(QLabel("Kalkış:"))
-        self._kalkis_edit = QTimeEdit()
-        self._kalkis_edit.setDisplayFormat("HH:mm")
-        self._kalkis_edit.setTime(QTime.currentTime())
-        h.addWidget(self._kalkis_edit)
-        kalktim_btn = QPushButton("Kalktım")
-        kalktim_btn.clicked.connect(self._kalktim)
-        h.addWidget(kalktim_btn)
-        self._uyanma_sonuc = QLabel()
-        self._uyanma_sonuc.setObjectName("Tag")
-        h.addWidget(self._uyanma_sonuc, stretch=1)
-        return frame
-
-    def _saat_parse(self, hhmm: str) -> QTime:
-        try:
-            saat, dakika = hhmm.split(":")
-            return QTime(int(saat), int(dakika))
-        except (ValueError, AttributeError):
-            return QTime(7, 0)
-
-    def _hedef_kaydet(self, t: QTime) -> None:
-        self._container.uyandirma.hedef_ayarla(t.toString("HH:mm"))
-
-    def _kalktim(self) -> None:
-        gercek = self._kalkis_edit.time().toString("HH:mm")
-        basarili = self._container.uyandirma.kalktim(gercek)
-        if not basarili and self._ses is not None:
-            self._ses.cal("hata")  # geç kalkış: başarısızlık anı
-        self._uyanma_yenile()
-        self.degisti.emit()
-
-    def _uyanma_yenile(self) -> None:
-        kayit = self._container.uyandirma.bugun_kaydi()
-        if kayit is None:
-            self._uyanma_sonuc.setText("Bugün henüz kalkmadın.")
-        elif kayit.basarili:
-            self._uyanma_sonuc.setText(f"Bugün {kayit.gercek} — zamanında ✓ (+Disiplin)")
-        else:
-            self._uyanma_sonuc.setText(f"Bugün {kayit.gercek} — geç kalkıldı")
 
     def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
@@ -140,7 +84,6 @@ class IradeView(QWidget):
             self._xp.setValue(eylem.xp)
 
     def yenile(self) -> None:
-        self._uyanma_yenile()
         self._baslik_af.yenile()
         while self._liste_layout.count():
             item = self._liste_layout.takeAt(0)

@@ -12,6 +12,7 @@ geçici bir klasöre yönlendirilebilir; böylece gerçek verilere dokunulmaz.
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 from platformdirs import user_data_dir
@@ -41,8 +42,11 @@ def logs_dir() -> Path:
 
 
 def assets_dir() -> Path:
-    """Görsel/ses dosyalarının (Mana Seed sprite'ları vb.) bulunduğu klasör."""
+    """gorsel ve ses dosyalarinin bulundugu klasor."""
     override = os.environ.get("LEVELTODO_ASSETS_DIR")
     if override:
         return Path(override)
+    # PyInstaller ile paketlenince asset'ler gecici cikarim klasorune konur
+    if getattr(sys, "frozen", False):
+        return Path(getattr(sys, "_MEIPASS", ".")) / "assets"
     return Path(__file__).resolve().parents[4] / "assets"

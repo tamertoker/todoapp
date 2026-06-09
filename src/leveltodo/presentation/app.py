@@ -15,9 +15,11 @@ from PyQt6.QtWidgets import QApplication
 
 from leveltodo.bootstrap import Container
 from leveltodo.domain.events import AppStarted
+from leveltodo.infrastructure.config import paths
 from leveltodo.infrastructure.eventbus.qt_bridge import QtEventBridge
 from leveltodo.presentation.common.icon import make_app_icon
 from leveltodo.presentation.common.ikonlar import uygulama_ikonu
+from leveltodo.presentation.common.imlec import imlec_uygula
 from leveltodo.presentation.main_window import MainWindow
 from leveltodo.presentation.theme.arrows import ok_yollari
 from leveltodo.presentation.theme.fonts import gecerli_font, load_all_fonts
@@ -66,11 +68,16 @@ class LevelTodoApp:
 
     def _apply_font(self, font: str) -> None:
         self._font_family = gecerli_font(font)
-        self.qapp.setFont(QFont(self._font_family))
+        qfont = QFont(self._font_family)
+        # Press Start 2P çok geniş/iri bir piksel fonttur; varsayılan puntoda taşar.
+        if self._font_family == "Press Start 2P":
+            qfont.setPointSize(7)
+        self.qapp.setFont(qfont)
         self._apply_theme(self.container.settings.theme)
 
     def run(self) -> int:
         self.window.show()
+        imlec_uygula(paths.assets_dir(), self.container.settings.get("imlec"))
         self.container.olay_hatti.publish(AppStarted(occurred_at=self.container.saat.simdi()))
         self.container.mentor.periyodik_kontrol()  # açılışta bir kez
         self.container.hatirlatma.kontrol()

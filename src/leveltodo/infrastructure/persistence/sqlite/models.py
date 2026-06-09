@@ -64,6 +64,7 @@ class Task(Base):
     tag_id: Mapped[str | None] = mapped_column(String(26), nullable=True)  # etiket (proje)
     reminder: Mapped[str | None] = mapped_column(String(5), nullable=True)  # "HH:MM" hatırlatma
     reminder_last: Mapped[date | None] = mapped_column(Date, nullable=True)  # son hatırlatılan gün
+    hedef_sure: Mapped[int | None] = mapped_column(Integer, nullable=True)  # hedef süre (saniye)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     streak_count: Mapped[int] = mapped_column(Integer, default=0)

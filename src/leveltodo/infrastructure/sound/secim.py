@@ -1,4 +1,4 @@
-"""Hangi olayda hangi sesin çalacağı — saf seçim (Qt'siz, test edilebilir)."""
+"""Hangi olayda hangi sesin çalacağı — saf seçim (Qt'siz)."""
 
 from __future__ import annotations
 

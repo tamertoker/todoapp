@@ -9,25 +9,21 @@ from __future__ import annotations
 import random
 
 _NORMAL = [
-    "+{xp} XP. Bir tuğla daha yerine oturdu.",
-    "+{xp} XP. Çoğu kişi başlamazdı bile; sen bitirdin.",
-    "+{xp} XP. Disiplin işte böyle anlardan örülür.",
-    "+{xp} XP. Küçük adım, sağlam yol.",
-    "+{xp} XP. İrade kasın biraz daha büyüdü.",
-    "+{xp} XP. Söz verip tuttun — fark tam burada.",
-    "+{xp} XP. Sırada ne var?",
+    "+{xp} XP. Bir görev daha bitti, eline sağlık.",
+    "+{xp} XP. Bravo, hadi sıradaki.",
+    "+{xp} XP. Ertelemedin, hallettin. Güzel.",
+    "+{xp} XP. Momentum yakaladın, bozma.",
 ]
 
 _KRITIK = [
-    "⚡ KRİTİK! +{xp} XP, +{puan} puan — iki katı! Tam isabet.",
-    "⚡ KRİTİK vuruş! Emeğin ikiye katlandı: +{xp} XP, +{puan} puan.",
-    "⚡ KRİTİK! Bugün şans senden yana: +{xp} XP, +{puan} puan.",
+    "KRİTİK geldi! +{xp} XP, +{puan} puan. Bugün şans yanında.",
+    "KRİTİK! Aynı işe çifte karşılık: +{xp} XP, +{puan} puan.",
+    "KRİTİK vuruş, ikiye katlandı: +{xp} XP, +{puan} puan. Aferin.",
 ]
 
 _COMBO = [
-    "🔥 COMBO! Akışı yakaladın — 1 saat boyunca her şey ×1.5.",
-    "🔥 COMBO başladı! Ritim sende; 1 saat ×1.5 ödül.",
-    "🔥 COMBO! Üç vuruş üst üste — 1 saat boyunca ×1.5.",
+    "Üç işi üst üste devirdin — 1 saat boyunca ödüller 1,5 kat. Bas gaza.",
+    "Combo açıldı. Ritmi bozma; 1 saat boyunca her şey 1,5 kat."
 ]
 
 

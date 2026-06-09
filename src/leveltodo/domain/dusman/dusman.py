@@ -1,4 +1,4 @@
-"""Düşman (Şeytan) tanımları, can eğrisi ve hazine ödülü — saf, test edilebilir.
+"""Düşman (Şeytan) tanımları, can eğrisi ve hazine ödülü — saf.
 
 Şeytan, tembelliğin görsel düşmanıdır. Görev yaptıkça "biriken hasar" toplanır;
 kullanıcı Düşman sekmesinde "Vur" deyince bu hasarın tamamı bir darbede iner.
@@ -37,44 +37,44 @@ class Dusman:
 
 
 DUSMANLAR: list[Dusman] = [
-    Dusman("erteleyici", "Erteleyici", "Küçük ama sinsi; her 'sonra yaparım'da büyür."),
-    Dusman("dagilan_golge", "Dağılan Gölge", "Dikkatini dağıtır, seni böler."),
-    Dusman("tembel_devi", "Tembel Devi", "Ağır ve uyuşuk; kıpırdamanı engeller."),
-    Dusman("karanlik_erteleme", "Karanlık Erteleme", "Ertelemenin en kara hâli."),
+    Dusman("erteleyici", "Erteletici", "'Bir dakikaya başlarım' dedirtir, sonra gün biter."),
+    Dusman("dagilan_golge", "Dağılgan", "Aklını dört bir yana çeker; bir türlü odaklanamazsın."),
+    Dusman("tembel_devi", "Tembel Dev", "Üstüne ağırlık çöker; kıpırdamak bile zahmet olur."),
+    Dusman("karanlik_erteleme", "Rehavet Ustası", "Tatlı tatlı her şeyi erteletir; en sinsisi."),
 ]
 
 
 # Düşmanın ara sıra fısıldadığı kışkırtmalar — seni tembelliğe çağıran ses.
 KISKIRTMALAR: tuple[str, ...] = (
-    "Amaan, bugün de olmadı; yarın nasılsa yaparsın...",
-    "Otur otur, görevler kaçmıyor ya.",
-    "Bir mola daha? Sonuçta hak ettin.",
-    "Yarın bol bol vaktin olacak, merak etme.",
-    "Bugünlük bu kadar yeter, kendine bu kadar yüklenme.",
-    "Şu an pek havanda değilsin, zorlama.",
-    "Küçük bir es ver; zaten dünya kurtarmıyorsun.",
+    "Amaan, bugün de olmadı; yarın nasılsa yaparsın.",
+    "Otursana, görevler kaçmıyor ya.",
+    "Bir mola daha iyi gider, hak etmedin mi?",
+    "Yarın bol bol vaktin var, acelesi ne.",
+    "Bugünlük bu kadar yeter, kendini yorma.",
+    "Pek havanda değilsin bugün, zorlama.",
+    "Şöyle biraz uzan; dünya başına yıkılmaz.",
 )
 
 
-# Darbe yediğinde okuduğu lanetler / acı çığlıkları (sohbet baloncuğunda görünür).
+# Darbe yediğinde söylediği laf (sohbet baloncuğunda görünür).
 LANETLER: tuple[str, ...] = (
-    "Aaargh! Bu da neydi böyle?!",
-    "Lanet olsun sana! Yine mi kalktın?",
-    "Canımı yakıyorsun ama pes etmem!",
-    "Bu kadar iradeyi nereden buluyorsun?!",
-    "Dur... biraz daha ertele, ne olur...",
-    "Her darbenle eriyorum... hayır!",
-    "Senden nefret ediyorum, çalışkan fani!",
-    "Bedelini ödeyeceksin bunun!",
+    "Ay! Yine mi kalktın yahu?",
+    "Dur biraz, bu kadar üstüme gelme.",
+    "Canımı acıttın ama daha bitmedi bu iş.",
+    "Nereden buluyorsun bu enerjiyi sen?",
+    "Otursana, ne acelen var böyle...",
+    "Her seferinde biraz daha eriyorum, farkında mısın?",
+    "İnatçısın, onu kabul ediyorum.",
+    "Bunu yanına bırakmam, haberin olsun.",
 )
 
 
 # Devrildiğinde söylediği son söz.
 SON_SOZLER: tuple[str, ...] = (
-    "Hayır... bu imkânsız... döneceğim!",
-    "Beni yendin... ama tembellik asla ölmez!",
-    "Bu son değil... yarın yine karşındayım!",
-    "Küllerimden daha güçlü doğacağım!",
+    "Tamam tamam, bugün sen kazandın.",
+    "Beni devirdin ama tembellik kolay kolay bitmez.",
+    "Bu son değil; yarın yine buradayım.",
+    "Pekâlâ... bir dahakine hazır ol.",
 )
 
 
@@ -130,7 +130,7 @@ def hazine_odulu(tier: int, secim: float, olcek: float) -> HazineOdulu:
     """tier'a göre artan bir hazine ödülü üretir.
 
     secim (0..1) ödül türünü, olcek (0..1) miktar varyansını belirler — böylece
-    fonksiyon saf kalır (rastgeleliği çağıran verir, burada test edilebilir).
+    fonksiyon saf kalır (rastgeleliği çağıran verir).
     """
     tur = ODUL_TURLERI[min(int(secim * len(ODUL_TURLERI)), len(ODUL_TURLERI) - 1)]
     comert = 1.0 + 0.18 * tier  # tier büyüdükçe daha cömert

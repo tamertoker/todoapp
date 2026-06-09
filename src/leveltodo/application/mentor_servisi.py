@@ -31,12 +31,14 @@ from leveltodo.infrastructure.persistence.sqlite.models import DEFAULT_USER_ID
 MENTOR_IHMAL_GUN = 3
 KISKIRTMA_OLASILIK = 0.15
 AMNESTI_ESIK = 10
+AKSAM_SAAT = 18  # bu saatten sonra biten görev kalmışsa akşam uyarısı çıkar
 
 
 class MentorServisi:
     SON_DURTME = "mentor_son_durtme_gun"
     SON_KISKIRTMA = "dusman_son_kiskirtma_gun"
     SON_AMNESTI = "amnesti_son_uyari_gun"
+    SON_AKSAM = "mentor_aksam_gorev_gun"
 
     def __init__(
         self,
@@ -71,6 +73,24 @@ class MentorServisi:
         self._mentor_durtme(gun)
         self._dusman_kiskirtma(gun)
         self._amnesti_uyari(gun)
+        self._aksam_gorev_uyari(gun)
+
+    def _aksam_gorev_uyari(self, gun: date) -> None:
+        """Akşama doğru hâlâ bitmemiş görev varsa bir kez nazikçe hatırlatır."""
+        if self._bugun_yapildi_mi(self.SON_AKSAM, gun):
+            return
+        if self._saat.simdi().hour < AKSAM_SAAT:
+            return
+        biten, toplam = self._gorevler.gun_gorev_ilerleme()
+        kalan = toplam - biten
+        if kalan <= 0:
+            return
+        if kalan == 1:
+            mesaj = "Akşam oluyor, bugünden bir görev hâlâ duruyor. Şunu da devirip kapatalım mı?"
+        else:
+            mesaj = f"Akşam oluyor, bugünden {kalan} görev hâlâ duruyor. Bir tanesiyle başla yeter."
+        if self._bildirim.bildir(BildirimKategori.DURTME, "Mentor", mesaj):
+            self._settings.set(self.SON_AKSAM, gun.isoformat())
 
     def _mentor_durtme(self, gun: date) -> None:
         if self._bugun_yapildi_mi(self.SON_DURTME, gun):

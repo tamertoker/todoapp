@@ -83,6 +83,7 @@ class DashboardView(QWidget):
         self._arkaplan_cache: dict[str, QPixmap | None] = {}
         self._son_arkaplan_ad: str | None = None
         self._sure_etiketleri: dict[str, tuple[QLabel, GorevSatiri]] = {}
+        self._ilerleme_barlari: dict[str, tuple[QProgressBar, GorevSatiri]] = {}
         self._mod = "bugun"  # "bugun" | "tumu"
         self._acik_seanslar: set[str] = set()  # açık (genişletilmiş) seans listeleri
 
@@ -96,11 +97,11 @@ class DashboardView(QWidget):
         self._points_label = QLabel()
         self._points_label.setObjectName("Counter")
         xp_ikon = QLabel()
-        _xp_px = ikon("xp", 30)
+        _xp_px = ikon("xp", 46)  # XP görseli puan'a göre küçük duruyordu; hizalamak için büyütüldü
         if _xp_px is not None:
             xp_ikon.setPixmap(_xp_px)
         puan_ikon = QLabel()
-        _puan_px = ikon("puan", 30)
+        _puan_px = ikon("puan", 38)
         if _puan_px is not None:
             puan_ikon.setPixmap(_puan_px)
         ust = QHBoxLayout()
@@ -136,11 +137,16 @@ class DashboardView(QWidget):
         seri_satiri.addWidget(self._combo_label)
         seri_satiri.addStretch(1)
 
+        self._gunluk_bar = QProgressBar()
+        self._gunluk_bar.setObjectName("GunlukBar")
+        self._gunluk_bar.setTextVisible(True)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
         layout.addLayout(ust)
         layout.addWidget(self._unvan_label)
+        layout.addWidget(self._gunluk_bar)
         layout.addLayout(seri_satiri)
         layout.addLayout(orta, stretch=1)
 
@@ -214,7 +220,7 @@ class DashboardView(QWidget):
 
     # — Sağ panel: kasalar + görev listesi —
     def _build_sag_panel(self) -> QVBoxLayout:
-        subtitle = QLabel("Burada güç, gösterdiğin iradeyle ölçülür.")
+        subtitle = QLabel("Her gün iradeni zorlayarak zihnine seviye atlatmalısın.")
         subtitle.setObjectName("Subtitle")
         self._day_label = QLabel()
         self._status_label = QLabel("…")
@@ -270,13 +276,24 @@ class DashboardView(QWidget):
 
     def _render(self) -> None:
         xp, puan = self._vm.toplamlar()
-        self._xp_label.setText(str(xp) if ikon("xp", 30) is not None else f"XP  {xp}")
-        self._points_label.setText(str(puan) if ikon("puan", 30) is not None else f"Puan  {puan}")
+        self._xp_label.setText(str(xp) if ikon("xp", 46) is not None else f"XP  {xp}")
+        self._points_label.setText(str(puan) if ikon("puan", 38) is not None else f"Puan  {puan}")
 
         self._render_arkaplan()
         self._render_profil_ve_statlar()
+        self._render_gunluk_bar()
         self._render_seriler()
         self._render_gorevler()
+
+    def _render_gunluk_bar(self) -> None:
+        biten, toplam = self._vm.gun_gorev_ilerleme()
+        if toplam <= 0:
+            self._gunluk_bar.setVisible(False)
+            return
+        self._gunluk_bar.setVisible(True)
+        self._gunluk_bar.setMaximum(toplam)
+        self._gunluk_bar.setValue(biten)
+        self._gunluk_bar.setFormat(f"Bugünün görevleri: {biten} / {toplam}")
 
     def _render_arkaplan(self) -> None:
         zaman = zaman_dilimi(self._container.saat.simdi().hour)
@@ -306,7 +323,7 @@ class DashboardView(QWidget):
         simdi = self._container.saat.simdi()
         if self._container.combo.aktif_mi(simdi):
             kalan = self._container.combo.kalan_dakika(simdi)
-            combo_px = ikon("combo", 40)
+            combo_px = ikon("combo", 56)
             if combo_px is not None:
                 self._combo_ikon.setPixmap(combo_px)
                 self._combo_label.setText(f"Combo ×1.5 ({kalan} dk)")
@@ -385,6 +402,7 @@ class DashboardView(QWidget):
 
     def _render_gorevler(self) -> None:
         self._sure_etiketleri = {}
+        self._ilerleme_barlari = {}
         while self._tasks_layout.count():
             item = self._tasks_layout.takeAt(0)
             widget = item.widget()
@@ -410,7 +428,35 @@ class DashboardView(QWidget):
             else:
                 for satir in satirlar:
                     self._tasks_layout.addWidget(self._build_row(satir))
+            tamamlananlar = self._vm.tamamlanan_satirlar()
+            if tamamlananlar:
+                baslik = QLabel(f"Tamamlananlar ({len(tamamlananlar)})")
+                baslik.setObjectName("Subtitle")
+                self._tasks_layout.addWidget(baslik)
+                for satir in tamamlananlar:
+                    self._tasks_layout.addWidget(self._tamamlanan_satir(satir))
         self._tasks_layout.addStretch(1)
+
+    def _tamamlanan_satir(self, satir: GorevSatiri) -> QFrame:
+        frame = QFrame()
+        frame.setObjectName("TaskRow")
+        h = QHBoxLayout(frame)
+        h.setContentsMargins(12, 6, 12, 6)
+        h.setSpacing(8)
+        ad = QLabel(satir.baslik)
+        yazi = ad.font()
+        yazi.setStrikeOut(True)  # üstü çizili: "yapıldı" hissi
+        ad.setFont(yazi)
+        ad.setStyleSheet("color: #8a8a8a;")  # silik
+        h.addWidget(ad, stretch=1)
+        if satir.calisilan_saniye:
+            sure = QLabel(format_sure(satir.calisilan_saniye))
+            sure.setStyleSheet("color: #8a8a8a;")
+            h.addWidget(sure)
+        onay = QLabel("✓")
+        onay.setStyleSheet("color: #6ab04c; font-weight: bold;")
+        h.addWidget(onay)
+        return frame
 
     def _mod_degis(self, mod: str) -> None:
         self._mod = mod
@@ -461,6 +507,7 @@ class DashboardView(QWidget):
             satir,
             simdi=self._container.saat.simdi(),
             sure_etiketleri=self._sure_etiketleri,
+            ilerleme_barlari=self._ilerleme_barlari,
             seanslar=self._vm.seanslar(satir.kayit_id),
             baslat=self._vm.seans_baslat,
             durdur=self._vm.seans_durdur,
@@ -484,6 +531,11 @@ class DashboardView(QWidget):
         for _kayit_id, (etiket, satir) in self._sure_etiketleri.items():
             if satir.calisiyor:
                 etiket.setText(format_sure(satir_canli_saniye(satir, simdi)))
+        for _kid, (bar, satir) in self._ilerleme_barlari.items():
+            if satir.calisiyor and satir.hedef_sure:
+                calisilan = satir_canli_saniye(satir, simdi)
+                bar.setValue(min(calisilan, satir.hedef_sure))
+                bar.setFormat(f"{format_sure(calisilan)} / {format_sure(satir.hedef_sure)}")
         self._render_arkaplan()  # saat dilimi sınırını geçince arkaplan kendi değişsin
 
     # — Avatar önizleme (ok'larla gelecek seviyeleri gözetleme) —
@@ -502,8 +554,10 @@ class DashboardView(QWidget):
         return self._pixmap_cache[ad]
 
     def _onizleme_kaydir(self, yon: int) -> None:
+        # İleri yön yalnızca BİR sonraki seviyeye kadar; geri yön tüm geçmiş seviyeler.
+        ust = min((self._mevcut_rank_indeks or 0) + 1, len(self._unvan_listesi) - 1)
         yeni = self._onizleme_indeks + yon
-        if 0 <= yeni < len(self._unvan_listesi):
+        if 0 <= yeni <= ust:
             self._onizleme_indeks = yeni
             self._avatar_onizleme_ciz()
 
@@ -554,8 +608,9 @@ class DashboardView(QWidget):
         if kilitli:
             etiket += "  · 🔒"
         self._onizleme_unvan_label.setText(etiket)
+        ust = min(mevcut_idx + 1, len(liste) - 1)  # en fazla bir sonraki seviye gözlenebilir
         self._geri_btn.setEnabled(indeks > 0)
-        self._ileri_btn.setEnabled(indeks < len(liste) - 1)
+        self._ileri_btn.setEnabled(indeks < ust)
 
     def _on_add(self) -> None:
         dialog = AddTaskDialog(
@@ -566,13 +621,24 @@ class DashboardView(QWidget):
             stat_servisi=self._container.stat,
         )
         if dialog.exec():
-            baslik, tekrar, parametre, ozel_odul, stat, tag_id, reminder = dialog.result_values()
+            (
+                baslik,
+                tekrar,
+                parametre,
+                ozel_odul,
+                stat,
+                tag_id,
+                reminder,
+                hedef_sure,
+            ) = dialog.result_values()
             if baslik:
-                self._vm.gorev_ekle(baslik, tekrar, ozel_odul, stat, parametre, tag_id, reminder)
+                self._vm.gorev_ekle(
+                    baslik, tekrar, ozel_odul, stat, parametre, tag_id, reminder, hedef_sure
+                )
 
     def _on_event(self, event: DomainEvent) -> None:
         if isinstance(event, AppStarted):
-            mesaj = "Yine buradasın. Çoğu insan dönmez; sen döndün."
+            mesaj = "Yine buradasın, iyi ettin. Kaldığın yerden devam edelim."
             if self._kurtarma_sayisi:
                 mesaj = "Yarım kalmış kronometre vardı, durdurdum — kayıtlı süre duruyor. " + mesaj
             self._status_label.setText(mesaj)

@@ -31,6 +31,10 @@ class AyarlanabilirSaat:
     def gun_kaydir(self, gun: int) -> None:
         self._ofset += timedelta(days=gun)
 
+    def saate_atla(self, hedef_saat: int) -> None:
+        """Şimdiki saati verilen saate getirir (debug: sabah/öğle/akşam avatar testi)."""
+        self._ofset += timedelta(hours=hedef_saat - self.simdi().hour)
+
     def sifirla(self) -> None:
         self._ofset = timedelta()
 

@@ -32,6 +32,12 @@ class DashboardViewModel(QObject):
     def toplamlar(self) -> tuple[int, int]:
         return self._gorevler.toplamlar()
 
+    def gun_gorev_ilerleme(self) -> tuple[int, int]:
+        return self._gorevler.gun_gorev_ilerleme()
+
+    def tamamlanan_satirlar(self) -> list[GorevSatiri]:
+        return self._gorevler.bugun_tamamlanan_gorevler()
+
     def gorev_ekle(
         self,
         baslik: str,
@@ -41,9 +47,10 @@ class DashboardViewModel(QObject):
         parametre: str = "",
         tag_id: str | None = None,
         reminder: str | None = None,
+        hedef_sure: int | None = None,
     ) -> None:
         self._gorevler.gorev_olustur(
-            baslik, tekrar, ozel_odul, stat, parametre, tag_id, reminder
+            baslik, tekrar, ozel_odul, stat, parametre, tag_id, reminder, hedef_sure
         )
         self.changed.emit()
 

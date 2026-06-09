@@ -39,6 +39,13 @@ class SettingsViewModel(QObject):
     def minimize_to_tray(self) -> bool:
         return self._settings.minimize_to_tray
 
+    @property
+    def imlec(self) -> str:
+        return str(self._settings.get("imlec"))
+
+    def imlec_kaydet(self, ad: str) -> None:
+        self._settings.set("imlec", ad)
+
     def save(
         self, theme: str, day_start_hour: int, minimize_to_tray: bool, font: str
     ) -> None:

@@ -8,11 +8,11 @@ Seçim tohuma (günün sıra numarası) göre deterministiktir.
 from __future__ import annotations
 
 MENTOR_DURTMELERI: tuple[str, ...] = (
-    "{gun} gündür {stat} sessiz. Küçük bir adım at, kas körelmesin.",
-    "{stat} seni bekliyor — {gun} gündür hiç dokunmadın.",
-    "{gun} gün ara verdin {stat} için. Bugün bir kıvılcım yeter.",
-    "Unutma: {stat} ancak emekle büyür. {gun} gündür beslenmedi.",
-    "{stat} tarafın paslanıyor — {gun} gündür beklemede. Hadi.",
+    "{gun} gündür {stat} tarafına hiç bakmadın. Bugün ufak bir şey yapsan?",
+    "{stat} biraz ihmal oldu — {gun} gün geçmiş. Beş dakikalık bir şeyle aç hesabı.",
+    "{gun} gündür {stat} yok ortalıkta. Çok değil, bir adım yeter bugün.",
+    "{stat} için {gun} gün ara vermişsin. Bugün küçük bir başlangıç iyi gelir.",
+    "{gun} gündür {stat} beklemede. Bir kıvılcım at, gerisi gelir.",
 )
 
 

@@ -1,4 +1,4 @@
-"""Seri (streak) kuralları — saf, test edilebilir.
+"""Seri (streak) kuralları — saf.
 
 İki tür seri var:
 - GIRIS: kaç ardışık gün uygulamayı açtın.

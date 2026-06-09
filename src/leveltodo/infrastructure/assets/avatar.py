@@ -1,8 +1,7 @@
-"""Avatar oluşturucu — Mana Seed katmanlarını birleştirir.
+"""avatar gorseli olusturur.
 
-512×512'lik sprite sayfalarından sol-üstteki 64×64 kareyi (karşıya bakan, dik
-duruş) alır, katmanları üst üste bindirir (önce vücut, sonra kıyafet) ve net
-(bulanıklaştırmadan) büyütür. Şapka katmanı şimdilik yok.
+hazir bir avatar resmi (tek png) varsa onu kullanir; yoksa katmanli kareleri
+ust uste koyup buyutur, hicbiri yoksa sade bir yer tutucu doner.
 """
 
 from __future__ import annotations
@@ -33,12 +32,17 @@ class AvatarOlusturucu:
         sonuc = QPixmap(_KARE, _KARE)
         sonuc.fill(Qt.GlobalColor.transparent)
         painter = QPainter(sonuc)
+        cizildi = False
         for dosya in katman_dosyalari:
             sayfa = QPixmap(str(self._p1 / dosya))
             if sayfa.isNull():
                 continue
             on_kare = sayfa.copy(QRect(0, 0, _KARE, _KARE))
             painter.drawPixmap(0, 0, on_kare)
+            cizildi = True
+        if not cizildi:
+            # kaynak gorsel yoksa sade bir yer tutucu birak
+            painter.fillRect(sonuc.rect(), QColor("#3a2d52"))
         painter.end()
         return sonuc.scaled(
             _KARE * buyutme,
@@ -48,28 +52,8 @@ class AvatarOlusturucu:
         )
 
 
-def kategori_secenekleri(assets_dizini: Path) -> dict[str, list[str]]:
-    """Avatar editörü için her kategorideki katman dosyalarını listeler.
-    Anahtarlar: vucut, kiyafet, sac, sapka. Değerler char_a_p1'e göreli yollar."""
-    p1 = assets_dizini / "char_a_p1"
-
-    def alt(klasor: str, on_ek: str) -> list[str]:
-        dizin = p1 / klasor
-        if not dizin.is_dir():
-            return []
-        return sorted(on_ek + dosya.name for dosya in dizin.glob("*.png"))
-
-    return {
-        "vucut": sorted(d.name for d in p1.glob("char_a_p1_0bas_*.png")),
-        "kiyafet": alt("1out", "1out/"),
-        "sac": alt("4har", "4har/"),
-        "sapka": alt("5hat", "5hat/"),
-    }
-
-
 def avatar_katmanlari(profil_seviye: int) -> list[str]:
-    """Profil seviyesine göre hangi katmanların gösterileceği.
-    Seviye yükseldikçe vücut paleti (v00→v10) ve kıyafet (v01→v05) ilerler."""
+    """seviyeye gore hangi katmanlarin gosterilecegini verir."""
     bas_v = min(10, max(0, profil_seviye))
     kiyafet_v = min(5, 1 + max(0, profil_seviye) // 5)
     return [

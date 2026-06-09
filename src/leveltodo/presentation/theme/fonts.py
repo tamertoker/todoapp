@@ -1,8 +1,7 @@
 """Yazı tipi (font) yükleme ve seçimi.
 
-assets/fonts altındaki tüm .ttf dosyaları yüklenir (Pixelify Sans'ın tüm
-ağırlıkları dahil), kullanılabilir aile adları toplanır. Varsayılan "Pixelify
-Sans"tır (çok ağırlıklı; önemli yerler bold ile vurgulanır). Kullanıcı ayarlardan
+assets/fonts altındaki tüm .ttf dosyaları yüklenir, kullanılabilir aile adları
+toplanır. Varsayılan "Geo"dur (sayıları daha okunaklı). Kullanıcı ayarlardan
 diğer ailelere geçebilir. Hiç font yoksa Windows'ta her zaman bulunan "Consolas"a
 düşülür.
 """
@@ -14,7 +13,7 @@ from pathlib import Path
 from PyQt6.QtGui import QFontDatabase
 
 _FALLBACK = "Consolas"
-_VARSAYILAN = "Pixelify Sans"
+_VARSAYILAN = "Geo"
 _yuklenen: list[str] = []
 
 

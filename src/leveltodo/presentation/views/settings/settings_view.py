@@ -11,6 +11,11 @@ yayılır (tema canlı değişir, dashboard tazelenir).
 
 from __future__ import annotations
 
+import re
+from pathlib import Path
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -30,6 +35,8 @@ from PyQt6.QtWidgets import (
 from leveltodo.application.bildirim_servisi import BildirimServisi
 from leveltodo.domain.bildirim.bildirim import BildirimKategori
 from leveltodo.infrastructure.backup.yedekleme import Yedekleyici
+from leveltodo.infrastructure.config import paths
+from leveltodo.presentation.common.imlec import IMLEC_BOYUT, imlec_uygula
 from leveltodo.presentation.theme.fonts import mevcut_fontlar
 from leveltodo.presentation.views.settings.settings_viewmodel import SettingsViewModel
 
@@ -46,8 +53,8 @@ _THEME_LABELS = {
     "midnight": "Gece Mavisi",
     "forest": "Orman",
     "sunset": "Gün Batımı",
-    "arcane": "Mor Büyü",
-    "kadim": "Kadim Meşe",
+    "arcane": "Mor",
+    "kadim": "Meşe",
 }
 
 
@@ -91,8 +98,21 @@ class SettingsView(QWidget):
 
         self._minimize = QCheckBox("Pencereyi kapatınca tepsiye insin")
 
+        # İmleç: sistem ya da assets/cursors/ altındaki bir görsel (canlı uygulanır).
+        self._imlec = QComboBox()
+        self._imlec.currentIndexChanged.connect(self._imlec_secildi)
+        self._imlec_doldur()
+        imlec_yukle_btn = QPushButton("Görsel yükle…")
+        imlec_yukle_btn.clicked.connect(self._imlec_yukle)
+        imlec_kap = QWidget()
+        imlec_satir = QHBoxLayout(imlec_kap)
+        imlec_satir.setContentsMargins(0, 0, 0, 0)
+        imlec_satir.addWidget(self._imlec, stretch=1)
+        imlec_satir.addWidget(imlec_yukle_btn)
+
         form.addRow("Tema:", self._theme)
         form.addRow("Yazı tipi:", self._font)
+        form.addRow("İmleç:", imlec_kap)
         form.addRow("Gün başlangıcı:", self._day_start)
         form.addRow("", self._minimize)
 
@@ -305,6 +325,49 @@ class SettingsView(QWidget):
             "Geri yükleme",
             "Yedek hazırlandı. Değişiklikler uygulamayı yeniden başlatınca yüklenecek.",
         )
+
+    # — İmleç (cursor) —
+    def _imlec_doldur(self, secili: str | None = None) -> None:
+        self._imlec.blockSignals(True)
+        self._imlec.clear()
+        self._imlec.addItem("Sistem (varsayılan)", "")
+        cur_dir = paths.assets_dir() / "cursors"
+        if cur_dir.is_dir():
+            for p in sorted(cur_dir.glob("*.png")):
+                self._imlec.addItem(p.stem, p.name)
+        hedef = secili if secili is not None else self.view_model.imlec
+        self._imlec.setCurrentIndex(max(0, self._imlec.findData(hedef)))
+        self._imlec.blockSignals(False)
+
+    def _imlec_secildi(self) -> None:
+        ad = self._imlec.currentData()
+        self.view_model.imlec_kaydet(ad)
+        imlec_uygula(paths.assets_dir(), ad)
+
+    def _imlec_yukle(self) -> None:
+        yol, _ = QFileDialog.getOpenFileName(
+            self, "İmleç görseli seç", "", "Görsel (*.png *.jpg *.jpeg *.bmp)"
+        )
+        if not yol:
+            return
+        px = QPixmap(yol)
+        if px.isNull():
+            QMessageBox.warning(self, "İmleç", "Görsel okunamadı.")
+            return
+        cur_dir = paths.assets_dir() / "cursors"
+        cur_dir.mkdir(parents=True, exist_ok=True)
+        # Her görsel imleç boyutuna (32 px) indirgenir.
+        kucuk = px.scaled(
+            IMLEC_BOYUT,
+            IMLEC_BOYUT,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+        ad = re.sub(r"[^a-z0-9_.-]", "_", Path(yol).stem.lower()) + ".png"
+        kucuk.save(str(cur_dir / ad), "PNG")
+        self._imlec_doldur(ad)
+        self.view_model.imlec_kaydet(ad)
+        imlec_uygula(paths.assets_dir(), ad)
 
     def _load(self) -> None:
         idx = self._theme.findData(self.view_model.theme)

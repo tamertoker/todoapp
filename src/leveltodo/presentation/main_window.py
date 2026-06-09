@@ -32,7 +32,6 @@ from leveltodo.infrastructure.sound.secim import tamamlama_sesi
 from leveltodo.infrastructure.sound.ses_motoru import SesMotoru
 from leveltodo.presentation.common.toast import ToastYoneticisi
 from leveltodo.presentation.views.admin.admin_view import AdminView
-from leveltodo.presentation.views.avatar.avatar_view import AvatarEditorView
 from leveltodo.presentation.views.cuzdan.cuzdan_view import CuzdanView
 from leveltodo.presentation.views.dashboard.dashboard_view import DashboardView
 from leveltodo.presentation.views.dusman.dusman_view import DusmanView
@@ -65,11 +64,10 @@ class MainWindow(QWidget):
         # — Sayfalar —
         self._dashboard = DashboardView(container, bridge)
         self._dusman = DusmanView(container)
-        self._irade = IradeView(container, self._ses)
-        self._rutin = RutinView(container)
+        self._irade = IradeView(container)
+        self._rutin = RutinView(container, self._ses)
         self._gunluk = GunlukView(container)
         self._telafi = TelafiView(container)
-        self._avatar_editor = AvatarEditorView()
         self._rozetler = RozetView(container, self._ses)
         self._istatistik = IstatistikView(container)
         self._pano = PanoView(container)
@@ -92,7 +90,6 @@ class MainWindow(QWidget):
             self._rutin,
             self._gunluk,
             self._telafi,
-            self._avatar_editor,
             self._rozetler,
             self._istatistik,
             self._pano,
@@ -164,7 +161,6 @@ class MainWindow(QWidget):
                 "Rutin",
                 "Günlük",
                 "Telafi",
-                "Avatar",
                 "Rozetler",
                 "İstatistik",
                 "Pano",
