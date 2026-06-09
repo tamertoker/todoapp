@@ -1,0 +1,238 @@
+{
+  "domains": [
+    {
+      "id": "gorev-yonetimi",
+      "name": "Görev Yönetimi",
+      "description": "Kullanıcı görevlerinin yaşam döngüsünü, zaman takibini ve temel işleyişini kapsayan alan.",
+      "flows": [
+        {
+          "id": "gorev-takibi-ve-tamamlama",
+          "name": "Görev Takibi ve Tamamlama",
+          "description": "Bir görevin oluşturulmasından tamamlanmasına kadar geçen süreç.",
+          "steps": [
+            {
+              "id": "gorev-olusturma",
+              "name": "Görev veya Şablon Oluşturma",
+              "description": "Tek seferlik görevlerin veya tekrarlı şablonların sisteme tanımlanması.",
+              "weight": 1
+            },
+            {
+              "id": "kronometre-baslatma",
+              "name": "Zaman Takibinin Başlatılması",
+              "description": "Görev üzerinde çalışırken harcanan sürenin ölçülmesi.",
+              "weight": 2
+            },
+            {
+              "id": "gorev-tamamlama",
+              "name": "Görevin Tamamlanması",
+              "description": "Çalışma süresinin girilmesi ve görevin kapalı duruma getirilmesi.",
+              "weight": 3
+            },
+            {
+              "id": "seri-isleme",
+              "name": "Seri (Streak) Güncelleme",
+              "description": "Tekrarlı görevlerin ardışık tamamlanma durumlarının kontrol edilmesi.",
+              "weight": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "oyunlastirma-ve-ilerleme",
+      "name": "Oyunlaştırma & İlerleme",
+      "description": "Kullanıcı motivasyonunu artıran ödül, combo, rozet ve seri koruma mekanizmaları.",
+      "flows": [
+        {
+          "id": "basari-ve-bonus-kazanimi",
+          "name": "Başarı ve Bonus Kazanımı",
+          "description": "Ekstra ödüller ve özel başarıların elde edilme süreci.",
+          "steps": [
+            {
+              "id": "combo-uygulama",
+              "name": "Combo Çarpanı Kontrolü",
+              "description": "Kısa sürede tamamlanan görevler için ek çarpan uygulanması.",
+              "weight": 1
+            },
+            {
+              "id": "rozet-degerlendirme",
+              "name": "Rozet Kriterlerinin Kontrolü",
+              "description": "Kazanılan rozetlerin ve yeni başarıların değerlendirilmesi.",
+              "weight": 2
+            },
+            {
+              "id": "kritik-basari-kontrol",
+              "name": "Kritik Başarı Denetimi",
+              "description": "Rastgele veya performansa bağlı kritik ödül şansının hesaplanması.",
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "id": "seri-koruma",
+          "name": "Seri Koruma (Streak Protection)",
+          "description": "Dondurma jetonları ile sürekliliğin sağlanması.",
+          "steps": [
+            {
+              "id": "stok-kontrol",
+              "name": "Dondurma Jetonu Stoğu Kontrolü",
+              "description": "Kullanılabilir dondurma jetonlarının sorgulanması.",
+              "weight": 1
+            },
+            {
+              "id": "jeton-kazanma",
+              "name": "Seviye Ödülü Olarak Jeton Kazanımı",
+              "description": "Belirli seviyelerde yeni dondurma jetonlarının stoğa eklenmesi.",
+              "weight": 2
+            },
+            {
+              "id": "jeton-kullanimi",
+              "name": "Jeton Kullanarak Seriyi Kurtarma",
+              "description": "Eksik günlerde serinin sıfırlanmasını önlemek için jeton harcanması.",
+              "weight": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "karakter-ve-savas",
+      "name": "Karakter ve Savaş",
+      "description": "İstatistikler, seviye atlama ve düşmanlarla mücadele mekanikleri.",
+      "flows": [
+        {
+          "id": "dusmanla-mucadele",
+          "name": "Düşmanla Mücadele",
+          "description": "Günlük düşman hasarı ve HP yönetimi.",
+          "steps": [
+            {
+              "id": "dusman-durum-kontrol",
+              "name": "Günlük Düşman Durumu Kontrolü",
+              "description": "Düşmanın HP ve iyileşme (heal) durumunun sorgulanması.",
+              "weight": 1
+            },
+            {
+              "id": "hasar-verme",
+              "name": "XP Üzerinden Hasar Verme",
+              "description": "Tamamlanan görevlerden kazanılan XP'nin düşman HP'sine hasar olarak yansıması.",
+              "weight": 2
+            },
+            {
+              "id": "zorluk-ayari",
+              "name": "Tier Bazlı Zorluk Ayarı",
+              "description": "Düşmanın seviyesine göre hasar ve direnç hesaplamaları.",
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "id": "karakter-gelisimi",
+          "name": "Karakter Gelişimi",
+          "description": "Level, XP ve unvan sisteminin işleyişi.",
+          "steps": [
+            {
+              "id": "stat-xp-ekleme",
+              "name": "Stat Bazlı XP Kazanımı",
+              "description": "Disiplin, İrade gibi kategorilere göre tecrübe puanı eklenmesi.",
+              "weight": 1
+            },
+            {
+              "id": "seviye-kontrol",
+              "name": "Seviye Atlama Denetimi",
+              "description": "Toplam XP'nin bir sonraki seviye eşiğine ulaşıp ulaşmadığının kontrolü.",
+              "weight": 2
+            },
+            {
+              "id": "unvan-kazanimi",
+              "name": "Yeni Unvanların Açılması",
+              "description": "Belirli seviyelerde veya başarılarda yeni karakter unvanlarının kazanılması.",
+              "weight": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "disiplin-ve-rutinler",
+      "name": "Disiplin ve Rutinler",
+      "description": "Günlük yansımalar, rutinler ve öz-disiplin takibi.",
+      "flows": [
+        {
+          "id": "gunluk-yansima",
+          "name": "Günlük Yansıma (Journaling)",
+          "description": "Günün değerlendirilmesi ve yansıma sorularının yanıtlanması.",
+          "steps": [
+            {
+              "id": "soru-sunumu",
+              "name": "Yansıma Sorularının Sunulması",
+              "description": "Kullanıcıya günlük rastgele veya sabit yansıma sorularının gösterilmesi.",
+              "weight": 1
+            },
+            {
+              "id": "yansima-kaydi",
+              "name": "Yansıma Metninin Kaydedilmesi",
+              "description": "Kullanıcının verdiği yanıtların veritabanına işlenmesi.",
+              "weight": 2
+            },
+            {
+              "id": "gunluk-odul",
+              "name": "Günlük Tamamlama Ödülü",
+              "description": "Yansıma sonrası disiplin XP veya diğer ödüllerin verilmesi.",
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "id": "rutin-ve-irade-takibi",
+          "name": "Rutin ve İrade Takibi",
+          "description": "Alışkanlıkların ve anlık irade eylemlerinin yönetimi.",
+          "steps": [
+            {
+              "id": "rutin-deger-girisi",
+              "name": "Rutin Değerlerinin Girilmesi",
+              "description": "Sayısal veya onay kutusu şeklindeki rutinlerin güncellenmesi.",
+              "weight": 1
+            },
+            {
+              "id": "hedef-kontrol",
+              "name": "Rutin Hedef Denetimi",
+              "description": "Belirlenen rutin hedeflerine ulaşılıp ulaşılmadığının kontrolü.",
+              "weight": 2
+            },
+            {
+              "id": "irade-eylemi-ekleme",
+              "name": "Manuel İrade Eylemi Ekleme",
+              "description": "Zorlu anlarda gösterilen irade eylemlerinin sisteme girilmesi.",
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "id": "uyandirma-disiplini",
+          "name": "Zamanında Uyanma Disiplini",
+          "description": "Sabah disiplini ve zamanında uyanma takibi.",
+          "steps": [
+            {
+              "id": "uyanma-saati-kontrol",
+              "name": "Uyanma Saati Denetimi",
+              "description": "Hedef uyanma saati ile gerçek uyanma saatinin karşılaştırılması.",
+              "weight": 1
+            },
+            {
+              "id": "disiplin-puani-kazanimi",
+              "name": "Disiplin Puanı Kazanımı",
+              "description": "Zamanında uyanma durumunda Disiplin statına XP eklenmesi.",
+              "weight": 2
+            },
+            {
+              "id": "sabah-rutini-baslangic",
+              "name": "Sabah Rutini Başlangıcı",
+              "description": "Günün ilk disiplin eyleminin başarıyla tamamlanması.",
+              "weight": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
